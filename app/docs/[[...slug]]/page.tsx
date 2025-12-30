@@ -10,8 +10,6 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { ReactNode } from 'react';
 import type { TableOfContents } from 'fumadocs-core/toc';
 
-export const runtime = 'edge';
-
 interface MDXPageData {
   title: string;
   description?: string;
