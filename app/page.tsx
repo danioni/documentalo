@@ -41,7 +41,7 @@ export default function HomePage() {
       </div>
 
       <p className="mt-12 text-sm text-gray-500">
-        Parte del ecosistema <a href="https://grupodigitalo.com" className="underline hover:text-blue-500">Grupo Digitalo</a>
+        Parte de <a href="https://grupodigitalo.com" className="underline hover:text-blue-500">Grupo Digitalo</a>
       </p>
     </main>
   );
