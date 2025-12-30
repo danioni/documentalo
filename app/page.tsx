@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
       <h1 className="mb-4 text-5xl font-bold">Documéntalo</h1>
       <p className="mb-8 max-w-xl text-lg text-gray-600 dark:text-gray-400">
-        Hub central de documentación técnica en español para desarrolladores de LATAM.
+        Hub central de documentación técnica en español para desarrolladores de Digitalo.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -41,7 +41,7 @@ export default function HomePage() {
       </div>
 
       <p className="mt-12 text-sm text-gray-500">
-        Parte del ecosistema <a href="https://grupodigitalo.com" className="underline hover:text-blue-500">Grupo Digitalo</a>
+        Parte del ecosistema <a href="https://digitalo.com" className="underline hover:text-blue-500">Digitalo</a>
       </p>
     </main>
   );
