@@ -41,7 +41,7 @@ export default function HomePage() {
       </div>
 
       <p className="mt-12 text-sm text-gray-500">
-        Parte del ecosistema <a href="https://digitalo.com" className="underline hover:text-blue-500">Digitalo</a>
+        Parte del ecosistema <a href="https://grupodigitalo.com" className="underline hover:text-blue-500">Digitalo</a>
       </p>
     </main>
   );
