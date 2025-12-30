@@ -1,0 +1,113 @@
+---
+title: Sesiones
+description: Crear, listar y gestionar sesiones en Coordinalo
+---
+
+# Sesiones
+
+Las sesiones son el corazón de Coordinalo. Representan una cita entre un proveedor y un cliente.
+
+## Listar sesiones
+
+```bash
+GET /api/v1/sessions
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `providerId` | `string` | Filtrar por proveedor |
+| `clientId` | `string` | Filtrar por cliente |
+| `status` | `string` | Estado: `scheduled`, `completed`, `cancelled` |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "sess_123abc",
+      "startTime": "2026-01-15T10:00:00Z",
+      "endTime": "2026-01-15T11:00:00Z",
+      "status": "scheduled",
+      "provider": {
+        "id": "prov_456def",
+        "name": "María González"
+      },
+      "client": {
+        "id": "cli_789ghi",
+        "name": "Juan Pérez"
+      },
+      "service": {
+        "id": "serv_abc123",
+        "name": "Sesión de kinesiología"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 20
+  }
+}
+```
+
+## Crear sesión
+
+```bash
+POST /api/v1/sessions
+```
+
+### Body
+
+```json
+{
+  "providerId": "prov_456def",
+  "clientId": "cli_789ghi",
+  "serviceId": "serv_abc123",
+  "startTime": "2026-01-15T10:00:00Z",
+  "notes": "Primera sesión del paciente"
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "sess_new123",
+  "startTime": "2026-01-15T10:00:00Z",
+  "endTime": "2026-01-15T11:00:00Z",
+  "status": "scheduled",
+  "createdAt": "2025-12-30T15:30:00Z"
+}
+```
+
+## Estados de sesión
+
+| Estado | Descripción |
+|--------|-------------|
+| `scheduled` | Agendada, pendiente |
+| `confirmed` | Confirmada por el cliente |
+| `in_progress` | En curso |
+| `completed` | Finalizada |
+| `cancelled` | Cancelada |
+| `no_show` | Cliente no asistió |
+
+## Webhooks
+
+Coordinalo puede notificar cambios de estado via webhooks:
+
+```json
+{
+  "event": "session.completed",
+  "data": {
+    "sessionId": "sess_123abc",
+    "previousStatus": "in_progress",
+    "newStatus": "completed",
+    "completedAt": "2026-01-15T11:05:00Z"
+  }
+}
+```

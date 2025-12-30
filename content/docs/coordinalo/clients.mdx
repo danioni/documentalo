@@ -1,0 +1,92 @@
+---
+title: Clientes
+description: Gestión de clientes en Coordinalo
+---
+
+# Clientes
+
+Los clientes son las personas que reciben servicios de tu organización.
+
+## Modelo de datos
+
+```typescript
+interface Client {
+  id: string;
+  person: {
+    name: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+  };
+  organizationId: string;
+  createdAt: string;
+  updatedAt: string;
+  // Campos opcionales
+  notes?: string;
+  tags?: string[];
+}
+```
+
+## Listar clientes
+
+```bash
+GET /api/v1/clients
+```
+
+### Parámetros
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `search` | `string` | Buscar por nombre o email |
+| `limit` | `number` | Resultados por página (default: 20) |
+| `offset` | `number` | Offset para paginación |
+
+## Crear cliente
+
+```bash
+POST /api/v1/clients
+```
+
+### Body
+
+```json
+{
+  "name": "Juan",
+  "lastName": "Pérez",
+  "email": "juan.perez@ejemplo.com",
+  "phone": "+56912345678"
+}
+```
+
+## Obtener cliente
+
+```bash
+GET /api/v1/clients/:id
+```
+
+Incluye historial de sesiones y métricas:
+
+```json
+{
+  "id": "cli_789ghi",
+  "person": {
+    "name": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@ejemplo.com"
+  },
+  "stats": {
+    "totalSessions": 24,
+    "completedSessions": 22,
+    "cancelledSessions": 2,
+    "totalSpent": 480000,
+    "firstSession": "2024-03-15T10:00:00Z",
+    "lastSession": "2025-12-20T10:00:00Z"
+  }
+}
+```
+
+## Notas importantes
+
+<Callout type="info">
+El campo `totalSpent` representa el LTV (Lifetime Value) del cliente. Este dato es clave para el lead scoring del ecosistema Digitalo.
+</Callout>

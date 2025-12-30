@@ -1,0 +1,186 @@
+---
+title: Multi-tenancy con Prisma y Next.js
+description: Cómo implementar una arquitectura multi-tenant usando Prisma ORM
+---
+
+# Multi-tenancy con Prisma y Next.js
+
+Guía completa para implementar una arquitectura multi-tenant donde cada organización tiene sus datos aislados.
+
+## ¿Qué es multi-tenancy?
+
+Multi-tenancy permite que múltiples organizaciones (tenants) usen la misma aplicación con datos completamente aislados entre sí.
+
+### Estrategias comunes
+
+| Estrategia | Descripción | Pros | Contras |
+|------------|-------------|------|---------|
+| **Row-level** | Una DB, filtrado por `organizationId` | Simple, económico | Riesgo de data leak |
+| **Schema-level** | Una DB, un schema por tenant | Buen aislamiento | Complejidad media |
+| **Database-level** | Una DB por tenant | Máximo aislamiento | Costoso, difícil de mantener |
+
+Esta guía cubre **row-level tenancy**, la más común para SaaS.
+
+## Modelo de datos
+
+```prisma
+// schema.prisma
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  // Relaciones - todo pertenece a una org
+  clients   Client[]
+  providers Provider[]
+  sessions  Session[]
+}
+
+model Client {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  name      String
+  email     String
+
+  // Index compuesto para queries eficientes
+  @@index([organizationId])
+  // Email único DENTRO de la organización
+  @@unique([organizationId, email])
+}
+```
+
+## El patrón: Context de Organización
+
+Crea un helper que siempre incluya el `organizationId`:
+
+```typescript
+// lib/db/organization-context.ts
+
+import { prisma } from '@/lib/prisma'
+
+export function getOrgPrisma(organizationId: string) {
+  return {
+    client: {
+      findMany: (args?: Parameters<typeof prisma.client.findMany>[0]) =>
+        prisma.client.findMany({
+          ...args,
+          where: {
+            ...args?.where,
+            organizationId, // SIEMPRE se filtra por org
+          },
+        }),
+
+      create: (args: Parameters<typeof prisma.client.create>[0]) =>
+        prisma.client.create({
+          ...args,
+          data: {
+            ...args.data,
+            organizationId, // SIEMPRE se asocia a la org
+          },
+        }),
+
+      // ... otros métodos
+    },
+  }
+}
+```
+
+## Uso en API Routes
+
+```typescript
+// app/api/organizations/[orgSlug]/clients/route.ts
+
+import { getOrganizationBySlug } from '@/lib/db/organizations'
+import { getOrgPrisma } from '@/lib/db/organization-context'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { orgSlug: string } }
+) {
+  const { orgSlug } = await params
+
+  // 1. Validar auth
+  const session = await getServerSession()
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  // 2. Obtener organización
+  const org = await getOrganizationBySlug(orgSlug)
+  if (!org) {
+    return NextResponse.json({ error: 'Org no encontrada' }, { status: 404 })
+  }
+
+  // 3. Usar prisma con contexto de org
+  const db = getOrgPrisma(org.id)
+  const clients = await db.client.findMany()
+
+  return NextResponse.json(clients)
+}
+```
+
+## Validación en middleware
+
+Para mayor seguridad, valida en middleware que el usuario pertenece a la org:
+
+```typescript
+// middleware.ts
+
+export async function middleware(request: NextRequest) {
+  const orgSlug = request.nextUrl.pathname.split('/')[1]
+
+  if (orgSlug && !orgSlug.startsWith('api')) {
+    const session = await getToken({ req: request })
+
+    if (session) {
+      const hasAccess = await userBelongsToOrg(session.userId, orgSlug)
+      if (!hasAccess) {
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
+      }
+    }
+  }
+
+  return NextResponse.next()
+}
+```
+
+## Errores comunes a evitar
+
+<Callout type="error">
+**Nunca hagas queries sin filtrar por organización.** Un simple `prisma.client.findMany()` sin `where: { organizationId }` expone datos de TODOS los tenants.
+</Callout>
+
+<Callout type="warning">
+**Cuidado con los includes.** Si haces `include: { sessions: true }`, asegúrate que las sesiones también estén filtradas o uses el contexto correcto.
+</Callout>
+
+## Testing
+
+```typescript
+// tests/multi-tenancy.test.ts
+
+describe('Data isolation', () => {
+  it('org A cannot see org B clients', async () => {
+    const dbOrgA = getOrgPrisma('org_a_id')
+    const dbOrgB = getOrgPrisma('org_b_id')
+
+    // Crear cliente en org B
+    await dbOrgB.client.create({
+      data: { name: 'Cliente B', email: 'b@test.com' }
+    })
+
+    // Org A no debe verlo
+    const clientsA = await dbOrgA.client.findMany()
+    expect(clientsA).toHaveLength(0)
+  })
+})
+```
+
+## Recursos adicionales
+
+- [Prisma docs: Multi-tenancy](https://www.prisma.io/docs/guides/other/multi-tenancy)
+- [Código fuente de Coordinalo](https://github.com/grupodigitalo/coordinalo) (próximamente)

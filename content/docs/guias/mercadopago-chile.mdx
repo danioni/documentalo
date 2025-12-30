@@ -1,0 +1,223 @@
+---
+title: Integración MercadoPago en Chile
+description: Guía completa para integrar pagos con MercadoPago en aplicaciones chilenas
+---
+
+# Integración MercadoPago en Chile
+
+Guía paso a paso para integrar MercadoPago en tu aplicación, con consideraciones específicas para Chile.
+
+## Prerequisitos
+
+1. Cuenta de MercadoPago Chile verificada
+2. Credenciales de producción (Access Token, Public Key)
+3. Certificado de dominio SSL (HTTPS obligatorio)
+
+## Instalación
+
+```bash
+pnpm add mercadopago
+```
+
+## Configuración
+
+```typescript
+// lib/mercadopago.ts
+
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago'
+
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
+})
+
+export const preferenceClient = new Preference(client)
+export const paymentClient = new Payment(client)
+```
+
+<Callout type="warning">
+**Nunca expongas el Access Token en el frontend.** Solo usa la Public Key del lado del cliente.
+</Callout>
+
+## Crear preferencia de pago
+
+```typescript
+// app/api/payments/create-preference/route.ts
+
+import { preferenceClient } from '@/lib/mercadopago'
+
+export async function POST(request: NextRequest) {
+  const { items, payer, externalReference } = await request.json()
+
+  const preference = await preferenceClient.create({
+    body: {
+      items: items.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        currency_id: 'CLP', // Pesos chilenos
+      })),
+      payer: {
+        email: payer.email,
+        name: payer.name,
+      },
+      external_reference: externalReference,
+      back_urls: {
+        success: `${process.env.NEXT_PUBLIC_APP_URL}/pagos/exito`,
+        failure: `${process.env.NEXT_PUBLIC_APP_URL}/pagos/error`,
+        pending: `${process.env.NEXT_PUBLIC_APP_URL}/pagos/pendiente`,
+      },
+      auto_return: 'approved',
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
+    },
+  })
+
+  return NextResponse.json({
+    preferenceId: preference.id,
+    initPoint: preference.init_point,
+  })
+}
+```
+
+## Webhook de notificaciones
+
+```typescript
+// app/api/webhooks/mercadopago/route.ts
+
+import { paymentClient } from '@/lib/mercadopago'
+import { prisma } from '@/lib/prisma'
+
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+
+  // Verificar que es una notificación de pago
+  if (body.type !== 'payment') {
+    return NextResponse.json({ received: true })
+  }
+
+  const paymentId = body.data.id
+
+  // Obtener detalles del pago desde MercadoPago
+  const payment = await paymentClient.get({ id: paymentId })
+
+  // Actualizar en tu base de datos
+  await prisma.cobro.update({
+    where: { externalReference: payment.external_reference },
+    data: {
+      status: mapMercadoPagoStatus(payment.status),
+      mercadopagoId: payment.id.toString(),
+      paidAt: payment.status === 'approved' ? new Date() : null,
+    },
+  })
+
+  return NextResponse.json({ received: true })
+}
+
+function mapMercadoPagoStatus(mpStatus: string): string {
+  const statusMap: Record<string, string> = {
+    approved: 'paid',
+    pending: 'pending',
+    in_process: 'pending',
+    rejected: 'failed',
+    cancelled: 'cancelled',
+    refunded: 'refunded',
+  }
+  return statusMap[mpStatus] || 'unknown'
+}
+```
+
+## Checkout en el frontend
+
+```tsx
+// components/MercadoPagoButton.tsx
+'use client'
+
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
+import { useEffect, useState } from 'react'
+
+initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY!)
+
+export function MercadoPagoButton({
+  items,
+  payer,
+  externalReference
+}: Props) {
+  const [preferenceId, setPreferenceId] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function createPreference() {
+      const response = await fetch('/api/payments/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, payer, externalReference }),
+      })
+      const data = await response.json()
+      setPreferenceId(data.preferenceId)
+    }
+
+    createPreference()
+  }, [items, payer, externalReference])
+
+  if (!preferenceId) return <div>Cargando...</div>
+
+  return <Wallet initialization={{ preferenceId }} />
+}
+```
+
+## Consideraciones para Chile
+
+### Montos en CLP
+MercadoPago Chile trabaja en pesos chilenos (CLP) **sin decimales**:
+
+```typescript
+// ✅ Correcto
+unit_price: 15000
+
+// ❌ Incorrecto
+unit_price: 15000.50
+```
+
+### Medios de pago disponibles
+
+| Medio | Disponibilidad |
+|-------|----------------|
+| Tarjetas de crédito | Visa, Mastercard, Amex, Diners |
+| Tarjetas de débito | Redcompra |
+| Transferencia | Khipu (via MercadoPago) |
+| Efectivo | No disponible en Chile |
+
+### RUT del pagador (opcional pero recomendado)
+
+```typescript
+payer: {
+  email: 'juan@ejemplo.com',
+  identification: {
+    type: 'RUT',
+    number: '12345678-9',
+  },
+}
+```
+
+## Testing
+
+Usa las [tarjetas de prueba](https://www.mercadopago.cl/developers/es/docs/checkout-api/additional-content/test-cards):
+
+| Tarjeta | Número | CVV | Vencimiento |
+|---------|--------|-----|-------------|
+| Visa (aprobada) | 4009 1753 3280 6176 | 123 | 11/25 |
+| Mastercard (rechazada) | 5031 7557 3453 0604 | 123 | 11/25 |
+
+## Errores comunes
+
+<Callout type="error">
+**Error: "invalid_token"** - Verifica que estés usando el Access Token correcto (producción vs sandbox).
+</Callout>
+
+<Callout type="error">
+**Webhook no llega** - Asegúrate que la `notification_url` sea HTTPS y accesible públicamente. En desarrollo usa ngrok o similar.
+</Callout>
+
+## Recursos
+
+- [Documentación oficial MercadoPago Chile](https://www.mercadopago.cl/developers/es/docs)
+- [SDK React MercadoPago](https://github.com/mercadopago/sdk-react)

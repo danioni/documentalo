@@ -1,0 +1,52 @@
+---
+title: Coordinalo API
+description: API de agendamiento y gestión de sesiones para servicios profesionales
+---
+
+# Coordinalo API
+
+Coordinalo es una plataforma de gestión de agenda para organizaciones que ofrecen servicios profesionales.
+
+## Conceptos clave
+
+### Organización
+Entidad principal que agrupa proveedores, clientes, servicios y sesiones.
+
+### Proveedor
+Profesional que ofrece servicios (terapeuta, consultor, profesor, etc.).
+
+### Cliente
+Persona que recibe los servicios de la organización.
+
+### Sesión
+Una cita o encuentro entre un proveedor y un cliente.
+
+### Servicio
+Tipo de servicio ofrecido (ej: "Sesión de kinesiología", "Consultoría legal").
+
+## Autenticación
+
+Todas las llamadas a la API requieren autenticación. Usa el header `Authorization` con tu token de acceso:
+
+```bash
+curl -X GET "https://coordinalo.com/api/v1/sessions" \
+  -H "Authorization: Bearer tu_token_aqui"
+```
+
+## Endpoints principales
+
+| Endpoint | Descripción |
+|----------|-------------|
+| `GET /api/v1/sessions` | Listar sesiones |
+| `POST /api/v1/sessions` | Crear sesión |
+| `GET /api/v1/clients` | Listar clientes |
+| `GET /api/v1/providers` | Listar proveedores |
+| `GET /api/v1/services` | Listar servicios |
+
+## Próximos pasos
+
+<Cards>
+  <Card title="Sesiones" href="/docs/coordinalo/sessions" />
+  <Card title="Clientes" href="/docs/coordinalo/clients" />
+  <Card title="Disponibilidad" href="/docs/coordinalo/availability" />
+</Cards>

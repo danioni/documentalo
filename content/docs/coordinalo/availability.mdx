@@ -1,0 +1,98 @@
+---
+title: Disponibilidad
+description: Configurar horarios y disponibilidad de proveedores
+---
+
+# Disponibilidad
+
+Gestiona los horarios en que tus proveedores están disponibles para atender.
+
+## Conceptos
+
+### Disponibilidad recurrente
+Horarios que se repiten cada semana (ej: "Lunes de 9:00 a 13:00").
+
+### Bloqueos
+Períodos donde el proveedor no está disponible (vacaciones, feriados, etc.).
+
+### Slots disponibles
+Horarios específicos donde se puede agendar una sesión.
+
+## Configurar disponibilidad recurrente
+
+```bash
+POST /api/v1/providers/:providerId/availability
+```
+
+### Body
+
+```json
+{
+  "dayOfWeek": 1,
+  "startTime": "09:00",
+  "endTime": "13:00",
+  "locationId": "loc_abc123"
+}
+```
+
+`dayOfWeek` usa el estándar ISO: 1 = Lunes, 7 = Domingo.
+
+## Obtener slots disponibles
+
+```bash
+GET /api/v1/providers/:providerId/slots
+```
+
+### Parámetros
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (obligatorio) |
+| `to` | `string` | Fecha fin (obligatorio) |
+| `serviceId` | `string` | Servicio (para calcular duración) |
+
+### Respuesta
+
+```json
+{
+  "slots": [
+    {
+      "start": "2026-01-15T09:00:00Z",
+      "end": "2026-01-15T10:00:00Z",
+      "available": true
+    },
+    {
+      "start": "2026-01-15T10:00:00Z",
+      "end": "2026-01-15T11:00:00Z",
+      "available": false,
+      "reason": "session_booked"
+    }
+  ]
+}
+```
+
+## Crear bloqueo
+
+```bash
+POST /api/v1/providers/:providerId/blocks
+```
+
+### Body
+
+```json
+{
+  "startTime": "2026-02-01T00:00:00Z",
+  "endTime": "2026-02-15T23:59:59Z",
+  "reason": "Vacaciones"
+}
+```
+
+## Agenda pública
+
+Para booking público (sin autenticación):
+
+```bash
+GET /api/v1/public/agenda/:agendaSlug/slots
+```
+
+Retorna solo slots disponibles, sin información sensible del proveedor.
