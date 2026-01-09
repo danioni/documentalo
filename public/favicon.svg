@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Fondo -->
+  <rect width="32" height="32" rx="6" fill="#3b82f6"/>
+  <!-- Documento con esquina doblada -->
+  <path d="M7 5h12l6 6v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V5z" fill="white"/>
+  <!-- Esquina doblada -->
+  <path d="M19 5v5a1 1 0 0 0 1 1h5" fill="none" stroke="#3b82f6" stroke-width="1"/>
+  <path d="M19 5l6 6h-5a1 1 0 0 1-1-1V5z" fill="#e2e8f0"/>
+  <!-- Líneas de texto -->
+  <rect x="10" y="14" width="12" height="2" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+  <rect x="10" y="18" width="10" height="2" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+  <rect x="10" y="22" width="8" height="2" rx="0.5" fill="#3b82f6" opacity="0.6"/>
+</svg>
