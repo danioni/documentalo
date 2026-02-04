@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coordinalo - Sistema de Gestión para Servicios Profesionales</title>
+  <meta name="description" content="Coordinalo es una plataforma SaaS para gestionar agendas, finanzas y clientes de organizaciones que ofrecen servicios profesionales. Kinesiología, psicología, coaching y más.">
+  <meta name="keywords" content="gestión de agenda, software para kinesiólogos, sistema para psicólogos, gestión de clientes, facturación servicios profesionales, booking online">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Coordinalo - Gestión Inteligente para Servicios Profesionales">
+  <meta property="og:description" content="Agenda, finanzas y CRM en una sola plataforma. Ideal para centros de salud, clínicas y academias.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://coordinalo.com">
+  <meta property="og:image" content="https://coordinalo.com/og-image.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Coordinalo - Gestión Inteligente para Servicios Profesionales">
+  <meta name="twitter:description" content="Agenda, finanzas y CRM en una sola plataforma.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Coordinalo",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Plan gratuito disponible"
+    },
+    "description": "Plataforma SaaS para gestionar agendas, finanzas y clientes de servicios profesionales",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "50"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Qué es Coordinalo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Coordinalo es una plataforma SaaS multi-tenant para gestionar organizaciones que ofrecen servicios profesionales. Integra agenda, finanzas y CRM en una sola herramienta."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Para quién es Coordinalo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Centros de kinesiología, clínicas de psicología, academias de coaching, centros de estética, consultorios médicos y cualquier organización con múltiples profesionales que atienden clientes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Cuánto cuesta Coordinalo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Coordinalo tiene un plan gratuito para comenzar. Los planes pagos se ajustan según la cantidad de profesionales y funcionalidades requeridas."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --bg: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #334155;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.9);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .header {
+        background: rgba(15,23,42,0.9);
+      }
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .header-cta {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed;
+      top: 65px;
+      left: 0;
+      height: 3px;
+      background: var(--primary);
+      z-index: 99;
+      transition: width 0.1s;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 8rem 1.5rem 4rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg) 100%);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .badge svg {
+      width: 16px;
+      height: 16px;
+      color: var(--secondary);
+    }
+
+    /* Video Section */
+    .video-section {
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      padding: 0 1.5rem;
+    }
+
+    .video-container {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .video-placeholder:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .play-button {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s;
+    }
+
+    .video-placeholder:hover .play-button {
+      transform: scale(1.1);
+    }
+
+    .play-button svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+      margin-left: 4px;
+    }
+
+    .video-placeholder span {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      position: sticky;
+      top: 65px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabs-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabs-list {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    /* Main Content */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section Styles */
+    .section {
+      margin-bottom: 4rem;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    /* Module Cards */
+    .module-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .module-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .module-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .module-badge.coordinalo { background: #dbeafe; color: #1d4ed8; }
+    .module-badge.planificalo { background: #dcfce7; color: #15803d; }
+    .module-badge.relacionalo { background: #fef3c7; color: #b45309; }
+
+    @media (prefers-color-scheme: dark) {
+      .module-badge.coordinalo { background: #1e3a5f; color: #60a5fa; }
+      .module-badge.planificalo { background: #14532d; color: #4ade80; }
+      .module-badge.relacionalo { background: #451a03; color: #fbbf24; }
+    }
+
+    .module-header h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .module-header p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .module-features {
+      padding: 1.5rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feature-item:last-child {
+      border-bottom: none;
+    }
+
+    .feature-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--secondary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .feature-item span {
+      font-size: 0.9375rem;
+    }
+
+    /* Screenshots */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .screenshot-card {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .screenshot-card:hover img {
+      transform: scale(1.02);
+    }
+
+    .screenshot-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .screenshot-card:hover .screenshot-overlay {
+      opacity: 1;
+    }
+
+    .screenshot-overlay span {
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Placeholder for screenshots */
+    .screenshot-placeholder {
+      aspect-ratio: 16/10;
+      background: var(--bg-tertiary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .screenshot-placeholder svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.5;
+    }
+
+    /* Personas Section */
+    .persona-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+    }
+
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .persona-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .persona-info h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .persona-info p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .persona-needs h4 {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .persona-needs ul {
+      list-style: none;
+    }
+
+    .persona-needs li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--text-secondary);
+    }
+
+    .persona-needs li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+
+    /* Flow Diagram */
+    .flow-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      overflow-x: auto;
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: max-content;
+    }
+
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .flow-step-number {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .flow-step-title {
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .flow-step-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow {
+      color: var(--text-muted);
+      font-size: 1.5rem;
+    }
+
+    /* Finance Table */
+    .finance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .finance-table th,
+    .finance-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .finance-table th {
+      background: var(--bg-secondary);
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .finance-table td {
+      font-size: 0.9375rem;
+    }
+
+    .finance-table tr:hover td {
+      background: var(--bg-secondary);
+    }
+
+    /* FAQ */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .faq-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 1.25rem;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-question svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+      transition: transform 0.3s;
+    }
+
+    .faq-item.open .faq-question svg {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      padding: 0 1.25rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .faq-item.open .faq-answer {
+      padding: 0 1.25rem 1.25rem;
+      max-height: 500px;
+    }
+
+    .faq-answer p {
+      color: var(--text-secondary);
+    }
+
+    /* Integrations */
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .integration-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .integration-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .integration-logo {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .integration-logo img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .integration-card h4 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .integration-card p {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .integration-status {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 100px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .integration-status.available {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .integration-status.coming {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .integration-status.available {
+        background: #14532d;
+        color: #4ade80;
+      }
+      .integration-status.coming {
+        background: #451a03;
+        color: #fbbf24;
+      }
+    }
+
+    /* Use Cases */
+    .use-cases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .use-case-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .use-case-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .use-case-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .use-case-card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .use-case-card .description {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      margin-bottom: 1rem;
+    }
+
+    .use-case-metrics {
+      display: flex;
+      gap: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .metric {
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* CTA Section */
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: white;
+      margin-top: 4rem;
+    }
+
+    .cta-section h2 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .cta-section p {
+      opacity: 0.9;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta-section .btn {
+      background: white;
+      color: var(--primary);
+    }
+
+    .cta-section .btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    /* Floating CTA */
+    .floating-cta {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 90;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+
+    .floating-cta.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .floating-cta .btn {
+      box-shadow: var(--shadow-lg);
+      padding: 1rem 1.5rem;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: var(--radius);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    /* Mobile Progress */
+    .mobile-progress {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      z-index: 80;
+    }
+
+    .mobile-progress-bar {
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mobile-progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.1s;
+    }
+
+    .mobile-progress-text {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-progress {
+        display: block;
+      }
+
+      .floating-cta {
+        bottom: 5rem;
+        right: 1rem;
+      }
+
+      .hero {
+        padding: 6rem 1rem 3rem;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .tab-btn {
+        padding: 0.875rem 1rem;
+      }
+
+      .header-cta .btn-secondary {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a href="/" class="logo">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="currentColor"/>
+          <path d="M8 16L14 22L24 10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Coordinalo
+      </a>
+      <div class="header-cta">
+        <a href="https://coordinalo.com/explorar" class="btn btn-secondary">Ver Demo</a>
+        <a href="https://coordinalo.com/registro" class="btn btn-primary">Empezar Gratis</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Gestión Inteligente para<br>Servicios Profesionales</h1>
+    <p>Agenda, finanzas y CRM en una sola plataforma. Diseñado para centros de salud, clínicas y academias con múltiples profesionales.</p>
+
+    <div class="hero-badges">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Multi-tenant
+      </span>
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Pagos integrados
+      </span>
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        WhatsApp + Email
+      </span>
+    </div>
+  </section>
+
+  <!-- Video Demo -->
+  <section class="video-section">
+    <div class="video-container">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-button">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        <span>Ver demo de 2 minutos</span>
+      </div>
+      <iframe id="videoFrame" style="display:none; width:100%; height:100%; border:none;" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <!-- Tabs Navigation -->
+  <nav class="tabs-nav">
+    <div class="tabs-list">
+      <button class="tab-btn active" data-tab="resumen">Resumen</button>
+      <button class="tab-btn" data-tab="alcance">Alcance</button>
+      <button class="tab-btn" data-tab="personas">Personas</button>
+      <button class="tab-btn" data-tab="flujos">Flujos</button>
+      <button class="tab-btn" data-tab="finanzas">Finanzas</button>
+      <button class="tab-btn" data-tab="faq">FAQ</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Tab: Resumen -->
+    <div class="tab-content active" id="resumen">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">¿Qué es Coordinalo?</h2>
+          <p class="section-subtitle">Una plataforma todo-en-uno para organizaciones con múltiples profesionales</p>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <h3>Coordínalo</h3>
+            <p>Gestión de agenda, booking público, disponibilidad y sesiones. Tus clientes reservan online 24/7.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <h3>Planifícalo</h3>
+            <p>Ventas, cobros, pagos a profesionales, nóminas y estados financieros. Control total de tu dinero.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Relaciónalo</h3>
+            <p>CRM con audiencias, campañas de email/WhatsApp y recordatorios automáticos. Fideliza tus clientes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screenshots -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Capturas del Sistema</h2>
+          <p class="section-subtitle">Interfaz intuitiva diseñada para productividad</p>
+        </div>
+        <div class="screenshots-grid">
+          <div class="screenshot-card" onclick="openLightbox('images/dashboard.webp')">
+            <div class="screenshot-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+              <span>Dashboard</span>
+            </div>
+          </div>
+          <div class="screenshot-card" onclick="openLightbox('images/calendario.webp')">
+            <div class="screenshot-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>Calendario</span>
+            </div>
+          </div>
+          <div class="screenshot-card" onclick="openLightbox('images/portal-cliente.webp')">
+            <div class="screenshot-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Portal Cliente</span>
+            </div>
+          </div>
+          <div class="screenshot-card" onclick="openLightbox('images/finanzas.webp')">
+            <div class="screenshot-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+              <span>Finanzas</span>
+            </div>
+          </div>
+        </div>
+        <p style="text-align: center; color: var(--text-muted); margin-top: 1rem; font-size: 0.875rem;">
+          Explora el sistema en vivo: <a href="https://coordinalo.com/explorar" style="color: var(--primary);">coordinalo.com/explorar</a>
+        </p>
+      </section>
+
+      <!-- Use Cases -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Quiénes Usan Coordinalo</h2>
+          <p class="section-subtitle">Casos reales de organizaciones que optimizaron su gestión</p>
+        </div>
+        <div class="use-cases-grid">
+          <div class="use-case-card">
+            <div class="use-case-icon">🏥</div>
+            <h3>Centro de Kinesiología</h3>
+            <p class="description">5 profesionales atendiendo 200+ pacientes mensuales. Antes usaban Excel y WhatsApp manual.</p>
+            <div class="use-case-metrics">
+              <div class="metric">
+                <div class="metric-value">-80%</div>
+                <div class="metric-label">Tiempo admin</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">+35%</div>
+                <div class="metric-label">Retención</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">0</div>
+                <div class="metric-label">No-shows</div>
+              </div>
+            </div>
+          </div>
+          <div class="use-case-card">
+            <div class="use-case-icon">🧠</div>
+            <h3>Clínica de Psicología</h3>
+            <p class="description">8 terapeutas con consultas presenciales y online. Necesitaban control financiero detallado.</p>
+            <div class="use-case-metrics">
+              <div class="metric">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">Visibilidad $</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">-90%</div>
+                <div class="metric-label">Errores pago</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">24/7</div>
+                <div class="metric-label">Booking</div>
+              </div>
+            </div>
+          </div>
+          <div class="use-case-card">
+            <div class="use-case-icon">🎯</div>
+            <h3>Academia de Coaching</h3>
+            <p class="description">3 instructores con sesiones grupales e individuales. Vendían paquetes de sesiones.</p>
+            <div class="use-case-metrics">
+              <div class="metric">
+                <div class="metric-value">+50%</div>
+                <div class="metric-label">Ventas</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">Auto</div>
+                <div class="metric-label">Recordatorios</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">1 día</div>
+                <div class="metric-label">Setup</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Integrations -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Integraciones</h2>
+          <p class="section-subtitle">Conecta con las herramientas que ya usas</p>
+        </div>
+        <div class="integrations-grid">
+          <div class="integration-card">
+            <div class="integration-logo">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <path fill="#00bcd4" d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z"/>
+                <path fill="#fff" d="M29,20h-2v-2c0-0.6-0.4-1-1-1h-4c-0.6,0-1,0.4-1,1v2h-2c-0.6,0-1,0.4-1,1v6c0,0.6,0.4,1,1,1h2v6 c0,0.6,0.4,1,1,1h4c0.6,0,1-0.4,1-1v-6h2c0.6,0,1-0.4,1-1v-6C30,20.4,29.6,20,29,20z"/>
+              </svg>
+            </div>
+            <h4>MercadoPago</h4>
+            <p>Cobros online con tarjetas y transferencias</p>
+            <span class="integration-status available">Disponible</span>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <path fill="#25D366" d="M24,4C13,4,4,13,4,24c0,3.9,1.1,7.5,3,10.5L4,44l9.8-3.1c3,1.7,6.4,2.6,10.2,2.6c11,0,20-9,20-20S35,4,24,4z"/>
+                <path fill="#fff" d="M35,29.3c-0.6,1.8-3.1,3.3-5.1,3.7c-1.4,0.3-3.2,0.5-9.3-2c-7.8-3.2-12.8-11.2-13.2-11.7 c-0.4-0.5-3.1-4.1-3.1-7.9c0-3.7,2-5.6,2.7-6.3c0.6-0.6,1.5-0.9,2.3-0.9c0.3,0,0.5,0,0.8,0c0.7,0,1,0.1,1.5,1.1 c0.6,1.3,2,4.9,2.2,5.3c0.2,0.4,0.3,0.8,0.1,1.3c-0.2,0.5-0.4,0.7-0.7,1.1c-0.4,0.4-0.7,0.8-1,1.2c-0.4,0.4-0.7,0.8-0.3,1.5 c0.4,0.7,1.8,3,3.9,4.9c2.7,2.4,4.9,3.1,5.6,3.5c0.7,0.3,1.1,0.3,1.5-0.2c0.4-0.5,1.7-2,2.2-2.7c0.4-0.7,0.9-0.6,1.5-0.3 c0.6,0.2,4.1,1.9,4.8,2.3c0.7,0.3,1.2,0.5,1.3,0.8C35.5,26.2,35.5,27.5,35,29.3z"/>
+              </svg>
+            </div>
+            <h4>WhatsApp</h4>
+            <p>Recordatorios y confirmaciones automáticas</p>
+            <span class="integration-status available">Disponible</span>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <path fill="#4285F4" d="M43,24c0-1.2-0.1-2.3-0.3-3.4H24v6.5h10.7c-0.5,2.5-1.9,4.6-4,6l6.4,5C40.5,35,43,30,43,24z"/>
+                <path fill="#34A853" d="M24,44c5.4,0,9.9-1.8,13.2-4.8l-6.4-5c-1.8,1.2-4.1,1.9-6.8,1.9c-5.2,0-9.6-3.5-11.2-8.2l-6.6,5.1 C9.4,39.6,16.2,44,24,44z"/>
+                <path fill="#FBBC05" d="M12.8,27.9c-0.4-1.2-0.6-2.5-0.6-3.9s0.2-2.7,0.6-3.9l-6.6-5.1C4.8,17.7,4,20.7,4,24s0.8,6.3,2.2,9l6.6-5.1z"/>
+                <path fill="#EA4335" d="M24,9.9c2.9,0,5.5,1,7.6,3l5.7-5.7C33.9,4.1,29.4,2,24,2C16.2,2,9.4,6.4,6.2,13l6.6,5.1 C14.4,13.4,18.8,9.9,24,9.9z"/>
+              </svg>
+            </div>
+            <h4>Google Calendar</h4>
+            <p>Sincronización bidireccional de agenda</p>
+            <span class="integration-status available">Disponible</span>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <path fill="#1a73e8" d="M24,4C12.95,4,4,12.95,4,24s8.95,20,20,20s20-8.95,20-20S35.05,4,24,4z"/>
+                <path fill="#fff" d="M34,26H26v8h-4v-8h-8v-4h8v-8h4v8h8V26z"/>
+              </svg>
+            </div>
+            <h4>Resend</h4>
+            <p>Emails transaccionales y campañas</p>
+            <span class="integration-status available">Disponible</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="cta-section">
+        <h2>¿Listo para simplificar tu gestión?</h2>
+        <p>Comienza gratis hoy. Sin tarjeta de crédito.</p>
+        <a href="https://coordinalo.com/registro" class="btn">Crear cuenta gratis</a>
+      </section>
+    </div>
+
+    <!-- Tab: Alcance -->
+    <div class="tab-content" id="alcance">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Módulos del Sistema</h2>
+          <p class="section-subtitle">Tres módulos integrados que trabajan juntos</p>
+        </div>
+
+        <div class="cards-grid">
+          <div class="module-card">
+            <div class="module-header">
+              <span class="module-badge coordinalo">Coordínalo</span>
+              <h3>Gestión de Agenda</h3>
+              <p>Todo lo relacionado con citas y disponibilidad</p>
+            </div>
+            <div class="module-features">
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Calendario visual con vista diaria, semanal y mensual</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Booking público con URL personalizada</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Gestión de disponibilidad por profesional</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Sincronización con Google Calendar</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Estados de sesión: proyectada, agendada, confirmada, completada</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card">
+            <div class="module-header">
+              <span class="module-badge planificalo">Planifícalo</span>
+              <h3>Gestión Financiera</h3>
+              <p>Control total del dinero de tu organización</p>
+            </div>
+            <div class="module-features">
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Ventas de paquetes de sesiones</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Cobros con MercadoPago, transferencia y efectivo</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Liquidación de pagos a profesionales</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Revenue share configurable por proveedor</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Estado de resultados (P&L) automático</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card">
+            <div class="module-header">
+              <span class="module-badge relacionalo">Relaciónalo</span>
+              <h3>CRM y Comunicación</h3>
+              <p>Fideliza y comunica con tus clientes</p>
+            </div>
+            <div class="module-features">
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Ficha de cliente con historial completo</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Segmentación de audiencias por comportamiento</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Campañas de email y WhatsApp</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Recordatorios automáticos de sesiones</span>
+              </div>
+              <div class="feature-item">
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Portal del cliente para autogestión</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab: Personas -->
+    <div class="tab-content" id="personas">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">¿Para Quién es Coordinalo?</h2>
+          <p class="section-subtitle">Diseñado para diferentes roles en tu organización</p>
+        </div>
+
+        <div class="cards-grid">
+          <div class="persona-card">
+            <div class="persona-header">
+              <div class="persona-avatar">👔</div>
+              <div class="persona-info">
+                <h3>Dueño / Administrador</h3>
+                <p>Gestiona la organización completa</p>
+              </div>
+            </div>
+            <div class="persona-needs">
+              <h4>Necesidades</h4>
+              <ul>
+                <li>Visibilidad total de ingresos y egresos</li>
+                <li>Control de pagos a profesionales</li>
+                <li>Reportes de rendimiento del negocio</li>
+                <li>Gestión de múltiples profesionales</li>
+                <li>Configuración de precios y comisiones</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="persona-card">
+            <div class="persona-header">
+              <div class="persona-avatar">👩‍⚕️</div>
+              <div class="persona-info">
+                <h3>Profesional / Proveedor</h3>
+                <p>Atiende clientes y entrega servicios</p>
+              </div>
+            </div>
+            <div class="persona-needs">
+              <h4>Necesidades</h4>
+              <ul>
+                <li>Ver su agenda del día y semana</li>
+                <li>Marcar sesiones como completadas</li>
+                <li>Consultar sus ganancias acumuladas</li>
+                <li>Sincronizar con su calendario personal</li>
+                <li>Acceder a historial de sus pacientes</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="persona-card">
+            <div class="persona-header">
+              <div class="persona-avatar">🙋</div>
+              <div class="persona-info">
+                <h3>Recepcionista</h3>
+                <p>Opera el día a día del centro</p>
+              </div>
+            </div>
+            <div class="persona-needs">
+              <h4>Necesidades</h4>
+              <ul>
+                <li>Agendar y reagendar citas rápidamente</li>
+                <li>Registrar cobros de clientes</li>
+                <li>Ver disponibilidad de todos los profesionales</li>
+                <li>Gestionar llegada de pacientes</li>
+                <li>Enviar recordatorios cuando es necesario</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="persona-card">
+            <div class="persona-header">
+              <div class="persona-avatar">😊</div>
+              <div class="persona-info">
+                <h3>Cliente / Paciente</h3>
+                <p>Recibe los servicios</p>
+              </div>
+            </div>
+            <div class="persona-needs">
+              <h4>Necesidades</h4>
+              <ul>
+                <li>Reservar citas online cuando quiera</li>
+                <li>Ver su plan de tratamiento</li>
+                <li>Recibir recordatorios de sus citas</li>
+                <li>Pagar online de forma segura</li>
+                <li>Consultar su historial de sesiones</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab: Flujos -->
+    <div class="tab-content" id="flujos">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Flujos Principales</h2>
+          <p class="section-subtitle">Cómo funciona Coordinalo en el día a día</p>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">Flujo de Sesión</h3>
+        <div class="flow-container">
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step-number">1</div>
+              <div class="flow-step-title">Proyectada</div>
+              <div class="flow-step-desc">Se vende paquete</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">2</div>
+              <div class="flow-step-title">Agendada</div>
+              <div class="flow-step-desc">Se asigna fecha</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">3</div>
+              <div class="flow-step-title">Confirmada</div>
+              <div class="flow-step-desc">Cliente confirma</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">4</div>
+              <div class="flow-step-title">En Progreso</div>
+              <div class="flow-step-desc">Sesión activa</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">5</div>
+              <div class="flow-step-title">Completada</div>
+              <div class="flow-step-desc">Sesión finalizada</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem;">Flujo de Venta y Cobro</h3>
+        <div class="flow-container">
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step-number">1</div>
+              <div class="flow-step-title">Crear Venta</div>
+              <div class="flow-step-desc">Paquete de sesiones</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">2</div>
+              <div class="flow-step-title">Registrar Cobro</div>
+              <div class="flow-step-desc">MP / Transfer / Efectivo</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">3</div>
+              <div class="flow-step-title">Entregar Sesiones</div>
+              <div class="flow-step-desc">Marcar completadas</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">4</div>
+              <div class="flow-step-title">Liquidar</div>
+              <div class="flow-step-desc">Pagar al profesional</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem;">Flujo de Booking Público</h3>
+        <div class="flow-container">
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step-number">1</div>
+              <div class="flow-step-title">Cliente entra</div>
+              <div class="flow-step-desc">URL pública</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">2</div>
+              <div class="flow-step-title">Elige servicio</div>
+              <div class="flow-step-desc">Y profesional</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">3</div>
+              <div class="flow-step-title">Selecciona hora</div>
+              <div class="flow-step-desc">Slots disponibles</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">4</div>
+              <div class="flow-step-title">Confirma datos</div>
+              <div class="flow-step-desc">Nombre, email, tel</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+              <div class="flow-step-number">5</div>
+              <div class="flow-step-title">Reservado</div>
+              <div class="flow-step-desc">Email confirmación</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab: Finanzas -->
+    <div class="tab-content" id="finanzas">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Modelo Financiero</h2>
+          <p class="section-subtitle">Cómo Coordinalo gestiona el dinero de tu organización</p>
+        </div>
+
+        <div class="cards-grid" style="margin-bottom: 2rem;">
+          <div class="card">
+            <h3>Revenue Share</h3>
+            <p>Define qué porcentaje recibe cada profesional por sesión entregada. Configurable individualmente.</p>
+          </div>
+          <div class="card">
+            <h3>Multi-método de pago</h3>
+            <p>Acepta MercadoPago, transferencias bancarias y efectivo. Todo queda registrado automáticamente.</p>
+          </div>
+          <div class="card">
+            <h3>Liquidación automática</h3>
+            <p>Calcula automáticamente cuánto debes pagar a cada profesional según las sesiones completadas.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">Ejemplo de Revenue Share</h3>
+        <div style="overflow-x: auto;">
+          <table class="finance-table">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Descripción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Precio sesión</td>
+                <td>$50.000</td>
+                <td>Lo que paga el cliente</td>
+              </tr>
+              <tr>
+                <td>Profesional (70%)</td>
+                <td>$35.000</td>
+                <td>Va al proveedor del servicio</td>
+              </tr>
+              <tr>
+                <td>Organización (30%)</td>
+                <td>$15.000</td>
+                <td>Queda para el centro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem;">Reportes Disponibles</h3>
+        <div class="cards-grid">
+          <div class="card">
+            <h3>Estado de Resultados</h3>
+            <p>P&L completo con ingresos por servicio, pagos a proveedores y margen neto del período.</p>
+          </div>
+          <div class="card">
+            <h3>Balance por Cliente</h3>
+            <p>Cuentas por cobrar, pagos pendientes y aging de deuda por cliente.</p>
+          </div>
+          <div class="card">
+            <h3>Liquidación por Proveedor</h3>
+            <p>Detalle de sesiones completadas y montos a pagar a cada profesional.</p>
+          </div>
+          <div class="card">
+            <h3>Flujo de Caja</h3>
+            <p>Ingresos y egresos diarios/mensuales con proyección de saldo.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tab: FAQ -->
+    <div class="tab-content" id="faq">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Preguntas Frecuentes</h2>
+          <p class="section-subtitle">Respuestas a las dudas más comunes</p>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Qué es Coordinalo?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Coordinalo es una plataforma SaaS multi-tenant para gestionar organizaciones que ofrecen servicios profesionales. Integra tres módulos: Coordínalo (agenda), Planifícalo (finanzas) y Relaciónalo (CRM), permitiendo gestionar citas, pagos y comunicación con clientes desde un solo lugar.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Para quién es Coordinalo?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Centros de kinesiología, clínicas de psicología, academias de coaching, centros de estética, consultorios médicos y cualquier organización con múltiples profesionales que atienden clientes con citas programadas.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Cuánto cuesta Coordinalo?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Coordinalo tiene un plan gratuito para comenzar con funcionalidades básicas. Los planes pagos se ajustan según la cantidad de profesionales y funcionalidades requeridas. Contacta a ventas para un presupuesto personalizado.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Puedo probarlo antes de pagar?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Sí, puedes crear una cuenta gratuita y explorar el sistema con datos de demostración. También puedes visitar <a href="https://coordinalo.com/explorar">coordinalo.com/explorar</a> para ver una organización demo sin registrarte.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Cómo funciona el revenue share?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Configuras el porcentaje que recibe cada profesional por sesión (ej: 70% para el profesional, 30% para el centro). Cuando se completa una sesión, el sistema calcula automáticamente cuánto corresponde a cada parte y lo registra en la liquidación pendiente.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Qué métodos de pago soporta?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>MercadoPago (tarjetas de crédito/débito), transferencias bancarias y efectivo. Los pagos con MercadoPago se registran automáticamente via webhook. Transferencias y efectivo se registran manualmente.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Funciona en Chile?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Sí, Coordinalo está optimizado para Chile con integración de MercadoPago Chile, formato de moneda CLP, y soporte para RUT. También funciona en otros países de Latinoamérica.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Mis datos están seguros?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Sí, usamos Supabase como base de datos con cifrado en reposo y en tránsito. Implementamos Row Level Security (RLS) para que cada organización solo acceda a sus propios datos. Cumplimos con estándares de seguridad de la industria.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Puedo importar mis datos existentes?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Sí, ofrecemos importación de clientes y sesiones históricas desde Excel/CSV. Contacta a soporte para asistencia con la migración de datos.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              ¿Tiene aplicación móvil?
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              <p>Coordinalo es una aplicación web responsive que funciona perfectamente en móviles. No requiere instalación. Una app nativa está en el roadmap para futuras versiones.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Floating CTA -->
+  <div class="floating-cta" id="floatingCta">
+    <a href="https://coordinalo.com/registro" class="btn btn-primary">Empezar Gratis →</a>
+  </div>
+
+  <!-- Mobile Progress -->
+  <div class="mobile-progress">
+    <div class="mobile-progress-bar">
+      <div class="mobile-progress-fill" id="mobileProgressFill"></div>
+    </div>
+    <div class="mobile-progress-text" id="mobileProgressText">Resumen</div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <img id="lightboxImg" src="" alt="Screenshot">
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 Coordinalo · Parte de <a href="https://digitalo.com">Grupo Digitalo</a> · <a href="https://documentalo.com">Documentación técnica</a></p>
+  </footer>
+
+  <script>
+    // Tab Navigation
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const mobileProgressText = document.getElementById('mobileProgressText');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+
+        mobileProgressText.textContent = btn.textContent;
+      });
+    });
+
+    // Progress Bar
+    const progressBar = document.getElementById('progressBar');
+    const mobileProgressFill = document.getElementById('mobileProgressFill');
+    const floatingCta = document.getElementById('floatingCta');
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+
+      progressBar.style.width = progress + '%';
+      mobileProgressFill.style.width = progress + '%';
+
+      // Show floating CTA after scrolling 300px
+      if (scrollTop > 300) {
+        floatingCta.classList.add('visible');
+      } else {
+        floatingCta.classList.remove('visible');
+      }
+    });
+
+    // FAQ Accordion
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      question.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        faqItems.forEach(i => i.classList.remove('open'));
+        if (!isOpen) {
+          item.classList.add('open');
+        }
+      });
+    });
+
+    // Lightbox
+    function openLightbox(src) {
+      const lightbox = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      img.src = src;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('lightbox');
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('lightbox').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeLightbox();
+      }
+    });
+
+    // Video Placeholder
+    const videoPlaceholder = document.getElementById('videoPlaceholder');
+    const videoFrame = document.getElementById('videoFrame');
+
+    videoPlaceholder.addEventListener('click', () => {
+      // Replace with actual video URL when available
+      // videoFrame.src = 'https://www.youtube.com/embed/VIDEO_ID?autoplay=1';
+      // videoPlaceholder.style.display = 'none';
+      // videoFrame.style.display = 'block';
+
+      // For now, redirect to demo
+      window.open('https://coordinalo.com/explorar', '_blank');
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+  </script>
+</body>
+</html>
