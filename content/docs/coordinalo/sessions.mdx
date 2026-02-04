@@ -87,14 +87,29 @@ POST /api/v1/sessions
 
 ## Estados de sesión
 
-| Estado | Descripción |
-|--------|-------------|
-| `scheduled` | Agendada, pendiente |
-| `confirmed` | Confirmada por el cliente |
-| `in_progress` | En curso |
-| `completed` | Finalizada |
-| `cancelled` | Cancelada |
-| `no_show` | Cliente no asistió |
+Coordinalo rastrea las sesiones a través del siguiente flujo:
+
+```
+Proyectado → Programado → Confirmado → Entregado
+```
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Proyectado** | `projected` | Sesión planificada pero aún no agendada |
+| **Programado** | `scheduled` | Agendada con fecha y hora |
+| **Confirmado** | `confirmed` | Confirmada por el cliente (WhatsApp/Email) |
+| **En progreso** | `in_progress` | Sesión en curso |
+| **Entregado** | `completed` | Sesión finalizada exitosamente |
+| **Cancelada** | `cancelled` | Cancelada por cliente o proveedor |
+| **No asistió** | `no_show` | Cliente no se presentó |
+
+## Confirmaciones automáticas
+
+Coordinalo envía confirmaciones automáticas por WhatsApp y email. Los clientes pueden confirmar su asistencia directamente desde el mensaje.
+
+<Callout type="info">
+Las confirmaciones por WhatsApp requieren integración con la API de WhatsApp Business configurada en tu organización.
+</Callout>
 
 ## Webhooks
 
@@ -111,3 +126,13 @@ Coordinalo puede notificar cambios de estado via webhooks:
   }
 }
 ```
+
+### Eventos disponibles
+
+| Evento | Descripción |
+|--------|-------------|
+| `session.created` | Nueva sesión creada |
+| `session.confirmed` | Cliente confirmó asistencia |
+| `session.completed` | Sesión marcada como entregada |
+| `session.cancelled` | Sesión cancelada |
+| `session.no_show` | Cliente no asistió |

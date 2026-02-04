@@ -5,7 +5,13 @@ description: Gestión de clientes en Coordinalo
 
 # Clientes
 
-Los clientes son las personas que reciben servicios de tu organización.
+Los clientes son las personas que reciben servicios de tu organización. Cada cliente tiene acceso a un **portal personalizado** donde puede:
+
+- Ver su plan de tratamiento completo
+- Consultar saldo de sesiones
+- Hacer reservas 24/7
+- Ver historial de pagos
+- Recibir confirmaciones automáticas por WhatsApp
 
 ## Modelo de datos
 
@@ -85,8 +91,26 @@ Incluye historial de sesiones y métricas:
 }
 ```
 
+## Portal del cliente
+
+Cada cliente tiene acceso a un portal personalizado mediante un token único:
+
+```bash
+GET /clientes/:token
+```
+
+El portal permite al cliente:
+- Ver plan de tratamiento y sesiones pendientes
+- Agendar nuevas citas en horarios disponibles
+- Ver historial de sesiones completadas
+- Consultar pagos pendientes y realizados
+
+<Callout type="info">
+El enlace al portal se puede enviar automáticamente por WhatsApp o email al crear el cliente.
+</Callout>
+
 ## Notas importantes
 
 <Callout type="info">
-El campo `totalSpent` representa el LTV (Lifetime Value) del cliente. Este dato es clave para el lead scoring del ecosistema Digitalo.
+El campo `totalSpent` representa el LTV (Lifetime Value) del cliente. Este dato es clave para el lead scoring y análisis financiero de la organización.
 </Callout>

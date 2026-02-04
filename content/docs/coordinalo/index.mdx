@@ -5,24 +5,50 @@ description: API de agendamiento y gestión de sesiones para servicios profesion
 
 # Coordinalo API
 
-Coordinalo es una plataforma de gestión de agenda para organizaciones que ofrecen servicios profesionales.
+Coordinalo es un sistema de coordinación para negocios de servicios que mantiene a la organización, profesionales y clientes en la misma página. A diferencia de herramientas básicas de agendamiento, Coordinalo gestiona el ciclo de vida completo del servicio: **captación → programación → entrega → cierre**.
+
+## Mercado objetivo
+
+Organizaciones de servicios con 3+ profesionales:
+- Clínicas de kinesiología
+- Centros de psicología
+- Empresas de enfermería a domicilio
+- Academias de coaching
+- Gimnasios y centros de yoga
+- Salones y spas
 
 ## Conceptos clave
 
 ### Organización
 Entidad principal que agrupa proveedores, clientes, servicios y sesiones.
 
-### Proveedor
-Profesional que ofrece servicios (terapeuta, consultor, profesor, etc.).
+### Proveedor (Profesional)
+Profesional que ofrece servicios (kinesiólogo, psicólogo, coach, terapeuta, etc.). Tiene acceso a su agenda diaria, fichas clínicas y seguimiento de comisiones.
 
 ### Cliente
-Persona que recibe los servicios de la organización.
+Persona que recibe los servicios de la organización. Tiene acceso a un portal para ver su plan de tratamiento, saldo de sesiones y hacer reservas 24/7.
 
 ### Sesión
-Una cita o encuentro entre un proveedor y un cliente.
+Una cita entre un proveedor y un cliente. Sigue el flujo: **Proyectado → Programado → Confirmado → Entregado**.
 
 ### Servicio
-Tipo de servicio ofrecido (ej: "Sesión de kinesiología", "Consultoría legal").
+Tipo de servicio ofrecido (ej: "Sesión de kinesiología", "Consultoría legal", "Clase de yoga").
+
+## Roles de usuario
+
+| Rol | Descripción | Acceso |
+|-----|-------------|--------|
+| **Admin** | Gestiona toda la organización | Dashboard, reportes, configuración, visibilidad completa |
+| **Proveedor** | Profesional que atiende clientes | Agenda personal, sesiones diarias, gestión de clientes |
+| **Cliente** | Recibe los servicios | Portal de citas, pagos pendientes, historial |
+
+## Integraciones incluidas
+
+- **Google Calendar**: Sincronización bidireccional de agenda
+- **MercadoPago**: Procesamiento de pagos
+- **WhatsApp**: Confirmaciones y campañas automáticas
+- **Email**: Notificaciones y recordatorios
+- **SII**: Generación automática de boletas (Chile)
 
 ## Autenticación
 
@@ -46,7 +72,8 @@ curl -X GET "https://coordinalo.com/api/v1/sessions" \
 ## Próximos pasos
 
 <Cards>
-  <Card title="Sesiones" href="/docs/coordinalo/sessions" />
-  <Card title="Clientes" href="/docs/coordinalo/clients" />
-  <Card title="Disponibilidad" href="/docs/coordinalo/availability" />
+  <Card title="Módulos" href="/docs/coordinalo/modules" description="Coordinalo, Planificalo y Relacionalo" />
+  <Card title="Sesiones" href="/docs/coordinalo/sessions" description="Crear y gestionar citas" />
+  <Card title="Clientes" href="/docs/coordinalo/clients" description="Gestión de clientes y portal" />
+  <Card title="Disponibilidad" href="/docs/coordinalo/availability" description="Horarios y sincronización" />
 </Cards>

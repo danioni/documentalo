@@ -5,7 +5,7 @@ description: Configurar horarios y disponibilidad de proveedores
 
 # Disponibilidad
 
-Gestiona los horarios en que tus proveedores están disponibles para atender.
+Gestiona los horarios en que tus proveedores están disponibles para atender. Coordinalo soporta sincronización bidireccional con **Google Calendar**.
 
 ## Conceptos
 
@@ -96,3 +96,27 @@ GET /api/v1/public/agenda/:agendaSlug/slots
 ```
 
 Retorna solo slots disponibles, sin información sensible del proveedor.
+
+## Sincronización con Google Calendar
+
+Coordinalo sincroniza de forma bidireccional con Google Calendar:
+
+- **Coordinalo → Google**: Las sesiones creadas aparecen automáticamente en el calendario del proveedor
+- **Google → Coordinalo**: Eventos externos bloquean automáticamente la disponibilidad
+
+### Configurar sincronización
+
+```bash
+POST /api/v1/providers/:providerId/calendar/connect
+```
+
+```json
+{
+  "provider": "google",
+  "calendarId": "primary"
+}
+```
+
+<Callout type="info">
+La sincronización requiere que el proveedor autorice el acceso a su cuenta de Google.
+</Callout>

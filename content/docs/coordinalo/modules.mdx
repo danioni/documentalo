@@ -1,0 +1,101 @@
+---
+title: Módulos
+description: Ecosistema de módulos de Coordinalo - Agenda, Finanzas y Clientes
+---
+
+# Módulos del Ecosistema
+
+Coordinalo se organiza en tres módulos principales que trabajan de forma integrada:
+
+## Coordinalo (Agenda)
+
+El módulo central de gestión de agenda y sesiones.
+
+### Funcionalidades
+
+- **Agenda multi-proveedor**: Vista consolidada de todos los profesionales
+- **Reservas públicas**: Portal de booking sin necesidad de cuenta
+- **Confirmaciones automáticas**: WhatsApp y email
+- **Sincronización**: Google Calendar bidireccional
+- **Vista "Mi Día"**: Agenda personal del profesional
+
+### Rutas principales
+
+| Ruta | Descripción |
+|------|-------------|
+| `/[org]/dashboard` | Dashboard administrativo |
+| `/[org]/agenda` | Vista de agenda general |
+| `/mi-dia` | Agenda personal del proveedor |
+
+---
+
+## Planificalo (Finanzas)
+
+Módulo de gestión financiera y facturación.
+
+### Funcionalidades
+
+- **Facturación automática**: Generación de boletas SII (Chile)
+- **Comisiones**: Cálculo automático por sesión basado en porcentajes
+- **Reportes**: Exportación a Excel/PDF
+- **Pagos**: Integración con MercadoPago
+- **Nómina**: Automatización de pagos a proveedores
+
+### Características financieras
+
+```typescript
+// Ejemplo: Cálculo de comisión
+interface SessionPayment {
+  sessionId: string;
+  totalAmount: number;
+  providerCommission: number; // Porcentaje configurable
+  organizationAmount: number;
+}
+```
+
+<Callout type="info">
+Las comisiones se calculan automáticamente al marcar una sesión como entregada.
+</Callout>
+
+---
+
+## Relacionalo (CRM)
+
+Módulo de gestión de relaciones con clientes.
+
+### Funcionalidades
+
+- **Fichas de cliente**: Historial completo de atenciones
+- **Campañas**: WhatsApp y email masivos
+- **Seguimiento**: Tracking de sesiones y tratamientos
+- **Métricas**: LTV, tasa de asistencia, retención
+
+### Métricas de cliente
+
+| Métrica | Descripción |
+|---------|-------------|
+| `totalSessions` | Total de sesiones agendadas |
+| `completedSessions` | Sesiones entregadas |
+| `cancelledSessions` | Sesiones canceladas |
+| `totalSpent` | Gasto total (LTV) |
+| `attendanceRate` | Tasa de asistencia |
+
+---
+
+## Integración entre módulos
+
+Los módulos comparten datos en tiempo real:
+
+```
+Cliente agenda sesión (Coordinalo)
+        ↓
+Sesión se completa
+        ↓
+Se genera cobro (Planificalo)
+        ↓
+Se actualiza historial (Relacionalo)
+```
+
+<Callout type="warning">
+Los tres módulos están incluidos en todos los planes de Coordinalo. No requieren activación adicional.
+</Callout>

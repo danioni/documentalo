@@ -2,6 +2,7 @@
   "title": "Coordinalo",
   "pages": [
     "index",
+    "modules",
     "sessions",
     "clients",
     "availability"
