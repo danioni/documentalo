@@ -69,12 +69,21 @@ curl -X GET "https://coordinalo.com/api/v1/sessions" \
 | `GET /api/v1/providers` | Listar proveedores |
 | `GET /api/v1/services` | Listar servicios |
 
+## Estructura de módulos
+
+Coordinalo se organiza en tres módulos **MECE** (Mutuamente Excluyentes, Colectivamente Exhaustivos):
+
+| Módulo | Dominio | Contenido |
+|--------|---------|-----------|
+| **Coordinalo** | Operaciones | Sesiones, disponibilidad, servicios, booking |
+| **Relaciónalo** | CRM | Clientes, audiencias, campañas, comunicaciones |
+| **Planifícalo** | Finanzas | Ventas, cobros, pagos, nóminas, reportes |
+
 ## Próximos pasos
 
 <Cards>
-  <Card title="Módulos" href="/docs/coordinalo/modules" description="Coordinalo, Planificalo y Relacionalo" />
-  <Card title="Sesiones" href="/docs/coordinalo/sessions" description="Crear y gestionar citas" />
-  <Card title="Clientes" href="/docs/coordinalo/clients" description="Gestión de clientes y portal" />
-  <Card title="Disponibilidad" href="/docs/coordinalo/availability" description="Horarios y sincronización" />
-  <Card title="Finanzas" href="/docs/coordinalo/finances" description="Revenue share y comisiones" />
+  <Card title="Módulos" href="/docs/coordinalo/modules" description="Arquitectura del ecosistema" />
+  <Card title="Sesiones" href="/docs/coordinalo/sessions" description="Coordinalo: gestionar citas" />
+  <Card title="Clientes" href="/docs/coordinalo/clients" description="Relaciónalo: gestión CRM" />
+  <Card title="Finanzas" href="/docs/coordinalo/finances" description="Planifícalo: comisiones y pagos" />
 </Cards>

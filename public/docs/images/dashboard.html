@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200, height=800">
+  <title>Dashboard - Coordinalo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      width: 1200px;
+      height: 800px;
+    }
+    .layout {
+      display: flex;
+      height: 100%;
+    }
+    .sidebar {
+      width: 240px;
+      background: #0f172a;
+      color: white;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      padding: 0 0.5rem;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #6366f1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-section {
+      margin-bottom: 1.5rem;
+    }
+    .nav-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      padding: 0 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: #1e293b;
+      color: white;
+    }
+    .nav-item.active {
+      background: #6366f1;
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      height: 64px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+    }
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: #6366f1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow: auto;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid #e2e8f0;
+    }
+    .stat-label {
+      font-size: 0.8125rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+    .stat-change {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    .stat-change.positive { color: #10b981; }
+    .stat-change.negative { color: #ef4444; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-weight: 600;
+    }
+    .card-body {
+      padding: 1.25rem;
+    }
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .session-item:last-child { border-bottom: none; }
+    .session-time {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #6366f1;
+      width: 50px;
+    }
+    .session-avatar {
+      width: 36px;
+      height: 36px;
+      background: #e0e7ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: #6366f1;
+    }
+    .session-info { flex: 1; }
+    .session-name { font-weight: 500; font-size: 0.875rem; }
+    .session-service { font-size: 0.75rem; color: #64748b; }
+    .session-status {
+      font-size: 0.6875rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+    .status-confirmed { background: #dcfce7; color: #15803d; }
+    .status-pending { background: #fef3c7; color: #b45309; }
+    .chart-placeholder {
+      height: 180px;
+      background: linear-gradient(180deg, #e0e7ff 0%, #f8fafc 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+    .chart-bar {
+      flex: 1;
+      background: #6366f1;
+      border-radius: 4px 4px 0 0;
+      min-height: 20px;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        Coordinalo
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Coordinalo</div>
+        <div class="nav-item active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Calendario
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Sesiones
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          Servicios
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profesionales
+        </div>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Relaciónalo</div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+          Clientes
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          Campañas
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Comunicaciones
+        </div>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-label">Planifícalo</div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Finanzas
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Reportes
+        </div>
+        <div class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Configuración
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <h1 class="header-title">Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn">+ Nueva Sesión</button>
+          <div class="avatar">MG</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Sesiones Hoy</div>
+            <div class="stat-value">12</div>
+            <div class="stat-change positive">↑ 3 vs ayer</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ocupación Semanal</div>
+            <div class="stat-value">78%</div>
+            <div class="stat-change positive">↑ 5% vs sem. ant.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ingresos del Mes</div>
+            <div class="stat-value">$2.4M</div>
+            <div class="stat-change positive">↑ 12% vs mes ant.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Clientes Activos</div>
+            <div class="stat-value">186</div>
+            <div class="stat-change positive">↑ 8 nuevos</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Sesiones de Hoy</span>
+              <span style="font-size: 0.8125rem; color: #64748b;">Martes, 21 Enero</span>
+            </div>
+            <div class="card-body">
+              <div class="session-item">
+                <span class="session-time">09:00</span>
+                <div class="session-avatar">JP</div>
+                <div class="session-info">
+                  <div class="session-name">Juan Pérez</div>
+                  <div class="session-service">Kinesiología · María González</div>
+                </div>
+                <span class="session-status status-confirmed">Confirmada</span>
+              </div>
+              <div class="session-item">
+                <span class="session-time">10:00</span>
+                <div class="session-avatar">AL</div>
+                <div class="session-info">
+                  <div class="session-name">Ana López</div>
+                  <div class="session-service">Masoterapia · Carlos Ruiz</div>
+                </div>
+                <span class="session-status status-confirmed">Confirmada</span>
+              </div>
+              <div class="session-item">
+                <span class="session-time">11:00</span>
+                <div class="session-avatar">PG</div>
+                <div class="session-info">
+                  <div class="session-name">Pedro García</div>
+                  <div class="session-service">Kinesiología · María González</div>
+                </div>
+                <span class="session-status status-pending">Pendiente</span>
+              </div>
+              <div class="session-item">
+                <span class="session-time">12:00</span>
+                <div class="session-avatar">LS</div>
+                <div class="session-info">
+                  <div class="session-name">Laura Silva</div>
+                  <div class="session-service">Evaluación · Diego Torres</div>
+                </div>
+                <span class="session-status status-confirmed">Confirmada</span>
+              </div>
+              <div class="session-item">
+                <span class="session-time">15:00</span>
+                <div class="session-avatar">RM</div>
+                <div class="session-info">
+                  <div class="session-name">Roberto Muñoz</div>
+                  <div class="session-service">Kinesiología · María González</div>
+                </div>
+                <span class="session-status status-confirmed">Confirmada</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ingresos Semanal</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-placeholder">
+                <div class="chart-bar" style="height: 60%;"></div>
+                <div class="chart-bar" style="height: 80%;"></div>
+                <div class="chart-bar" style="height: 45%;"></div>
+                <div class="chart-bar" style="height: 90%;"></div>
+                <div class="chart-bar" style="height: 70%;"></div>
+                <div class="chart-bar" style="height: 55%;"></div>
+                <div class="chart-bar" style="height: 40%;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.6875rem; color: #64748b;">
+                <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

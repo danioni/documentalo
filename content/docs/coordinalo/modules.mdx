@@ -1,74 +1,76 @@
 ---
 title: Módulos
-description: Ecosistema de módulos de Coordinalo - Agenda, Finanzas y Clientes
+description: Ecosistema de módulos de Coordinalo - Operaciones, CRM y Finanzas
 ---
 
 # Módulos del Ecosistema
 
-Coordinalo se organiza en tres módulos principales que trabajan de forma integrada:
+Coordinalo se organiza en tres módulos principales que trabajan de forma integrada. Cada módulo cubre un dominio específico y mutuamente excluyente:
 
-## Coordinalo (Agenda)
+| Módulo | Dominio | Pregunta que responde |
+|--------|---------|----------------------|
+| **Coordinalo** | Operaciones | ¿Qué servicios se entregan, cuándo y por quién? |
+| **Relaciónalo** | CRM | ¿A quién atendemos y cómo nos comunicamos? |
+| **Planifícalo** | Finanzas | ¿Cuánto cobramos, pagamos y ganamos? |
 
-El módulo central de gestión de agenda y sesiones.
+---
+
+## Coordinalo (Operaciones)
+
+Gestión del día a día: sesiones, disponibilidad y catálogo de servicios.
+
+### Alcance
+
+| Incluye | No incluye |
+|---------|------------|
+| Sesiones y citas | Datos de contacto del cliente |
+| Disponibilidad de profesionales | Historial de comunicaciones |
+| Catálogo de servicios | Cobros y pagos |
+| Reservas públicas | Campañas de marketing |
+| Asignación automática | Reportes financieros |
 
 ### Funcionalidades
 
-- **Agenda multi-proveedor**: Vista consolidada de todos los profesionales
-- **Reservas públicas**: Portal de booking sin necesidad de cuenta
-- **Confirmaciones automáticas**: WhatsApp y email
-- **Sincronización**: Google Calendar bidireccional
-- **Vista "Mi Día"**: Agenda personal del profesional
+- **Sesiones**: Crear, confirmar, reprogramar y cancelar citas
+- **Disponibilidad**: Horarios por profesional con sincronización Google Calendar
+- **Catálogo**: Servicios, duraciones y precios base
+- **Booking público**: Portal de reservas 24/7 sin cuenta
+- **Asignación inteligente**: Sugerencias automáticas de profesional
 
 ### Rutas principales
 
 | Ruta | Descripción |
 |------|-------------|
 | `/[org]/dashboard` | Dashboard administrativo |
-| `/[org]/agenda` | Vista de agenda general |
-| `/mi-dia` | Agenda personal del proveedor |
+| `/[org]/calendario` | Vista de agenda general |
+| `/[org]/sesiones` | Listado de sesiones |
+| `/[org]/servicios` | Catálogo de servicios |
+| `/[org]/profesionales` | Gestión de profesionales |
 
 ---
 
-## Planificalo (Finanzas)
+## Relaciónalo (CRM)
 
-Módulo de gestión financiera y facturación.
+Gestión de clientes y comunicaciones.
 
-### Funcionalidades
+### Alcance
 
-- **Facturación automática**: Generación de boletas SII (Chile)
-- **Comisiones**: Cálculo automático por sesión basado en porcentajes
-- **Reportes**: Exportación a Excel/PDF
-- **Pagos**: Integración con MercadoPago
-- **Nómina**: Automatización de pagos a proveedores
-
-### Características financieras
-
-```typescript
-// Ejemplo: Cálculo de comisión
-interface SessionPayment {
-  sessionId: string;
-  totalAmount: number;
-  providerCommission: number; // Porcentaje configurable
-  organizationAmount: number;
-}
-```
-
-<Callout type="info">
-Las comisiones se calculan automáticamente al marcar una sesión como entregada.
-</Callout>
-
----
-
-## Relacionalo (CRM)
-
-Módulo de gestión de relaciones con clientes.
+| Incluye | No incluye |
+|---------|------------|
+| Ficha de cliente | Agenda del profesional |
+| Historial de atenciones | Disponibilidad horaria |
+| Campañas y recordatorios | Facturación |
+| Audiencias y segmentación | Nóminas |
+| Disputas y reclamos | Estados financieros |
 
 ### Funcionalidades
 
-- **Fichas de cliente**: Historial completo de atenciones
+- **Clientes**: Fichas completas con historial de atenciones
+- **Audiencias**: Segmentación por comportamiento y atributos
 - **Campañas**: WhatsApp y email masivos
-- **Seguimiento**: Tracking de sesiones y tratamientos
-- **Métricas**: LTV, tasa de asistencia, retención
+- **Recordatorios**: Confirmaciones automáticas pre-sesión
+- **Comunicaciones**: Log de todas las interacciones
+- **Disputas**: Gestión de reclamos y resoluciones
 
 ### Métricas de cliente
 
@@ -82,18 +84,65 @@ Módulo de gestión de relaciones con clientes.
 
 ---
 
+## Planifícalo (Finanzas)
+
+Gestión financiera: ingresos, egresos y reportes.
+
+### Alcance
+
+| Incluye | No incluye |
+|---------|------------|
+| Ventas y cobros | Datos personales del cliente |
+| Pagos a proveedores | Historial de comunicaciones |
+| Nóminas | Gestión de citas |
+| Estados financieros | Campañas de marketing |
+| Comisiones | Disponibilidad horaria |
+
+### Funcionalidades
+
+- **Ventas**: Registro de transacciones por sesión
+- **Cobros**: Integración MercadoPago, estados de pago
+- **Pagos a proveedores**: Liquidaciones y transferencias
+- **Nóminas**: Cálculo automático de comisiones
+- **Estados financieros**: Reportes de ingresos, egresos y utilidad
+
+### Modelo de comisiones
+
+```typescript
+interface SessionPayment {
+  sessionId: string;
+  totalAmount: number;           // Precio cobrado al cliente
+  providerCommission: number;    // Porcentaje para el profesional
+  organizationAmount: number;    // Margen de la organización
+}
+```
+
+<Callout type="info">
+Las comisiones se calculan automáticamente al marcar una sesión como entregada.
+</Callout>
+
+---
+
 ## Integración entre módulos
 
-Los módulos comparten datos en tiempo real:
+Los módulos comparten datos en tiempo real siguiendo el ciclo de vida del servicio:
 
 ```
-Cliente agenda sesión (Coordinalo)
-        ↓
-Sesión se completa
-        ↓
-Se genera cobro (Planificalo)
-        ↓
-Se actualiza historial (Relacionalo)
+┌─────────────────────────────────────────────────────────────┐
+│                    CICLO DE VIDA                            │
+├─────────────────────────────────────────────────────────────┤
+│  RELACIÓNALO          COORDINALO           PLANIFÍCALO     │
+│  (CRM)                (Operaciones)        (Finanzas)       │
+│                                                             │
+│  Cliente              Agenda sesión        Genera venta     │
+│  solicita     →       con profesional  →   pendiente        │
+│                                                             │
+│  Recibe               Profesional          Procesa          │
+│  confirmación ←       atiende          →   cobro            │
+│                                                             │
+│  Actualiza            Marca como           Calcula          │
+│  historial    ←       entregada        →   comisiones       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 <Callout type="warning">
