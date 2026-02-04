@@ -1,0 +1,496 @@
+---
+title: Recordatorios
+description: Configuración de recordatorios automáticos en Coordinalo
+---
+
+# Recordatorios
+
+Los recordatorios automáticos permiten enviar notificaciones a clientes sobre sesiones próximas, pagos pendientes y reactivación por inactividad a través de email y WhatsApp.
+
+## Modelo de datos
+
+```typescript
+interface ReminderConfig {
+  sessionReminder: SessionReminderConfig;
+  paymentReminder: PaymentReminderConfig;
+  reactivation: ReactivationConfig;
+  confirmation: ConfirmationConfig;
+}
+
+interface SessionReminderConfig {
+  enabled: boolean;
+  triggers: SessionReminderTrigger[];
+  channels: ('email' | 'whatsapp')[];
+  template: ReminderTemplate;
+}
+
+interface SessionReminderTrigger {
+  hoursBefore: number;
+  channels: ('email' | 'whatsapp')[];
+}
+
+interface PaymentReminderConfig {
+  enabled: boolean;
+  daysAfterDue: number[];
+  channels: ('email' | 'whatsapp')[];
+  template: ReminderTemplate;
+}
+
+interface ReactivationConfig {
+  enabled: boolean;
+  daysInactive: number;
+  channels: ('email' | 'whatsapp')[];
+  template: ReminderTemplate;
+  maxReminders: number;
+}
+
+interface ConfirmationConfig {
+  enabled: boolean;
+  hoursBefore: number;
+  requireResponse: boolean;
+  channels: ('email' | 'whatsapp')[];
+}
+
+interface ReminderTemplate {
+  subject?: string;
+  body: string;
+}
+```
+
+## Obtener configuración
+
+```bash
+GET /api/v1/reminders
+```
+
+### Respuesta
+
+```json
+{
+  "sessionReminder": {
+    "enabled": true,
+    "triggers": [
+      {
+        "hoursBefore": 24,
+        "channels": ["email", "whatsapp"]
+      },
+      {
+        "hoursBefore": 2,
+        "channels": ["whatsapp"]
+      }
+    ],
+    "template": {
+      "subject": "Recordatorio: Tu sesión de {{service}}",
+      "body": "Hola {{name}},\n\nTe recordamos que tienes una sesión de {{service}} programada para {{date}} a las {{time}}.\n\nTe esperamos en {{location}}.\n\nSaludos,\n{{organizationName}}"
+    }
+  },
+  "paymentReminder": {
+    "enabled": true,
+    "daysAfterDue": [3, 7, 14],
+    "channels": ["email"],
+    "template": {
+      "subject": "Recordatorio de pago pendiente",
+      "body": "Hola {{name}},\n\nTe recordamos que tienes un saldo pendiente de {{pendingAmount}}.\n\nPuedes realizar tu pago en {{paymentUrl}}.\n\nSaludos,\n{{organizationName}}"
+    }
+  },
+  "reactivation": {
+    "enabled": true,
+    "daysInactive": 30,
+    "channels": ["email", "whatsapp"],
+    "template": {
+      "subject": "¡Te extrañamos!",
+      "body": "Hola {{name}},\n\nHace {{daysSinceLastSession}} días que no te vemos.\n\n¿Te gustaría agendar una nueva sesión? Reserva en {{bookingUrl}}\n\nSaludos,\n{{organizationName}}"
+    },
+    "maxReminders": 3
+  },
+  "confirmation": {
+    "enabled": true,
+    "hoursBefore": 48,
+    "requireResponse": true,
+    "channels": ["whatsapp"],
+    "template": {
+      "body": "Hola {{name}}, te confirmamos tu sesión de {{service}} para el {{date}} a las {{time}}. ¿Podrás asistir?\n\nResponde SÍ para confirmar o NO para cancelar."
+    }
+  }
+}
+```
+
+## Actualizar configuración
+
+```bash
+PUT /api/v1/reminders
+```
+
+### Body
+
+```json
+{
+  "sessionReminder": {
+    "enabled": true,
+    "triggers": [
+      {
+        "hoursBefore": 24,
+        "channels": ["email", "whatsapp"]
+      },
+      {
+        "hoursBefore": 1,
+        "channels": ["whatsapp"]
+      }
+    ]
+  },
+  "paymentReminder": {
+    "enabled": true,
+    "daysAfterDue": [3, 7, 14, 30]
+  }
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "sessionReminder": {
+    "enabled": true,
+    "triggers": [
+      {
+        "hoursBefore": 24,
+        "channels": ["email", "whatsapp"]
+      },
+      {
+        "hoursBefore": 1,
+        "channels": ["whatsapp"]
+      }
+    ]
+  },
+  "updatedAt": "2026-01-20T10:00:00Z"
+}
+```
+
+---
+
+## Recordatorio de sesión
+
+### Configurar triggers
+
+```bash
+PUT /api/v1/reminders/session
+```
+
+### Body
+
+```json
+{
+  "enabled": true,
+  "triggers": [
+    {
+      "hoursBefore": 48,
+      "channels": ["email"]
+    },
+    {
+      "hoursBefore": 24,
+      "channels": ["email", "whatsapp"]
+    },
+    {
+      "hoursBefore": 2,
+      "channels": ["whatsapp"]
+    }
+  ],
+  "template": {
+    "subject": "Recordatorio: {{service}} mañana",
+    "body": "Hola {{name}},\n\nMañana tienes tu sesión de {{service}} a las {{time}}."
+  }
+}
+```
+
+### Variables disponibles
+
+| Variable | Descripción |
+|----------|-------------|
+| `{{name}}` | Nombre del cliente |
+| `{{service}}` | Nombre del servicio |
+| `{{date}}` | Fecha de la sesión |
+| `{{time}}` | Hora de la sesión |
+| `{{provider}}` | Nombre del proveedor |
+| `{{location}}` | Dirección |
+| `{{organizationName}}` | Nombre de la organización |
+
+---
+
+## Recordatorio de pago
+
+### Configurar recordatorios de pago
+
+```bash
+PUT /api/v1/reminders/payment
+```
+
+### Body
+
+```json
+{
+  "enabled": true,
+  "daysAfterDue": [3, 7, 14, 30],
+  "channels": ["email", "whatsapp"],
+  "template": {
+    "subject": "Recordatorio de pago - {{organizationName}}",
+    "body": "Hola {{name}},\n\nTienes un saldo pendiente de {{pendingAmount}} correspondiente a {{description}}.\n\nFecha de vencimiento: {{dueDate}}\nDías de atraso: {{daysOverdue}}\n\nRealiza tu pago en: {{paymentUrl}}"
+  },
+  "escalation": {
+    "enabledAfterDays": 30,
+    "notifyAdmin": true,
+    "restrictBooking": true
+  }
+}
+```
+
+### Variables de pago
+
+| Variable | Descripción |
+|----------|-------------|
+| `{{pendingAmount}}` | Monto pendiente formateado |
+| `{{description}}` | Descripción de la venta |
+| `{{dueDate}}` | Fecha de vencimiento |
+| `{{daysOverdue}}` | Días de atraso |
+| `{{paymentUrl}}` | URL para pagar online |
+| `{{totalDebt}}` | Deuda total del cliente |
+
+---
+
+## Recordatorio de reactivación
+
+### Configurar reactivación
+
+```bash
+PUT /api/v1/reminders/reactivation
+```
+
+### Body
+
+```json
+{
+  "enabled": true,
+  "daysInactive": 30,
+  "channels": ["email", "whatsapp"],
+  "template": {
+    "subject": "¡{{name}}, te extrañamos!",
+    "body": "Hola {{name}},\n\nHace {{daysSinceLastSession}} días desde tu última visita.\n\nNos encantaría verte de nuevo. Agenda tu próxima sesión en {{bookingUrl}}"
+  },
+  "maxReminders": 3,
+  "reminderIntervalDays": 15,
+  "excludeTags": ["no-marketing", "churned"]
+}
+```
+
+<Callout type="info">
+Los recordatorios de reactivación se detienen automáticamente si el cliente agenda una nueva sesión.
+</Callout>
+
+---
+
+## Confirmación de asistencia
+
+### Configurar confirmación
+
+```bash
+PUT /api/v1/reminders/confirmation
+```
+
+### Body
+
+```json
+{
+  "enabled": true,
+  "hoursBefore": 48,
+  "requireResponse": true,
+  "channels": ["whatsapp"],
+  "template": {
+    "body": "Hola {{name}}, tienes una sesión de {{service}} agendada para el {{date}} a las {{time}}.\n\n¿Confirmas tu asistencia?\n\n✅ Responde SÍ para confirmar\n❌ Responde NO para cancelar"
+  },
+  "autoActions": {
+    "onConfirm": "mark_confirmed",
+    "onCancel": "cancel_session",
+    "onNoResponse": "send_reminder"
+  },
+  "noResponseReminderHours": 12
+}
+```
+
+### Flujo de confirmación
+
+```
+48h antes → Envía solicitud de confirmación
+           ↓
+      Cliente responde SÍ → Sesión confirmada
+           ↓
+      Cliente responde NO → Sesión cancelada
+           ↓
+      Sin respuesta (12h) → Reenvía recordatorio
+           ↓
+      Sin respuesta (4h antes) → Marca como "sin confirmar"
+```
+
+---
+
+## Ver recordatorios programados
+
+```bash
+GET /api/v1/reminders/scheduled
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `type` | `string` | `session`, `payment`, `reactivation`, `confirmation` |
+| `from` | `string` | Fecha inicio |
+| `to` | `string` | Fecha fin |
+| `clientId` | `string` | Filtrar por cliente |
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "rem_001",
+      "type": "session",
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "sessionId": "sess_001",
+      "scheduledAt": "2026-01-21T08:00:00Z",
+      "triggerHoursBefore": 24,
+      "channels": ["email", "whatsapp"],
+      "status": "pending"
+    },
+    {
+      "id": "rem_002",
+      "type": "payment",
+      "clientId": "cli_002",
+      "clientName": "Ana López",
+      "ventaId": "sale_001",
+      "scheduledAt": "2026-01-23T10:00:00Z",
+      "daysAfterDue": 7,
+      "channels": ["email"],
+      "status": "pending"
+    }
+  ],
+  "summary": {
+    "session": 15,
+    "payment": 8,
+    "reactivation": 12,
+    "confirmation": 10
+  }
+}
+```
+
+## Ver historial de recordatorios
+
+```bash
+GET /api/v1/reminders/history
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `type` | `string` | Tipo de recordatorio |
+| `clientId` | `string` | Filtrar por cliente |
+| `status` | `string` | `sent`, `delivered`, `failed` |
+| `from` | `string` | Fecha inicio |
+| `to` | `string` | Fecha fin |
+| `page` | `number` | Página |
+| `limit` | `number` | Resultados por página |
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "hist_001",
+      "type": "session",
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "channel": "whatsapp",
+      "status": "delivered",
+      "sentAt": "2026-01-20T08:00:00Z",
+      "deliveredAt": "2026-01-20T08:00:05Z",
+      "sessionId": "sess_001",
+      "message": "Hola Juan, te recordamos tu sesión..."
+    }
+  ],
+  "pagination": {
+    "total": 250,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 13
+  }
+}
+```
+
+## Cancelar recordatorio
+
+```bash
+DELETE /api/v1/reminders/scheduled/:id
+```
+
+### Respuesta exitosa (204)
+
+No content.
+
+## Enviar recordatorio manual
+
+```bash
+POST /api/v1/reminders/send
+```
+
+### Body
+
+```json
+{
+  "type": "session",
+  "sessionId": "sess_001",
+  "channels": ["whatsapp"],
+  "customMessage": "Mensaje personalizado opcional"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "sent": true,
+  "channels": {
+    "whatsapp": {
+      "status": "sent",
+      "sentAt": "2026-01-20T10:00:00Z"
+    }
+  }
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `reminder.sent` | Recordatorio enviado |
+| `reminder.delivered` | Recordatorio entregado |
+| `reminder.failed` | Fallo en envío |
+| `confirmation.received` | Respuesta de confirmación recibida |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "confirmation.received",
+  "data": {
+    "sessionId": "sess_001",
+    "clientId": "cli_001",
+    "clientName": "Juan Pérez",
+    "response": "confirmed",
+    "channel": "whatsapp",
+    "receivedAt": "2026-01-19T14:30:00Z"
+  },
+  "timestamp": "2026-01-19T14:30:01Z"
+}
+```

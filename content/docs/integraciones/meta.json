@@ -1,4 +1,9 @@
 {
   "title": "Integraciones",
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "whatsapp-evolution",
+    "resend",
+    "google-calendar"
+  ]
 }

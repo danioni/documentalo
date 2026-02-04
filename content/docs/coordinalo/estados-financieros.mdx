@@ -1,0 +1,563 @@
+---
+title: Estados Financieros
+description: Reportes P&L, balance y resúmenes financieros en Coordinalo
+---
+
+# Estados Financieros
+
+Coordinalo genera reportes financieros automatizados para analizar la salud financiera de la organización, incluyendo estado de resultados (P&L), balances y resúmenes mensuales.
+
+## Modelo de datos
+
+```typescript
+interface PnLReport {
+  period: {
+    from: string;
+    to: string;
+  };
+  revenue: {
+    services: number;
+    other: number;
+    total: number;
+  };
+  expenses: {
+    providerPayments: number;
+    operational: number;
+    total: number;
+  };
+  netIncome: number;
+  margin: number;
+}
+
+interface BalanceReport {
+  asOf: string;
+  receivables: {
+    total: number;
+    byClient: ClientBalance[];
+  };
+  payables: {
+    total: number;
+    byProvider: ProviderBalance[];
+  };
+  netPosition: number;
+}
+
+interface MonthlySummary {
+  month: string;
+  revenue: number;
+  expenses: number;
+  netIncome: number;
+  sessionsCount: number;
+  newClients: number;
+  activeProviders: number;
+}
+```
+
+## Estado de Resultados (P&L)
+
+Obtiene el estado de pérdidas y ganancias para un período.
+
+```bash
+GET /api/v1/reports/pnl
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `groupBy` | `string` | Agrupar por: `day`, `week`, `month` |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "revenue": {
+    "services": 5250000,
+    "products": 150000,
+    "other": 50000,
+    "total": 5450000,
+    "breakdown": [
+      {
+        "category": "Kinesiología",
+        "amount": 3500000,
+        "percentage": 64.2
+      },
+      {
+        "category": "Masoterapia",
+        "amount": 1750000,
+        "percentage": 32.1
+      },
+      {
+        "category": "Productos",
+        "amount": 150000,
+        "percentage": 2.8
+      },
+      {
+        "category": "Otros",
+        "amount": 50000,
+        "percentage": 0.9
+      }
+    ]
+  },
+  "expenses": {
+    "providerPayments": 3675000,
+    "operational": 450000,
+    "marketing": 100000,
+    "other": 75000,
+    "total": 4300000,
+    "breakdown": [
+      {
+        "category": "Pagos a proveedores",
+        "amount": 3675000,
+        "percentage": 85.5
+      },
+      {
+        "category": "Arriendo y servicios",
+        "amount": 300000,
+        "percentage": 7.0
+      },
+      {
+        "category": "Marketing",
+        "amount": 100000,
+        "percentage": 2.3
+      },
+      {
+        "category": "Otros operacionales",
+        "amount": 225000,
+        "percentage": 5.2
+      }
+    ]
+  },
+  "netIncome": 1150000,
+  "margin": 21.1,
+  "comparison": {
+    "previousPeriod": {
+      "revenue": 4800000,
+      "netIncome": 960000
+    },
+    "revenueGrowth": 13.5,
+    "netIncomeGrowth": 19.8
+  }
+}
+```
+
+## P&L por servicio
+
+```bash
+GET /api/v1/reports/pnl/by-service
+```
+
+### Respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "services": [
+    {
+      "serviceId": "serv_001",
+      "serviceName": "Sesión de kinesiología",
+      "sessionsCount": 70,
+      "revenue": 3500000,
+      "providerCost": 2450000,
+      "grossProfit": 1050000,
+      "margin": 30.0
+    },
+    {
+      "serviceId": "serv_002",
+      "serviceName": "Masoterapia",
+      "sessionsCount": 50,
+      "revenue": 1750000,
+      "providerCost": 1225000,
+      "grossProfit": 525000,
+      "margin": 30.0
+    }
+  ],
+  "totals": {
+    "sessionsCount": 120,
+    "revenue": 5250000,
+    "providerCost": 3675000,
+    "grossProfit": 1575000,
+    "averageMargin": 30.0
+  }
+}
+```
+
+## Balance por cliente
+
+Muestra las cuentas por cobrar de clientes.
+
+```bash
+GET /api/v1/reports/balance/clients
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `status` | `string` | `all`, `pending`, `overdue` |
+| `minAmount` | `number` | Monto mínimo pendiente |
+| `sortBy` | `string` | `amount`, `dueDate`, `name` |
+
+### Respuesta
+
+```json
+{
+  "asOf": "2026-01-31T23:59:59Z",
+  "summary": {
+    "totalReceivables": 850000,
+    "clientsWithDebt": 12,
+    "overdueAmount": 150000,
+    "overdueClients": 3
+  },
+  "clients": [
+    {
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "email": "juan@example.com",
+      "phone": "+56912345678",
+      "totalDebt": 200000,
+      "overdueAmount": 100000,
+      "oldestDueDate": "2026-01-15",
+      "sales": [
+        {
+          "saleId": "sale_001",
+          "description": "4 sesiones kinesiología",
+          "totalPrice": 200000,
+          "paid": 0,
+          "pending": 200000,
+          "dueDate": "2026-01-15"
+        }
+      ]
+    },
+    {
+      "clientId": "cli_002",
+      "clientName": "Ana López",
+      "email": "ana@example.com",
+      "totalDebt": 150000,
+      "overdueAmount": 0,
+      "oldestDueDate": "2026-02-10",
+      "sales": [
+        {
+          "saleId": "sale_002",
+          "description": "3 sesiones masoterapia",
+          "totalPrice": 150000,
+          "paid": 0,
+          "pending": 150000,
+          "dueDate": "2026-02-10"
+        }
+      ]
+    }
+  ],
+  "aging": {
+    "current": 500000,
+    "days1to30": 200000,
+    "days31to60": 100000,
+    "days61to90": 50000,
+    "over90": 0
+  }
+}
+```
+
+## Balance por proveedor
+
+Muestra las cuentas por pagar a proveedores.
+
+```bash
+GET /api/v1/reports/balance/providers
+```
+
+### Respuesta
+
+```json
+{
+  "asOf": "2026-01-31T23:59:59Z",
+  "summary": {
+    "totalPayables": 1250000,
+    "providersWithPending": 8,
+    "oldestPending": "2026-01-10"
+  },
+  "providers": [
+    {
+      "providerId": "prov_001",
+      "providerName": "María González",
+      "pendingAmount": 350000,
+      "sessionsCount": 10,
+      "oldestSession": "2026-01-10",
+      "bankInfo": {
+        "bank": "Banco Estado",
+        "accountNumber": "****5678"
+      }
+    },
+    {
+      "providerId": "prov_002",
+      "providerName": "Carlos Ruiz",
+      "pendingAmount": 280000,
+      "sessionsCount": 8,
+      "oldestSession": "2026-01-12"
+    }
+  ],
+  "aging": {
+    "current": 800000,
+    "days1to15": 300000,
+    "days16to30": 150000,
+    "over30": 0
+  }
+}
+```
+
+## Resumen mensual
+
+```bash
+GET /api/v1/reports/monthly-summary
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `year` | `number` | Año (default: año actual) |
+| `months` | `number` | Cantidad de meses (default: 12) |
+
+### Respuesta
+
+```json
+{
+  "year": 2026,
+  "months": [
+    {
+      "month": "2026-01",
+      "revenue": 5450000,
+      "expenses": 4300000,
+      "netIncome": 1150000,
+      "margin": 21.1,
+      "sessionsCount": 120,
+      "sessionsCompleted": 115,
+      "newClients": 8,
+      "activeProviders": 5,
+      "averageTicket": 45417
+    },
+    {
+      "month": "2025-12",
+      "revenue": 4800000,
+      "expenses": 3840000,
+      "netIncome": 960000,
+      "margin": 20.0,
+      "sessionsCount": 105,
+      "sessionsCompleted": 100,
+      "newClients": 6,
+      "activeProviders": 5,
+      "averageTicket": 45714
+    }
+  ],
+  "ytdTotals": {
+    "revenue": 5450000,
+    "expenses": 4300000,
+    "netIncome": 1150000,
+    "sessionsCount": 120,
+    "newClients": 8
+  },
+  "trends": {
+    "revenueGrowth": 13.5,
+    "clientGrowth": 33.3,
+    "marginTrend": 1.1
+  }
+}
+```
+
+## Flujo de caja
+
+```bash
+GET /api/v1/reports/cashflow
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `groupBy` | `string` | `day`, `week`, `month` |
+
+### Respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "openingBalance": 2500000,
+  "inflows": {
+    "collections": 5100000,
+    "other": 50000,
+    "total": 5150000
+  },
+  "outflows": {
+    "providerPayments": 3200000,
+    "operational": 450000,
+    "other": 75000,
+    "total": 3725000
+  },
+  "netCashflow": 1425000,
+  "closingBalance": 3925000,
+  "daily": [
+    {
+      "date": "2026-01-31",
+      "inflows": 250000,
+      "outflows": 150000,
+      "net": 100000,
+      "balance": 3925000
+    }
+  ]
+}
+```
+
+## KPIs del negocio
+
+```bash
+GET /api/v1/reports/kpis
+```
+
+### Respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "kpis": {
+    "revenue": {
+      "value": 5450000,
+      "change": 13.5,
+      "trend": "up"
+    },
+    "netMargin": {
+      "value": 21.1,
+      "change": 1.1,
+      "trend": "up"
+    },
+    "sessionsPerDay": {
+      "value": 3.9,
+      "change": 8.3,
+      "trend": "up"
+    },
+    "averageTicket": {
+      "value": 45417,
+      "change": -0.6,
+      "trend": "stable"
+    },
+    "clientRetention": {
+      "value": 85.0,
+      "change": 2.0,
+      "trend": "up"
+    },
+    "providerUtilization": {
+      "value": 72.0,
+      "change": 5.0,
+      "trend": "up"
+    },
+    "collectionRate": {
+      "value": 93.6,
+      "change": 1.2,
+      "trend": "up"
+    }
+  }
+}
+```
+
+## Exportar reportes
+
+```bash
+POST /api/v1/reports/export
+```
+
+### Body
+
+```json
+{
+  "report": "pnl",
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "format": "excel",
+  "includeCharts": true
+}
+```
+
+### Respuesta
+
+```json
+{
+  "downloadUrl": "https://exports.coordinalo.com/reports/pnl_202601.xlsx",
+  "expiresAt": "2026-02-01T10:00:00Z"
+}
+```
+
+### Reportes disponibles
+
+| Reporte | Código | Descripción |
+|---------|--------|-------------|
+| Estado de Resultados | `pnl` | P&L completo con breakdown |
+| Balance de clientes | `client_balance` | Cuentas por cobrar |
+| Balance de proveedores | `provider_balance` | Cuentas por pagar |
+| Resumen mensual | `monthly_summary` | Métricas mensuales |
+| Flujo de caja | `cashflow` | Ingresos y egresos |
+
+## Cierre de mes
+
+Proceso de cierre contable mensual.
+
+```bash
+POST /api/v1/reports/close-month
+```
+
+### Body
+
+```json
+{
+  "month": "2026-01",
+  "adjustments": [
+    {
+      "type": "expense",
+      "description": "Ajuste de inventario",
+      "amount": 25000
+    }
+  ],
+  "notes": "Cierre de enero 2026"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "id": "close_202601",
+  "month": "2026-01",
+  "status": "closed",
+  "closedAt": "2026-02-01T23:59:59Z",
+  "closedBy": {
+    "id": "user_admin",
+    "name": "Admin"
+  },
+  "summary": {
+    "revenue": 5450000,
+    "expenses": 4325000,
+    "netIncome": 1125000
+  }
+}
+```
+
+<Callout type="warning">
+Una vez cerrado el mes, no se pueden modificar transacciones de ese período. Asegúrese de revisar todos los ajustes antes de cerrar.
+</Callout>

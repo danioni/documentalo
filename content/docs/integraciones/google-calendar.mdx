@@ -1,0 +1,438 @@
+---
+title: Google Calendar
+description: Sincronización bidireccional con Google Calendar en Coordinalo
+---
+
+# Google Calendar
+
+Coordinalo sincroniza sesiones con Google Calendar de forma bidireccional, permitiendo que los proveedores vean sus citas en su calendario personal y que eventos externos bloqueen disponibilidad.
+
+## Flujo de sincronización
+
+```
+Coordinalo ←→ Google Calendar
+
+→ Sesiones de Coordinalo aparecen en el calendario del proveedor
+← Eventos externos en Google bloquean disponibilidad en Coordinalo
+```
+
+## Conectar calendario
+
+### Iniciar conexión OAuth
+
+```bash
+POST /api/v1/providers/:providerId/calendar/connect
+```
+
+### Body
+
+```json
+{
+  "provider": "google",
+  "calendarId": "primary"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "authUrl": "https://accounts.google.com/o/oauth2/v2/auth?client_id=...",
+  "state": "state_abc123",
+  "expiresAt": "2026-01-20T10:10:00Z"
+}
+```
+
+<Callout type="info">
+Redirige al proveedor a `authUrl` para que autorice el acceso a su calendario.
+</Callout>
+
+### Callback de OAuth
+
+```bash
+GET /api/v1/calendar/callback?code=xxx&state=state_abc123
+```
+
+Coordinalo procesa el código de autorización y completa la conexión.
+
+### Verificar estado de conexión
+
+```bash
+GET /api/v1/providers/:providerId/calendar/status
+```
+
+### Respuesta
+
+```json
+{
+  "connected": true,
+  "provider": "google",
+  "email": "maria@gmail.com",
+  "calendarId": "primary",
+  "calendarName": "Calendario principal",
+  "connectedAt": "2026-01-15T10:00:00Z",
+  "lastSync": "2026-01-20T08:00:00Z",
+  "syncStatus": "active",
+  "settings": {
+    "syncDirection": "bidirectional",
+    "blockOnExternalEvents": true,
+    "syncFrequency": "realtime"
+  }
+}
+```
+
+## Configuración de sincronización
+
+### Actualizar configuración
+
+```bash
+PUT /api/v1/providers/:providerId/calendar/settings
+```
+
+### Body
+
+```json
+{
+  "syncDirection": "bidirectional",
+  "blockOnExternalEvents": true,
+  "syncFrequency": "realtime",
+  "eventDefaults": {
+    "colorId": "9",
+    "reminderMinutes": [30, 10],
+    "visibility": "private"
+  },
+  "blockingRules": {
+    "allDayEvents": true,
+    "busyEvents": true,
+    "tentativeEvents": false,
+    "specificCalendars": ["primary", "work@company.com"]
+  }
+}
+```
+
+### Opciones de sincronización
+
+| Opción | Valores | Descripción |
+|--------|---------|-------------|
+| `syncDirection` | `bidirectional`, `to_google`, `from_google` | Dirección de sincronización |
+| `blockOnExternalEvents` | `true`, `false` | Bloquear disponibilidad por eventos externos |
+| `syncFrequency` | `realtime`, `hourly`, `daily` | Frecuencia de sincronización |
+
+### Reglas de bloqueo
+
+| Regla | Descripción |
+|-------|-------------|
+| `allDayEvents` | Eventos de día completo bloquean todo el día |
+| `busyEvents` | Solo eventos marcados como "ocupado" bloquean |
+| `tentativeEvents` | Eventos tentativos también bloquean |
+| `specificCalendars` | Lista de calendarios a considerar |
+
+## Sincronización manual
+
+### Forzar sincronización
+
+```bash
+POST /api/v1/providers/:providerId/calendar/sync
+```
+
+### Body (opcional)
+
+```json
+{
+  "direction": "both",
+  "from": "2026-01-01",
+  "to": "2026-02-28"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "syncId": "sync_abc123",
+  "status": "completed",
+  "results": {
+    "toGoogle": {
+      "created": 15,
+      "updated": 3,
+      "deleted": 1
+    },
+    "fromGoogle": {
+      "blocksCreated": 5,
+      "blocksRemoved": 2
+    }
+  },
+  "completedAt": "2026-01-20T10:00:30Z"
+}
+```
+
+## Eventos en Google Calendar
+
+### Formato de eventos creados
+
+Cuando Coordinalo crea un evento en Google Calendar:
+
+```json
+{
+  "summary": "Kinesiología - Juan Pérez",
+  "description": "Sesión de kinesiología\n\nCliente: Juan Pérez\nTeléfono: +56912345678\n\nVer en Coordinalo: https://app.coordinalo.com/sessions/sess_001",
+  "start": {
+    "dateTime": "2026-01-21T10:00:00-03:00",
+    "timeZone": "America/Santiago"
+  },
+  "end": {
+    "dateTime": "2026-01-21T11:00:00-03:00",
+    "timeZone": "America/Santiago"
+  },
+  "location": "Av. Principal 123, Santiago",
+  "colorId": "9",
+  "reminders": {
+    "useDefault": false,
+    "overrides": [
+      { "method": "popup", "minutes": 30 },
+      { "method": "popup", "minutes": 10 }
+    ]
+  },
+  "extendedProperties": {
+    "private": {
+      "coordinalo_session_id": "sess_001",
+      "coordinalo_org_id": "org_abc123"
+    }
+  }
+}
+```
+
+### Personalizar formato de eventos
+
+```bash
+PUT /api/v1/providers/:providerId/calendar/event-format
+```
+
+### Body
+
+```json
+{
+  "summaryTemplate": "{{service}} - {{clientName}}",
+  "descriptionTemplate": "Cliente: {{clientName}}\nTeléfono: {{clientPhone}}\nNotas: {{notes}}",
+  "includeLocation": true,
+  "includeCoordinaloLink": true,
+  "colorByService": {
+    "kinesiologia": "9",
+    "masoterapia": "5",
+    "default": "1"
+  }
+}
+```
+
+## Bloqueos de disponibilidad
+
+### Ver bloqueos importados
+
+```bash
+GET /api/v1/providers/:providerId/calendar/blocks
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "block_001",
+      "source": "google_calendar",
+      "googleEventId": "event_xyz789",
+      "title": "Reunión de trabajo",
+      "start": "2026-01-21T14:00:00Z",
+      "end": "2026-01-21T15:00:00Z",
+      "allDay": false,
+      "calendarId": "work@company.com",
+      "syncedAt": "2026-01-20T08:00:00Z"
+    },
+    {
+      "id": "block_002",
+      "source": "google_calendar",
+      "googleEventId": "event_abc123",
+      "title": "Vacaciones",
+      "start": "2026-02-01",
+      "end": "2026-02-08",
+      "allDay": true,
+      "calendarId": "primary",
+      "syncedAt": "2026-01-20T08:00:00Z"
+    }
+  ]
+}
+```
+
+### Excluir evento de bloqueo
+
+```bash
+POST /api/v1/providers/:providerId/calendar/blocks/:blockId/exclude
+```
+
+```json
+{
+  "excluded": true,
+  "reason": "Este evento no afecta mi disponibilidad"
+}
+```
+
+## Calendarios múltiples
+
+### Listar calendarios disponibles
+
+```bash
+GET /api/v1/providers/:providerId/calendar/available-calendars
+```
+
+### Respuesta
+
+```json
+{
+  "calendars": [
+    {
+      "id": "primary",
+      "name": "Calendario principal",
+      "accessRole": "owner",
+      "selected": true
+    },
+    {
+      "id": "work@company.com",
+      "name": "Trabajo",
+      "accessRole": "writer",
+      "selected": true
+    },
+    {
+      "id": "family@group.calendar.google.com",
+      "name": "Familia",
+      "accessRole": "reader",
+      "selected": false
+    }
+  ]
+}
+```
+
+### Seleccionar calendarios a sincronizar
+
+```bash
+PUT /api/v1/providers/:providerId/calendar/selected-calendars
+```
+
+### Body
+
+```json
+{
+  "writeCalendar": "primary",
+  "readCalendars": ["primary", "work@company.com"]
+}
+```
+
+## Resolución de conflictos
+
+### Política de conflictos
+
+```bash
+PUT /api/v1/providers/:providerId/calendar/conflict-policy
+```
+
+### Body
+
+```json
+{
+  "onGoogleConflict": "block_coordinalo",
+  "onCoordinaloConflict": "notify_admin",
+  "allowDoubleBooking": false,
+  "bufferMinutes": 15
+}
+```
+
+| Política | Descripción |
+|----------|-------------|
+| `block_coordinalo` | Evento de Google bloquea, no se puede agendar en Coordinalo |
+| `notify_admin` | Permite agendar pero notifica al admin |
+| `ignore` | Ignora conflictos |
+
+## Desconectar calendario
+
+```bash
+POST /api/v1/providers/:providerId/calendar/disconnect
+```
+
+### Body (opcional)
+
+```json
+{
+  "deleteGoogleEvents": false,
+  "keepBlocks": false
+}
+```
+
+### Respuesta
+
+```json
+{
+  "disconnected": true,
+  "disconnectedAt": "2026-01-20T16:00:00Z",
+  "eventsDeleted": 0,
+  "blocksRemoved": 5
+}
+```
+
+## Logs de sincronización
+
+```bash
+GET /api/v1/providers/:providerId/calendar/sync-logs
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "sync_001",
+      "type": "automatic",
+      "direction": "bidirectional",
+      "status": "completed",
+      "startedAt": "2026-01-20T08:00:00Z",
+      "completedAt": "2026-01-20T08:00:05Z",
+      "results": {
+        "toGoogle": { "created": 2, "updated": 0, "deleted": 0 },
+        "fromGoogle": { "blocksCreated": 1, "blocksRemoved": 0 }
+      }
+    }
+  ]
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `calendar.connected` | Calendario conectado |
+| `calendar.disconnected` | Calendario desconectado |
+| `calendar.sync_completed` | Sincronización completada |
+| `calendar.sync_failed` | Error en sincronización |
+| `calendar.conflict_detected` | Conflicto de horario detectado |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "calendar.conflict_detected",
+  "data": {
+    "providerId": "prov_001",
+    "providerName": "María González",
+    "coordinaloSession": {
+      "id": "sess_001",
+      "startTime": "2026-01-21T10:00:00Z"
+    },
+    "googleEvent": {
+      "id": "event_xyz789",
+      "title": "Reunión importante",
+      "startTime": "2026-01-21T09:30:00Z",
+      "endTime": "2026-01-21T10:30:00Z"
+    }
+  },
+  "timestamp": "2026-01-20T10:00:01Z"
+}
+```

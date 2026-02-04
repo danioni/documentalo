@@ -1,0 +1,324 @@
+---
+title: Ventas
+description: Crear, listar y gestionar ventas de servicios en Coordinalo
+---
+
+# Ventas
+
+Las ventas representan transacciones comerciales de servicios entre la organización y sus clientes. Cada venta puede estar asociada a una o más sesiones.
+
+## Modelo de datos
+
+```typescript
+interface Venta {
+  id: string;
+  clientId: string;
+  providerId: string;
+  serviceId: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  status: 'agendado' | 'realizado' | 'proyectado' | 'devuelto';
+  createdAt: string;
+  updatedAt: string;
+  sessions: Session[];
+}
+```
+
+## Estados y flujo
+
+Las ventas siguen el siguiente ciclo de vida:
+
+```
+proyectado → agendado → realizado
+                ↓
+            devuelto
+```
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Proyectado** | `proyectado` | Venta planificada, aún sin agendar sesiones |
+| **Agendado** | `agendado` | Sesiones programadas con fecha y hora |
+| **Realizado** | `realizado` | Todas las sesiones completadas |
+| **Devuelto** | `devuelto` | Venta reembolsada |
+
+## Listar ventas
+
+```bash
+GET /api/v1/sales
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `clientId` | `string` | Filtrar por cliente |
+| `providerId` | `string` | Filtrar por proveedor |
+| `serviceId` | `string` | Filtrar por servicio |
+| `status` | `string` | Estado: `proyectado`, `agendado`, `realizado`, `devuelto` |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "sale_abc123",
+      "clientId": "cli_789ghi",
+      "providerId": "prov_456def",
+      "serviceId": "serv_xyz789",
+      "quantity": 4,
+      "unitPrice": 50000,
+      "totalPrice": 200000,
+      "status": "agendado",
+      "createdAt": "2026-01-10T14:30:00Z",
+      "updatedAt": "2026-01-10T14:30:00Z",
+      "client": {
+        "id": "cli_789ghi",
+        "name": "Juan Pérez"
+      },
+      "provider": {
+        "id": "prov_456def",
+        "name": "María González"
+      },
+      "service": {
+        "id": "serv_xyz789",
+        "name": "Sesión de kinesiología"
+      },
+      "sessions": [
+        {
+          "id": "sess_001",
+          "startTime": "2026-01-15T10:00:00Z",
+          "status": "scheduled"
+        },
+        {
+          "id": "sess_002",
+          "startTime": "2026-01-22T10:00:00Z",
+          "status": "scheduled"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "total": 156,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 8
+  }
+}
+```
+
+## Crear venta
+
+```bash
+POST /api/v1/sales
+```
+
+### Body
+
+```json
+{
+  "clientId": "cli_789ghi",
+  "providerId": "prov_456def",
+  "serviceId": "serv_xyz789",
+  "quantity": 4,
+  "unitPrice": 50000,
+  "notes": "Paquete de 4 sesiones de kinesiología"
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "sale_new456",
+  "clientId": "cli_789ghi",
+  "providerId": "prov_456def",
+  "serviceId": "serv_xyz789",
+  "quantity": 4,
+  "unitPrice": 50000,
+  "totalPrice": 200000,
+  "status": "proyectado",
+  "createdAt": "2026-01-20T09:15:00Z",
+  "updatedAt": "2026-01-20T09:15:00Z"
+}
+```
+
+<Callout type="info">
+Al crear una venta, el estado inicial es `proyectado`. Cambia a `agendado` cuando se programan las sesiones asociadas.
+</Callout>
+
+## Obtener detalle de venta
+
+```bash
+GET /api/v1/sales/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "sale_abc123",
+  "clientId": "cli_789ghi",
+  "providerId": "prov_456def",
+  "serviceId": "serv_xyz789",
+  "quantity": 4,
+  "unitPrice": 50000,
+  "totalPrice": 200000,
+  "status": "agendado",
+  "notes": "Paquete de 4 sesiones de kinesiología",
+  "createdAt": "2026-01-10T14:30:00Z",
+  "updatedAt": "2026-01-15T10:00:00Z",
+  "client": {
+    "id": "cli_789ghi",
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "phone": "+56912345678"
+  },
+  "provider": {
+    "id": "prov_456def",
+    "name": "María González"
+  },
+  "service": {
+    "id": "serv_xyz789",
+    "name": "Sesión de kinesiología",
+    "duration": 60
+  },
+  "sessions": [
+    {
+      "id": "sess_001",
+      "startTime": "2026-01-15T10:00:00Z",
+      "endTime": "2026-01-15T11:00:00Z",
+      "status": "completed"
+    },
+    {
+      "id": "sess_002",
+      "startTime": "2026-01-22T10:00:00Z",
+      "endTime": "2026-01-22T11:00:00Z",
+      "status": "scheduled"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay_xyz789",
+      "amount": 100000,
+      "status": "approved",
+      "paidAt": "2026-01-10T14:35:00Z"
+    }
+  ],
+  "balance": {
+    "total": 200000,
+    "paid": 100000,
+    "pending": 100000
+  }
+}
+```
+
+## Actualizar venta
+
+```bash
+PUT /api/v1/sales/:id
+```
+
+### Body
+
+```json
+{
+  "quantity": 6,
+  "unitPrice": 45000,
+  "notes": "Ampliado a 6 sesiones con descuento"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "sale_abc123",
+  "quantity": 6,
+  "unitPrice": 45000,
+  "totalPrice": 270000,
+  "status": "agendado",
+  "updatedAt": "2026-01-20T11:00:00Z"
+}
+```
+
+<Callout type="warning">
+Solo se pueden actualizar ventas en estado `proyectado` o `agendado`. Las ventas `realizadas` o `devueltas` son inmutables.
+</Callout>
+
+## Eliminar venta
+
+```bash
+DELETE /api/v1/sales/:id
+```
+
+### Respuesta exitosa (204)
+
+No content.
+
+<Callout type="warning">
+Solo se pueden eliminar ventas en estado `proyectado` sin sesiones asociadas.
+</Callout>
+
+## Reembolsar venta
+
+```bash
+POST /api/v1/sales/:id/refund
+```
+
+### Body
+
+```json
+{
+  "reason": "Solicitud del cliente",
+  "refundAmount": 200000,
+  "refundMethod": "transfer"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "sale_abc123",
+  "status": "devuelto",
+  "refund": {
+    "amount": 200000,
+    "reason": "Solicitud del cliente",
+    "method": "transfer",
+    "processedAt": "2026-01-25T16:00:00Z"
+  }
+}
+```
+
+## Webhooks
+
+Coordinalo emite los siguientes eventos relacionados con ventas:
+
+| Evento | Descripción |
+|--------|-------------|
+| `sale.created` | Nueva venta creada |
+| `sale.updated` | Venta actualizada |
+| `sale.completed` | Todas las sesiones completadas |
+| `sale.refunded` | Venta reembolsada |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "sale.completed",
+  "data": {
+    "saleId": "sale_abc123",
+    "clientId": "cli_789ghi",
+    "totalPrice": 200000,
+    "sessionsCount": 4,
+    "completedAt": "2026-02-15T11:05:00Z"
+  },
+  "timestamp": "2026-02-15T11:05:01Z"
+}
+```

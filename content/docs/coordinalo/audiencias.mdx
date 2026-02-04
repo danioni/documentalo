@@ -1,0 +1,509 @@
+---
+title: Audiencias
+description: Segmentación de clientes para campañas en Coordinalo
+---
+
+# Audiencias
+
+Las audiencias permiten segmentar clientes basándose en criterios como actividad, gasto, tags y comportamiento. Son la base para campañas de marketing y comunicaciones automatizadas.
+
+## Modelo de datos
+
+```typescript
+interface Audience {
+  id: string;
+  name: string;
+  description: string;
+  criteria: AudienceCriteria[];
+  matchCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AudienceCriteria {
+  field: 'lastSession' | 'totalSpent' | 'sessionsCount' | 'tags' |
+         'createdAt' | 'provider' | 'service' | 'status';
+  operator: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' |
+            'contains' | 'notContains' | 'between' | 'daysAgo';
+  value: string | number | string[];
+}
+
+interface AudiencePreview {
+  matchCount: number;
+  sampleClients: Client[];
+  criteria: AudienceCriteria[];
+}
+```
+
+## Operadores disponibles
+
+| Operador | Código | Descripción | Campos compatibles |
+|----------|--------|-------------|-------------------|
+| Igual | `equals` | Valor exacto | Todos |
+| No igual | `notEquals` | Diferente de | Todos |
+| Mayor que | `greaterThan` | Mayor a valor | Numéricos, fechas |
+| Menor que | `lessThan` | Menor a valor | Numéricos, fechas |
+| Contiene | `contains` | Incluye valor | Tags, texto |
+| No contiene | `notContains` | No incluye | Tags, texto |
+| Entre | `between` | Rango de valores | Numéricos, fechas |
+| Hace X días | `daysAgo` | Días desde hoy | Fechas |
+
+## Campos de segmentación
+
+| Campo | Código | Tipo | Descripción |
+|-------|--------|------|-------------|
+| Última sesión | `lastSession` | fecha | Fecha de última sesión |
+| Total gastado | `totalSpent` | número | Monto total pagado |
+| Cantidad sesiones | `sessionsCount` | número | Total de sesiones |
+| Tags | `tags` | array | Etiquetas del cliente |
+| Fecha registro | `createdAt` | fecha | Cuándo se creó el cliente |
+| Proveedor | `provider` | id | Proveedor asignado |
+| Servicio | `service` | id | Servicio contratado |
+| Estado | `status` | string | active, inactive |
+
+## Listar audiencias
+
+```bash
+GET /api/v1/audiences
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `isActive` | `boolean` | Solo audiencias activas |
+| `search` | `string` | Buscar por nombre |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "aud_001",
+      "name": "Clientes inactivos 30+ días",
+      "description": "Clientes sin sesiones en los últimos 30 días",
+      "criteria": [
+        {
+          "field": "lastSession",
+          "operator": "daysAgo",
+          "value": 30
+        },
+        {
+          "field": "status",
+          "operator": "equals",
+          "value": "active"
+        }
+      ],
+      "matchCount": 45,
+      "isActive": true,
+      "createdAt": "2026-01-01T10:00:00Z"
+    },
+    {
+      "id": "aud_002",
+      "name": "Clientes VIP",
+      "description": "Clientes con más de $500.000 gastados",
+      "criteria": [
+        {
+          "field": "totalSpent",
+          "operator": "greaterThan",
+          "value": 500000
+        }
+      ],
+      "matchCount": 23,
+      "isActive": true,
+      "createdAt": "2026-01-05T14:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 8,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+## Crear audiencia
+
+```bash
+POST /api/v1/audiences
+```
+
+### Body
+
+```json
+{
+  "name": "Clientes frecuentes",
+  "description": "Clientes con 10+ sesiones que no vienen hace 15 días",
+  "criteria": [
+    {
+      "field": "sessionsCount",
+      "operator": "greaterThan",
+      "value": 10
+    },
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 15
+    }
+  ],
+  "isActive": true
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "aud_new001",
+  "name": "Clientes frecuentes",
+  "description": "Clientes con 10+ sesiones que no vienen hace 15 días",
+  "criteria": [
+    {
+      "field": "sessionsCount",
+      "operator": "greaterThan",
+      "value": 10
+    },
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 15
+    }
+  ],
+  "matchCount": 18,
+  "isActive": true,
+  "createdAt": "2026-01-20T10:00:00Z"
+}
+```
+
+## Obtener detalle de audiencia
+
+```bash
+GET /api/v1/audiences/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "aud_001",
+  "name": "Clientes inactivos 30+ días",
+  "description": "Clientes sin sesiones en los últimos 30 días",
+  "criteria": [
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 30
+    },
+    {
+      "field": "status",
+      "operator": "equals",
+      "value": "active"
+    }
+  ],
+  "matchCount": 45,
+  "isActive": true,
+  "stats": {
+    "avgDaysSinceLastSession": 52,
+    "avgTotalSpent": 180000,
+    "avgSessionsCount": 4.2
+  },
+  "campaigns": [
+    {
+      "id": "camp_001",
+      "name": "Reactivación enero",
+      "status": "sent",
+      "sentAt": "2026-01-15T10:00:00Z"
+    }
+  ],
+  "createdAt": "2026-01-01T10:00:00Z",
+  "updatedAt": "2026-01-10T15:00:00Z"
+}
+```
+
+## Preview de audiencia
+
+Obtiene una vista previa de los clientes que coinciden con los criterios.
+
+```bash
+GET /api/v1/audiences/:id/preview
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `limit` | `number` | Cantidad de clientes a mostrar (default: 10) |
+
+### Respuesta
+
+```json
+{
+  "audienceId": "aud_001",
+  "matchCount": 45,
+  "sampleClients": [
+    {
+      "id": "cli_001",
+      "name": "Juan Pérez",
+      "email": "juan@example.com",
+      "phone": "+56912345678",
+      "lastSession": "2025-12-15T10:00:00Z",
+      "daysSinceLastSession": 36,
+      "totalSpent": 200000,
+      "sessionsCount": 4
+    },
+    {
+      "id": "cli_002",
+      "name": "Ana López",
+      "email": "ana@example.com",
+      "phone": "+56987654321",
+      "lastSession": "2025-12-10T15:00:00Z",
+      "daysSinceLastSession": 41,
+      "totalSpent": 150000,
+      "sessionsCount": 3
+    }
+  ],
+  "criteria": [
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 30,
+      "description": "Última sesión hace más de 30 días"
+    }
+  ]
+}
+```
+
+## Preview con criterios personalizados
+
+Prueba criterios antes de crear la audiencia.
+
+```bash
+POST /api/v1/audiences/preview
+```
+
+### Body
+
+```json
+{
+  "criteria": [
+    {
+      "field": "totalSpent",
+      "operator": "between",
+      "value": [100000, 300000]
+    },
+    {
+      "field": "tags",
+      "operator": "contains",
+      "value": "kinesiologia"
+    }
+  ]
+}
+```
+
+### Respuesta
+
+```json
+{
+  "matchCount": 28,
+  "sampleClients": [
+    {
+      "id": "cli_003",
+      "name": "Pedro García",
+      "email": "pedro@example.com",
+      "totalSpent": 180000,
+      "tags": ["kinesiologia", "mensual"]
+    }
+  ]
+}
+```
+
+## Actualizar audiencia
+
+```bash
+PUT /api/v1/audiences/:id
+```
+
+### Body
+
+```json
+{
+  "name": "Clientes inactivos 45+ días",
+  "criteria": [
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 45
+    }
+  ]
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "aud_001",
+  "name": "Clientes inactivos 45+ días",
+  "criteria": [
+    {
+      "field": "lastSession",
+      "operator": "daysAgo",
+      "value": 45
+    }
+  ],
+  "matchCount": 32,
+  "updatedAt": "2026-01-20T11:00:00Z"
+}
+```
+
+<Callout type="info">
+El `matchCount` se recalcula automáticamente al actualizar los criterios.
+</Callout>
+
+## Eliminar audiencia
+
+```bash
+DELETE /api/v1/audiences/:id
+```
+
+### Respuesta exitosa (204)
+
+No content.
+
+<Callout type="warning">
+No se pueden eliminar audiencias con campañas activas asociadas.
+</Callout>
+
+## Listar clientes de audiencia
+
+```bash
+GET /api/v1/audiences/:id/clients
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+| `sortBy` | `string` | Campo de ordenamiento |
+| `sortOrder` | `string` | `asc` o `desc` |
+
+### Respuesta
+
+```json
+{
+  "audienceId": "aud_001",
+  "data": [
+    {
+      "id": "cli_001",
+      "name": "Juan Pérez",
+      "email": "juan@example.com",
+      "phone": "+56912345678",
+      "lastSession": "2025-12-15T10:00:00Z",
+      "totalSpent": 200000,
+      "sessionsCount": 4,
+      "tags": ["kinesiologia"]
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}
+```
+
+## Exportar audiencia
+
+```bash
+POST /api/v1/audiences/:id/export
+```
+
+### Body
+
+```json
+{
+  "format": "csv",
+  "fields": ["name", "email", "phone", "lastSession", "totalSpent"]
+}
+```
+
+### Respuesta
+
+```json
+{
+  "downloadUrl": "https://exports.coordinalo.com/audiences/aud_001.csv",
+  "clientsCount": 45,
+  "expiresAt": "2026-01-21T10:00:00Z"
+}
+```
+
+## Audiencias predefinidas
+
+Coordinalo incluye audiencias predefinidas que se actualizan automáticamente.
+
+```bash
+GET /api/v1/audiences/predefined
+```
+
+### Respuesta
+
+```json
+{
+  "predefined": [
+    {
+      "id": "pred_inactive_30",
+      "name": "Inactivos 30 días",
+      "description": "Clientes sin sesiones en 30 días",
+      "matchCount": 45,
+      "canModify": false
+    },
+    {
+      "id": "pred_new_clients",
+      "name": "Clientes nuevos",
+      "description": "Registrados en los últimos 7 días",
+      "matchCount": 8,
+      "canModify": false
+    },
+    {
+      "id": "pred_pending_payment",
+      "name": "Con saldo pendiente",
+      "description": "Clientes con pagos por cobrar",
+      "matchCount": 12,
+      "canModify": false
+    }
+  ]
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `audience.created` | Nueva audiencia creada |
+| `audience.updated` | Audiencia actualizada |
+| `audience.match_changed` | Cambio significativo en matchCount |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "audience.match_changed",
+  "data": {
+    "audienceId": "aud_001",
+    "audienceName": "Clientes inactivos 30+ días",
+    "previousCount": 45,
+    "newCount": 52,
+    "change": 7,
+    "changePercentage": 15.5
+  },
+  "timestamp": "2026-01-20T00:00:01Z"
+}
+```

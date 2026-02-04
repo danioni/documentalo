@@ -1,0 +1,394 @@
+---
+title: Pagos a Proveedores
+description: Liquidación y pagos a proveedores en Coordinalo
+---
+
+# Pagos a Proveedores
+
+Coordinalo gestiona la liquidación de pagos a proveedores (profesionales) basándose en las sesiones completadas y el modelo de revenue share configurado.
+
+## Modelo de datos
+
+```typescript
+interface Pago {
+  id: string;
+  providerId: string;
+  amount: number;
+  sessionIds: string[];
+  paymentMethod: 'transferencia' | 'efectivo';
+  reference: string;
+  status: 'pending' | 'paid';
+  paidAt?: string;
+  createdAt: string;
+}
+
+interface Settlement {
+  providerId: string;
+  pendingAmount: number;
+  sessionsCount: number;
+  oldestSession: string;
+  sessions: SettlementSession[];
+}
+
+interface SettlementSession {
+  id: string;
+  date: string;
+  clientName: string;
+  serviceName: string;
+  servicePrice: number;
+  providerAmount: number;
+}
+```
+
+## Obtener liquidación pendiente
+
+Consulta el monto pendiente de pago para un proveedor.
+
+```bash
+GET /api/v1/providers/:providerId/settlement
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "providerId": "prov_456def",
+  "provider": {
+    "id": "prov_456def",
+    "name": "María González",
+    "email": "maria@example.com",
+    "bankInfo": {
+      "bank": "Banco Estado",
+      "accountType": "Cuenta Vista",
+      "accountNumber": "****5678",
+      "rut": "12.345.678-9"
+    }
+  },
+  "pendingAmount": 350000,
+  "sessionsCount": 10,
+  "oldestSession": "2026-01-10",
+  "commissionRate": {
+    "type": "percentage",
+    "value": 70
+  },
+  "sessions": [
+    {
+      "id": "sess_001",
+      "date": "2026-01-10T10:00:00Z",
+      "clientName": "Juan Pérez",
+      "serviceName": "Sesión de kinesiología",
+      "servicePrice": 50000,
+      "providerAmount": 35000
+    },
+    {
+      "id": "sess_002",
+      "date": "2026-01-11T15:00:00Z",
+      "clientName": "Ana López",
+      "serviceName": "Sesión de kinesiología",
+      "servicePrice": 50000,
+      "providerAmount": 35000
+    }
+  ]
+}
+```
+
+## Marcar como pagado
+
+Registra el pago de la liquidación a un proveedor.
+
+```bash
+POST /api/v1/providers/:providerId/settlement/mark-paid
+```
+
+### Body
+
+```json
+{
+  "sessionIds": ["sess_001", "sess_002", "sess_003"],
+  "paymentMethod": "transferencia",
+  "reference": "TEF #12345 - 20/01/2026",
+  "paidAt": "2026-01-20T10:00:00Z"
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "pay_abc123",
+  "providerId": "prov_456def",
+  "amount": 105000,
+  "sessionsCount": 3,
+  "paymentMethod": "transferencia",
+  "reference": "TEF #12345 - 20/01/2026",
+  "status": "paid",
+  "paidAt": "2026-01-20T10:00:00Z",
+  "createdAt": "2026-01-20T10:05:00Z"
+}
+```
+
+<Callout type="info">
+Al marcar sesiones como pagadas, estas ya no aparecerán en futuras consultas de liquidación pendiente.
+</Callout>
+
+## Listar pagos realizados
+
+```bash
+GET /api/v1/payments
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `providerId` | `string` | Filtrar por proveedor |
+| `paymentMethod` | `string` | Método: `transferencia`, `efectivo` |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "pay_abc123",
+      "providerId": "prov_456def",
+      "provider": {
+        "id": "prov_456def",
+        "name": "María González"
+      },
+      "amount": 350000,
+      "sessionsCount": 10,
+      "paymentMethod": "transferencia",
+      "reference": "TEF #12345 - 20/01/2026",
+      "status": "paid",
+      "paidAt": "2026-01-20T10:00:00Z"
+    },
+    {
+      "id": "pay_def456",
+      "providerId": "prov_789abc",
+      "provider": {
+        "id": "prov_789abc",
+        "name": "Carlos Ruiz"
+      },
+      "amount": 280000,
+      "sessionsCount": 8,
+      "paymentMethod": "efectivo",
+      "reference": "Pago en oficina",
+      "status": "paid",
+      "paidAt": "2026-01-19T16:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  },
+  "summary": {
+    "totalPaid": 2500000,
+    "paymentsCount": 45
+  }
+}
+```
+
+## Obtener detalle de pago
+
+```bash
+GET /api/v1/payments/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "pay_abc123",
+  "providerId": "prov_456def",
+  "provider": {
+    "id": "prov_456def",
+    "name": "María González",
+    "email": "maria@example.com"
+  },
+  "amount": 350000,
+  "paymentMethod": "transferencia",
+  "reference": "TEF #12345 - 20/01/2026",
+  "status": "paid",
+  "paidAt": "2026-01-20T10:00:00Z",
+  "createdAt": "2026-01-20T10:05:00Z",
+  "sessions": [
+    {
+      "id": "sess_001",
+      "date": "2026-01-10T10:00:00Z",
+      "clientName": "Juan Pérez",
+      "serviceName": "Sesión de kinesiología",
+      "servicePrice": 50000,
+      "providerAmount": 35000
+    },
+    {
+      "id": "sess_002",
+      "date": "2026-01-11T15:00:00Z",
+      "clientName": "Ana López",
+      "serviceName": "Sesión de kinesiología",
+      "servicePrice": 50000,
+      "providerAmount": 35000
+    }
+  ]
+}
+```
+
+## Resumen de pagos por proveedor
+
+```bash
+GET /api/v1/providers/:providerId/payments/summary
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+
+### Respuesta
+
+```json
+{
+  "providerId": "prov_456def",
+  "providerName": "María González",
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "summary": {
+    "totalEarnings": 1470000,
+    "totalPaid": 1120000,
+    "pendingAmount": 350000,
+    "sessionsCompleted": 42,
+    "sessionsPaid": 32,
+    "sessionsPending": 10
+  },
+  "payments": [
+    {
+      "id": "pay_001",
+      "amount": 560000,
+      "paidAt": "2026-01-15T10:00:00Z"
+    },
+    {
+      "id": "pay_002",
+      "amount": 560000,
+      "paidAt": "2026-01-08T10:00:00Z"
+    }
+  ]
+}
+```
+
+## Exportar liquidación
+
+Genera un documento de liquidación para el proveedor.
+
+```bash
+POST /api/v1/providers/:providerId/settlement/export
+```
+
+### Body
+
+```json
+{
+  "format": "pdf",
+  "from": "2026-01-01",
+  "to": "2026-01-31",
+  "includeDetails": true
+}
+```
+
+### Respuesta
+
+```json
+{
+  "downloadUrl": "https://exports.coordinalo.com/settlements/prov_456def_202601.pdf",
+  "expiresAt": "2026-01-21T10:00:00Z"
+}
+```
+
+### Formatos disponibles
+
+| Formato | Descripción |
+|---------|-------------|
+| `pdf` | Documento PDF con detalle de sesiones |
+| `excel` | Planilla Excel para contabilidad |
+| `csv` | Archivo CSV para importar a otros sistemas |
+
+## Configuración de datos bancarios
+
+### Actualizar información bancaria del proveedor
+
+```bash
+PUT /api/v1/providers/:providerId/bank-info
+```
+
+### Body
+
+```json
+{
+  "bank": "Banco Estado",
+  "accountType": "Cuenta Vista",
+  "accountNumber": "12345678",
+  "rut": "12.345.678-9",
+  "holderName": "María González"
+}
+```
+
+<Callout type="warning">
+Los datos bancarios son sensibles. Solo administradores pueden ver y modificar esta información.
+</Callout>
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `payment.created` | Nuevo pago registrado |
+| `payment.completed` | Pago marcado como realizado |
+| `settlement.threshold` | Liquidación pendiente supera umbral configurado |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "payment.completed",
+  "data": {
+    "paymentId": "pay_abc123",
+    "providerId": "prov_456def",
+    "providerName": "María González",
+    "amount": 350000,
+    "sessionsCount": 10,
+    "paidAt": "2026-01-20T10:00:00Z"
+  },
+  "timestamp": "2026-01-20T10:05:01Z"
+}
+```
+
+### Alerta de liquidación pendiente
+
+Configura alertas cuando la liquidación pendiente supera un umbral.
+
+```bash
+PUT /api/v1/organization/settings/settlement-alerts
+```
+
+```json
+{
+  "enabled": true,
+  "thresholdAmount": 500000,
+  "notifyEmails": ["admin@org.com", "finanzas@org.com"]
+}
+```

@@ -1,0 +1,480 @@
+---
+title: Email con Resend
+description: Integración de email transaccional vía Resend en Coordinalo
+---
+
+# Email con Resend
+
+Coordinalo utiliza [Resend](https://resend.com) para enviar emails transaccionales como recordatorios, confirmaciones, recibos y campañas de marketing.
+
+## Requisitos previos
+
+- Cuenta de Resend
+- API Key de Resend
+- Dominio verificado en Resend
+
+## Configuración inicial
+
+### Configurar API Key
+
+La API Key se configura como variable de entorno:
+
+```bash
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+```
+
+### Verificar configuración
+
+```bash
+GET /api/v1/organization/email/status
+```
+
+### Respuesta
+
+```json
+{
+  "status": "active",
+  "provider": "resend",
+  "fromEmail": "notificaciones@micentro.com",
+  "fromName": "Centro de Kinesiología",
+  "replyTo": "contacto@micentro.com",
+  "domain": "micentro.com",
+  "domainStatus": "verified",
+  "stats": {
+    "sentToday": 125,
+    "deliveredToday": 122,
+    "bouncedToday": 2,
+    "openRateToday": 68.5
+  }
+}
+```
+
+### Actualizar configuración de email
+
+```bash
+PUT /api/v1/organization/email/settings
+```
+
+### Body
+
+```json
+{
+  "fromEmail": "notificaciones@micentro.com",
+  "fromName": "Centro de Kinesiología",
+  "replyTo": "contacto@micentro.com",
+  "footer": "Centro de Kinesiología | Av. Principal 123, Santiago | +56 2 1234 5678"
+}
+```
+
+## Templates de email
+
+### Templates predefinidos
+
+Coordinalo incluye los siguientes templates:
+
+| Template | Código | Descripción |
+|----------|--------|-------------|
+| Confirmación de sesión | `session_confirmation` | Confirma agendamiento |
+| Recordatorio de sesión | `session_reminder` | Recuerda sesión próxima |
+| Recibo de pago | `payment_receipt` | Comprobante de pago |
+| Recordatorio de pago | `payment_reminder` | Aviso de pago pendiente |
+| Bienvenida | `welcome_client` | Onboarding de cliente |
+| Campaña | `campaign` | Template para campañas |
+| Reseteo de contraseña | `password_reset` | Recuperar acceso |
+
+### Listar templates
+
+```bash
+GET /api/v1/organization/email/templates
+```
+
+### Respuesta
+
+```json
+{
+  "templates": [
+    {
+      "id": "session_confirmation",
+      "name": "Confirmación de sesión",
+      "subject": "Tu sesión de {{service}} está confirmada",
+      "category": "transactional",
+      "variables": ["name", "service", "date", "time", "provider", "location"],
+      "lastModified": "2026-01-15T10:00:00Z"
+    },
+    {
+      "id": "session_reminder",
+      "name": "Recordatorio de sesión",
+      "subject": "Recordatorio: {{service}} mañana a las {{time}}",
+      "category": "reminder",
+      "variables": ["name", "service", "date", "time", "provider"],
+      "lastModified": "2026-01-10T14:00:00Z"
+    },
+    {
+      "id": "payment_receipt",
+      "name": "Recibo de pago",
+      "subject": "Recibo de pago #{{receiptNumber}}",
+      "category": "transactional",
+      "variables": ["name", "receiptNumber", "amount", "description", "date"],
+      "lastModified": "2026-01-05T09:00:00Z"
+    }
+  ]
+}
+```
+
+### Ver template específico
+
+```bash
+GET /api/v1/organization/email/templates/:templateId
+```
+
+### Respuesta
+
+```json
+{
+  "id": "session_reminder",
+  "name": "Recordatorio de sesión",
+  "subject": "Recordatorio: {{service}} mañana a las {{time}}",
+  "body": "Hola {{name}},\n\nTe recordamos que tienes una sesión de {{service}} programada para:\n\n📅 Fecha: {{date}}\n⏰ Hora: {{time}}\n👤 Profesional: {{provider}}\n📍 Lugar: {{location}}\n\nSi necesitas cancelar o reprogramar, por favor hazlo con al menos 24 horas de anticipación.\n\n¡Te esperamos!\n\nSaludos,\n{{organizationName}}",
+  "html": "<!DOCTYPE html><html>...",
+  "variables": ["name", "service", "date", "time", "provider", "location", "organizationName"],
+  "category": "reminder",
+  "previewText": "No olvides tu sesión de {{service}}",
+  "createdAt": "2025-06-01T10:00:00Z",
+  "lastModified": "2026-01-10T14:00:00Z"
+}
+```
+
+### Personalizar template
+
+```bash
+PUT /api/v1/organization/email/templates/:templateId
+```
+
+### Body
+
+```json
+{
+  "subject": "⏰ Recordatorio: Tu sesión de {{service}}",
+  "body": "Hola {{name}},\n\nMañana tienes tu sesión de {{service}} a las {{time}}.\n\nTe esperamos en {{location}}.\n\n{{organizationName}}",
+  "previewText": "Tu sesión de {{service}} es mañana"
+}
+```
+
+### Crear template personalizado
+
+```bash
+POST /api/v1/organization/email/templates
+```
+
+### Body
+
+```json
+{
+  "id": "birthday_greeting",
+  "name": "Felicitación de cumpleaños",
+  "subject": "🎂 ¡Feliz cumpleaños, {{name}}!",
+  "body": "Querido/a {{name}},\n\n¡Todo el equipo de {{organizationName}} te desea un muy feliz cumpleaños!\n\nComo regalo, te ofrecemos un {{discount}}% de descuento en tu próxima sesión.\n\nUsa el código: {{promoCode}}\n\nVálido hasta: {{expirationDate}}\n\n¡Que tengas un excelente día!",
+  "category": "marketing",
+  "variables": ["name", "organizationName", "discount", "promoCode", "expirationDate"]
+}
+```
+
+## Enviar email
+
+### Enviar email directo
+
+```bash
+POST /api/v1/clients/:clientId/send-email
+```
+
+### Body
+
+```json
+{
+  "template": "session_reminder",
+  "variables": {
+    "service": "kinesiología",
+    "date": "21 de enero de 2026",
+    "time": "10:00",
+    "provider": "María González",
+    "location": "Av. Principal 123, Santiago"
+  }
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "email_abc123",
+  "clientId": "cli_001",
+  "to": "juan@example.com",
+  "subject": "Recordatorio: kinesiología mañana a las 10:00",
+  "template": "session_reminder",
+  "status": "sent",
+  "sentAt": "2026-01-20T08:00:00Z",
+  "resendId": "re_xyz789"
+}
+```
+
+### Enviar email con contenido personalizado
+
+```bash
+POST /api/v1/clients/:clientId/send-email
+```
+
+### Body
+
+```json
+{
+  "subject": "Información importante",
+  "body": "Hola Juan,\n\nQueríamos informarte que...",
+  "replyTo": "doctor@micentro.com"
+}
+```
+
+## Preview de email
+
+### Generar preview
+
+```bash
+POST /api/v1/organization/email/templates/:templateId/preview
+```
+
+### Body
+
+```json
+{
+  "clientId": "cli_001",
+  "variables": {
+    "service": "kinesiología",
+    "date": "21 de enero de 2026",
+    "time": "10:00"
+  }
+}
+```
+
+### Respuesta
+
+```json
+{
+  "subject": "Recordatorio: kinesiología mañana a las 10:00",
+  "body": "Hola Juan,\n\nTe recordamos que tienes una sesión de kinesiología programada para:\n\n📅 Fecha: 21 de enero de 2026\n⏰ Hora: 10:00\n...",
+  "html": "<!DOCTYPE html><html>...",
+  "previewText": "No olvides tu sesión de kinesiología"
+}
+```
+
+### Enviar email de prueba
+
+```bash
+POST /api/v1/organization/email/templates/:templateId/test
+```
+
+### Body
+
+```json
+{
+  "to": "test@micentro.com",
+  "variables": {
+    "name": "Usuario de Prueba",
+    "service": "kinesiología",
+    "date": "21 de enero de 2026",
+    "time": "10:00"
+  }
+}
+```
+
+## Webhooks de Resend
+
+Coordinalo recibe webhooks de Resend para rastrear el estado de los emails.
+
+### Eventos soportados
+
+| Evento | Descripción |
+|--------|-------------|
+| `email.sent` | Email enviado a Resend |
+| `email.delivered` | Email entregado al servidor destino |
+| `email.opened` | Email abierto por el destinatario |
+| `email.clicked` | Click en enlace del email |
+| `email.bounced` | Email rebotado |
+| `email.complained` | Marcado como spam |
+
+### Configurar webhook en Resend
+
+```bash
+GET /api/v1/organization/email/webhook-config
+```
+
+```json
+{
+  "webhookUrl": "https://api.coordinalo.com/webhooks/resend/org_abc123",
+  "secret": "whsec_xyz789",
+  "events": [
+    "email.delivered",
+    "email.opened",
+    "email.clicked",
+    "email.bounced",
+    "email.complained"
+  ]
+}
+```
+
+### Ejemplo de webhook recibido
+
+```json
+{
+  "type": "email.opened",
+  "data": {
+    "email_id": "re_xyz789",
+    "to": ["juan@example.com"],
+    "subject": "Recordatorio: kinesiología mañana a las 10:00",
+    "opened_at": "2026-01-20T09:15:00Z"
+  }
+}
+```
+
+## Gestión de rebotes
+
+### Ver emails rebotados
+
+```bash
+GET /api/v1/organization/email/bounces
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "bounce_001",
+      "clientId": "cli_002",
+      "clientName": "Ana López",
+      "email": "ana@invalid-domain.com",
+      "bounceType": "hard",
+      "reason": "Mailbox does not exist",
+      "bouncedAt": "2026-01-15T10:00:10Z",
+      "originalEmailId": "email_def456"
+    }
+  ],
+  "summary": {
+    "hardBounces": 15,
+    "softBounces": 8,
+    "last30Days": 23
+  }
+}
+```
+
+### Tipos de rebote
+
+| Tipo | Código | Descripción | Acción |
+|------|--------|-------------|--------|
+| Hard bounce | `hard` | Email no existe | Marcar como inválido |
+| Soft bounce | `soft` | Buzón lleno, temporal | Reintentar |
+| Spam complaint | `complaint` | Marcado como spam | Desuscribir |
+
+### Limpiar emails inválidos
+
+```bash
+POST /api/v1/organization/email/clean-bounces
+```
+
+```json
+{
+  "action": "mark_invalid",
+  "bounceIds": ["bounce_001", "bounce_002"]
+}
+```
+
+## Lista de supresión
+
+### Ver lista de supresión
+
+```bash
+GET /api/v1/organization/email/suppression-list
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "email": "unsubscribed@example.com",
+      "reason": "unsubscribed",
+      "addedAt": "2026-01-10T14:00:00Z"
+    },
+    {
+      "email": "bounced@invalid.com",
+      "reason": "hard_bounce",
+      "addedAt": "2026-01-15T10:00:10Z"
+    }
+  ]
+}
+```
+
+### Agregar a lista de supresión
+
+```bash
+POST /api/v1/organization/email/suppression-list
+```
+
+```json
+{
+  "email": "noemail@example.com",
+  "reason": "manual"
+}
+```
+
+## Estadísticas
+
+### Obtener estadísticas de email
+
+```bash
+GET /api/v1/organization/email/stats
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio |
+| `to` | `string` | Fecha fin |
+| `groupBy` | `string` | `day`, `week`, `month` |
+
+### Respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "totals": {
+    "sent": 1500,
+    "delivered": 1425,
+    "opened": 1100,
+    "clicked": 280,
+    "bounced": 50,
+    "complained": 5
+  },
+  "rates": {
+    "deliveryRate": 95.0,
+    "openRate": 77.2,
+    "clickRate": 19.6,
+    "bounceRate": 3.3,
+    "complaintRate": 0.3
+  },
+  "byTemplate": {
+    "session_reminder": {
+      "sent": 600,
+      "openRate": 82.5
+    },
+    "payment_receipt": {
+      "sent": 400,
+      "openRate": 75.0
+    }
+  }
+}
+```

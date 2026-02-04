@@ -1,0 +1,481 @@
+---
+title: Nóminas
+description: Generación y gestión de nóminas para proveedores en Coordinalo
+---
+
+# Nóminas (Payroll)
+
+El módulo de nóminas permite generar reportes consolidados de pagos a proveedores por período, facilitando la gestión contable y el cumplimiento de obligaciones laborales.
+
+## Modelo de datos
+
+```typescript
+interface PayrollRecord {
+  id: string;
+  providerId: string;
+  period: {
+    from: string;
+    to: string;
+  };
+  sessionsCount: number;
+  totalEarnings: number;
+  deductions: number;
+  bonuses: number;
+  netAmount: number;
+  status: 'draft' | 'approved' | 'paid';
+  approvedAt?: string;
+  paidAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PayrollDeduction {
+  id: string;
+  payrollId: string;
+  type: 'tax' | 'social_security' | 'advance' | 'other';
+  description: string;
+  amount: number;
+}
+
+interface PayrollBonus {
+  id: string;
+  payrollId: string;
+  type: 'performance' | 'attendance' | 'referral' | 'other';
+  description: string;
+  amount: number;
+}
+```
+
+## Estados de nómina
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Borrador** | `draft` | Nómina generada, pendiente de revisión |
+| **Aprobada** | `approved` | Revisada y aprobada para pago |
+| **Pagada** | `paid` | Pago realizado al proveedor |
+
+## Listar registros de nómina
+
+```bash
+GET /api/v1/payroll/records
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio del período (ISO 8601) |
+| `to` | `string` | Fecha fin del período (ISO 8601) |
+| `providerId` | `string` | Filtrar por proveedor |
+| `status` | `string` | Estado: `draft`, `approved`, `paid` |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "payroll_abc123",
+      "providerId": "prov_456def",
+      "provider": {
+        "id": "prov_456def",
+        "name": "María González",
+        "rut": "12.345.678-9"
+      },
+      "period": {
+        "from": "2026-01-01",
+        "to": "2026-01-31"
+      },
+      "sessionsCount": 42,
+      "totalEarnings": 1470000,
+      "deductions": 220500,
+      "bonuses": 50000,
+      "netAmount": 1299500,
+      "status": "approved",
+      "createdAt": "2026-02-01T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 15,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+## Generar nómina del período
+
+Genera registros de nómina para todos los proveedores activos en un período.
+
+```bash
+POST /api/v1/payroll/generate
+```
+
+### Body
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "providerIds": ["prov_456def", "prov_789abc"],
+  "includeDeductions": true,
+  "deductionRules": {
+    "tax": 0.10,
+    "socialSecurity": 0.05
+  }
+}
+```
+
+<Callout type="info">
+Si no se especifica `providerIds`, se generan nóminas para todos los proveedores con sesiones en el período.
+</Callout>
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "generated": 12,
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "records": [
+    {
+      "id": "payroll_new001",
+      "providerId": "prov_456def",
+      "providerName": "María González",
+      "sessionsCount": 42,
+      "totalEarnings": 1470000,
+      "deductions": 220500,
+      "netAmount": 1249500,
+      "status": "draft"
+    },
+    {
+      "id": "payroll_new002",
+      "providerId": "prov_789abc",
+      "providerName": "Carlos Ruiz",
+      "sessionsCount": 35,
+      "totalEarnings": 1225000,
+      "deductions": 183750,
+      "netAmount": 1041250,
+      "status": "draft"
+    }
+  ],
+  "summary": {
+    "totalProviders": 12,
+    "totalEarnings": 15680000,
+    "totalDeductions": 2352000,
+    "totalNet": 13328000
+  }
+}
+```
+
+## Obtener detalle de nómina
+
+```bash
+GET /api/v1/payroll/records/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "payroll_abc123",
+  "providerId": "prov_456def",
+  "provider": {
+    "id": "prov_456def",
+    "name": "María González",
+    "email": "maria@example.com",
+    "rut": "12.345.678-9",
+    "bankInfo": {
+      "bank": "Banco Estado",
+      "accountNumber": "****5678"
+    }
+  },
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "sessionsCount": 42,
+  "sessions": [
+    {
+      "id": "sess_001",
+      "date": "2026-01-05T10:00:00Z",
+      "clientName": "Juan Pérez",
+      "serviceName": "Sesión de kinesiología",
+      "servicePrice": 50000,
+      "providerAmount": 35000
+    }
+  ],
+  "totalEarnings": 1470000,
+  "deductions": [
+    {
+      "id": "ded_001",
+      "type": "tax",
+      "description": "Retención de impuestos (10%)",
+      "amount": 147000
+    },
+    {
+      "id": "ded_002",
+      "type": "social_security",
+      "description": "Previsión social (5%)",
+      "amount": 73500
+    }
+  ],
+  "bonuses": [
+    {
+      "id": "bonus_001",
+      "type": "performance",
+      "description": "Bono por desempeño",
+      "amount": 50000
+    }
+  ],
+  "totalDeductions": 220500,
+  "totalBonuses": 50000,
+  "netAmount": 1299500,
+  "status": "approved",
+  "approvedAt": "2026-02-02T14:00:00Z",
+  "approvedBy": {
+    "id": "user_admin",
+    "name": "Admin"
+  },
+  "createdAt": "2026-02-01T10:00:00Z",
+  "updatedAt": "2026-02-02T14:00:00Z"
+}
+```
+
+## Aprobar nómina
+
+```bash
+POST /api/v1/payroll/records/:id/approve
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "payroll_abc123",
+  "status": "approved",
+  "approvedAt": "2026-02-02T14:00:00Z",
+  "approvedBy": {
+    "id": "user_admin",
+    "name": "Admin"
+  }
+}
+```
+
+## Marcar como pagada
+
+```bash
+POST /api/v1/payroll/records/:id/mark-paid
+```
+
+### Body
+
+```json
+{
+  "paymentMethod": "transferencia",
+  "reference": "TEF Masiva #12345",
+  "paidAt": "2026-02-05T10:00:00Z"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "payroll_abc123",
+  "status": "paid",
+  "paidAt": "2026-02-05T10:00:00Z",
+  "payment": {
+    "method": "transferencia",
+    "reference": "TEF Masiva #12345"
+  }
+}
+```
+
+## Agregar deducción
+
+```bash
+POST /api/v1/payroll/records/:id/deductions
+```
+
+### Body
+
+```json
+{
+  "type": "advance",
+  "description": "Adelanto de sueldo - 15/01",
+  "amount": 100000
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "ded_new001",
+  "payrollId": "payroll_abc123",
+  "type": "advance",
+  "description": "Adelanto de sueldo - 15/01",
+  "amount": 100000,
+  "createdAt": "2026-02-01T11:00:00Z"
+}
+```
+
+## Agregar bono
+
+```bash
+POST /api/v1/payroll/records/:id/bonuses
+```
+
+### Body
+
+```json
+{
+  "type": "referral",
+  "description": "Bono por referir nuevo cliente",
+  "amount": 25000
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "bonus_new001",
+  "payrollId": "payroll_abc123",
+  "type": "referral",
+  "description": "Bono por referir nuevo cliente",
+  "amount": 25000,
+  "createdAt": "2026-02-01T11:30:00Z"
+}
+```
+
+## Exportar nómina
+
+```bash
+POST /api/v1/payroll/records/:id/export
+```
+
+### Body
+
+```json
+{
+  "format": "pdf",
+  "includeDetails": true,
+  "language": "es"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "downloadUrl": "https://exports.coordinalo.com/payroll/payroll_abc123.pdf",
+  "expiresAt": "2026-02-06T10:00:00Z"
+}
+```
+
+### Formatos disponibles
+
+| Formato | Descripción |
+|---------|-------------|
+| `pdf` | Liquidación de sueldo en PDF |
+| `excel` | Planilla Excel detallada |
+| `previred` | Formato Previred (Chile) |
+
+## Exportar nóminas masivamente
+
+```bash
+POST /api/v1/payroll/export-batch
+```
+
+### Body
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "format": "excel",
+  "status": "approved"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "downloadUrl": "https://exports.coordinalo.com/payroll/batch_202601.xlsx",
+  "recordsCount": 12,
+  "totalAmount": 13328000,
+  "expiresAt": "2026-02-06T10:00:00Z"
+}
+```
+
+## Configuración de deducciones automáticas
+
+```bash
+PUT /api/v1/organization/payroll/settings
+```
+
+### Body
+
+```json
+{
+  "autoDeductions": {
+    "enabled": true,
+    "rules": [
+      {
+        "type": "tax",
+        "rate": 0.10,
+        "description": "Retención de impuestos"
+      },
+      {
+        "type": "social_security",
+        "rate": 0.05,
+        "description": "Previsión social"
+      }
+    ]
+  },
+  "paymentSchedule": {
+    "dayOfMonth": 5,
+    "autoApprove": false
+  }
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `payroll.generated` | Nómina generada |
+| `payroll.approved` | Nómina aprobada |
+| `payroll.paid` | Nómina pagada |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "payroll.paid",
+  "data": {
+    "payrollId": "payroll_abc123",
+    "providerId": "prov_456def",
+    "providerName": "María González",
+    "period": {
+      "from": "2026-01-01",
+      "to": "2026-01-31"
+    },
+    "netAmount": 1299500,
+    "paidAt": "2026-02-05T10:00:00Z"
+  },
+  "timestamp": "2026-02-05T10:00:01Z"
+}
+```

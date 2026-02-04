@@ -1,0 +1,92 @@
+---
+title: Webhooks del Sistema
+description: Guía completa de webhooks en Coordinalo
+---
+
+# Webhooks del Sistema
+
+Coordinalo emite webhooks para notificar eventos en tiempo real a sistemas externos.
+
+## Configurar webhooks
+
+```bash
+POST /api/v1/organization/webhooks
+```
+
+```json
+{
+  "url": "https://tu-servidor.com/webhooks/coordinalo",
+  "secret": "tu-secret-key",
+  "events": ["session.*", "payment.*", "client.created"]
+}
+```
+
+## Eventos disponibles
+
+### Sesiones
+| Evento | Descripción |
+|--------|-------------|
+| `session.created` | Nueva sesión creada |
+| `session.confirmed` | Cliente confirmó asistencia |
+| `session.completed` | Sesión marcada como entregada |
+| `session.cancelled` | Sesión cancelada |
+| `session.no_show` | Cliente no asistió |
+
+### Pagos
+| Evento | Descripción |
+|--------|-------------|
+| `payment.approved` | Pago aprobado |
+| `payment.rejected` | Pago rechazado |
+| `cobro.created` | Nuevo cobro registrado |
+
+### Clientes
+| Evento | Descripción |
+|--------|-------------|
+| `client.created` | Nuevo cliente |
+| `client.updated` | Cliente actualizado |
+
+### Ventas
+| Evento | Descripción |
+|--------|-------------|
+| `sale.created` | Nueva venta |
+| `sale.completed` | Venta completada |
+| `sale.refunded` | Venta reembolsada |
+
+## Formato de webhook
+
+```json
+{
+  "event": "session.completed",
+  "data": {
+    "sessionId": "sess_123abc",
+    "previousStatus": "in_progress",
+    "newStatus": "completed",
+    "completedAt": "2026-01-15T11:05:00Z"
+  },
+  "timestamp": "2026-01-15T11:05:01Z",
+  "signature": "sha256=..."
+}
+```
+
+## Verificar firma
+
+```typescript
+const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return `sha256=${expected}` === signature;
+}
+```
+
+## Reintentos
+
+Coordinalo reintenta webhooks fallidos con backoff exponencial:
+- 1er reintento: 1 minuto
+- 2do reintento: 5 minutos
+- 3er reintento: 30 minutos
+- 4to reintento: 2 horas
+- 5to reintento: 24 horas

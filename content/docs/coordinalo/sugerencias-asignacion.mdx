@@ -1,0 +1,75 @@
+---
+title: Sugerencias de Asignación
+description: Sistema de sugerencias inteligentes para asignar proveedores
+---
+
+# Sugerencias de Asignación
+
+El sistema sugiere automáticamente proveedores para sesiones basándose en disponibilidad, expertise, carga de trabajo y preferencias del cliente.
+
+## Modelo de datos
+
+```typescript
+interface AssignmentSuggestion {
+  id: string;
+  sessionId: string;
+  suggestedProviderId: string;
+  score: number;
+  reasons: string[];
+  status: 'pending' | 'approved' | 'rejected';
+}
+```
+
+## Factores de puntuación
+
+| Factor | Peso | Descripción |
+|--------|------|-------------|
+| Disponibilidad | 30% | Proveedor tiene el horario libre |
+| Expertise | 25% | Especialista en el servicio |
+| Carga de trabajo | 20% | Balance de sesiones |
+| Historial | 15% | Cliente prefiere este proveedor |
+| Proximidad | 10% | Ubicación si aplica |
+
+## Listar sugerencias
+
+```bash
+GET /api/v1/assignment-suggestions
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "sug_001",
+      "sessionId": "sess_001",
+      "suggestedProviderId": "prov_001",
+      "suggestedProviderName": "María González",
+      "score": 92,
+      "reasons": [
+        "Disponible en el horario",
+        "Especialista en kinesiología",
+        "Cliente ha trabajado con ella antes"
+      ],
+      "status": "pending"
+    }
+  ]
+}
+```
+
+## Aprobar sugerencia
+
+```bash
+POST /api/v1/assignment-suggestions/:id/approve
+```
+
+## Rechazar sugerencia
+
+```bash
+POST /api/v1/assignment-suggestions/:id/reject
+```
+
+```json
+{
+  "reason": "Cliente prefiere otro proveedor"
+}
+```

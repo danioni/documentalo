@@ -1,0 +1,511 @@
+---
+title: Campañas
+description: Envío de campañas de marketing por email y WhatsApp en Coordinalo
+---
+
+# Campañas
+
+Las campañas permiten enviar comunicaciones masivas a audiencias segmentadas a través de email y/o WhatsApp. Incluyen tracking de métricas y automatización de envíos.
+
+## Modelo de datos
+
+```typescript
+interface Campaign {
+  id: string;
+  name: string;
+  audienceId: string;
+  channel: 'email' | 'whatsapp' | 'both';
+  template: CampaignTemplate;
+  scheduledAt?: string;
+  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
+  stats: CampaignStats;
+  createdAt: string;
+  updatedAt: string;
+  sentAt?: string;
+}
+
+interface CampaignTemplate {
+  subject?: string;
+  body: string;
+  variables: string[];
+  previewText?: string;
+}
+
+interface CampaignStats {
+  targetCount: number;
+  sent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  unsubscribed: number;
+}
+```
+
+## Estados de campaña
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Borrador** | `draft` | En edición, no enviada |
+| **Programada** | `scheduled` | Programada para envío futuro |
+| **Enviando** | `sending` | En proceso de envío |
+| **Enviada** | `sent` | Envío completado |
+| **Cancelada** | `cancelled` | Cancelada antes de enviar |
+
+## Listar campañas
+
+```bash
+GET /api/v1/campaigns
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `status` | `string` | Estado de la campaña |
+| `channel` | `string` | Canal: `email`, `whatsapp`, `both` |
+| `audienceId` | `string` | Filtrar por audiencia |
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "camp_001",
+      "name": "Reactivación enero 2026",
+      "audienceId": "aud_001",
+      "audience": {
+        "id": "aud_001",
+        "name": "Clientes inactivos 30+ días"
+      },
+      "channel": "both",
+      "status": "sent",
+      "stats": {
+        "targetCount": 45,
+        "sent": 45,
+        "delivered": 43,
+        "opened": 28,
+        "clicked": 12,
+        "bounced": 2,
+        "unsubscribed": 1
+      },
+      "sentAt": "2026-01-15T10:00:00Z",
+      "createdAt": "2026-01-14T16:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 12,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+## Crear campaña
+
+```bash
+POST /api/v1/campaigns
+```
+
+### Body
+
+```json
+{
+  "name": "Promoción febrero",
+  "audienceId": "aud_002",
+  "channel": "email",
+  "template": {
+    "subject": "¡Te extrañamos, {{name}}! 20% de descuento",
+    "body": "Hola {{name}},\n\nHace {{daysSinceLastSession}} días que no te vemos...",
+    "previewText": "Vuelve con 20% de descuento en tu próxima sesión"
+  }
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "camp_new001",
+  "name": "Promoción febrero",
+  "audienceId": "aud_002",
+  "audience": {
+    "id": "aud_002",
+    "name": "Clientes VIP",
+    "matchCount": 23
+  },
+  "channel": "email",
+  "template": {
+    "subject": "¡Te extrañamos, {{name}}! 20% de descuento",
+    "body": "Hola {{name}},\n\nHace {{daysSinceLastSession}} días que no te vemos...",
+    "previewText": "Vuelve con 20% de descuento en tu próxima sesión",
+    "variables": ["name", "daysSinceLastSession"]
+  },
+  "status": "draft",
+  "stats": {
+    "targetCount": 23,
+    "sent": 0,
+    "delivered": 0,
+    "opened": 0,
+    "clicked": 0,
+    "bounced": 0,
+    "unsubscribed": 0
+  },
+  "createdAt": "2026-01-20T10:00:00Z"
+}
+```
+
+## Variables disponibles
+
+Las siguientes variables pueden usarse en los templates:
+
+| Variable | Descripción |
+|----------|-------------|
+| `{{name}}` | Nombre del cliente |
+| `{{firstName}}` | Primer nombre |
+| `{{email}}` | Email del cliente |
+| `{{phone}}` | Teléfono |
+| `{{lastSession}}` | Fecha última sesión |
+| `{{daysSinceLastSession}}` | Días desde última sesión |
+| `{{totalSpent}}` | Total gastado formateado |
+| `{{sessionsCount}}` | Cantidad de sesiones |
+| `{{nextSessionDate}}` | Fecha próxima sesión |
+| `{{organizationName}}` | Nombre de la organización |
+| `{{bookingUrl}}` | URL de booking público |
+
+## Obtener detalle de campaña
+
+```bash
+GET /api/v1/campaigns/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "camp_001",
+  "name": "Reactivación enero 2026",
+  "audienceId": "aud_001",
+  "audience": {
+    "id": "aud_001",
+    "name": "Clientes inactivos 30+ días",
+    "matchCount": 45
+  },
+  "channel": "both",
+  "template": {
+    "subject": "¡Te extrañamos! Vuelve con descuento",
+    "body": "Hola {{name}},\n\nQueremos verte de vuelta...",
+    "variables": ["name"]
+  },
+  "status": "sent",
+  "scheduledAt": null,
+  "sentAt": "2026-01-15T10:00:00Z",
+  "stats": {
+    "targetCount": 45,
+    "sent": 45,
+    "delivered": 43,
+    "opened": 28,
+    "clicked": 12,
+    "bounced": 2,
+    "unsubscribed": 1,
+    "openRate": 65.1,
+    "clickRate": 27.9,
+    "bounceRate": 4.4
+  },
+  "breakdown": {
+    "email": {
+      "sent": 45,
+      "delivered": 43,
+      "opened": 28,
+      "clicked": 12
+    },
+    "whatsapp": {
+      "sent": 40,
+      "delivered": 38,
+      "read": 35
+    }
+  },
+  "createdAt": "2026-01-14T16:00:00Z",
+  "updatedAt": "2026-01-15T10:30:00Z"
+}
+```
+
+## Preview de campaña
+
+Genera un preview del mensaje con datos de un cliente de ejemplo.
+
+```bash
+POST /api/v1/campaigns/:id/preview
+```
+
+### Body (opcional)
+
+```json
+{
+  "clientId": "cli_001"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "campaignId": "camp_001",
+  "client": {
+    "id": "cli_001",
+    "name": "Juan Pérez"
+  },
+  "preview": {
+    "email": {
+      "subject": "¡Te extrañamos, Juan! Vuelve con descuento",
+      "body": "Hola Juan,\n\nQueremos verte de vuelta...",
+      "previewText": "Vuelve con 20% de descuento"
+    },
+    "whatsapp": {
+      "message": "Hola Juan,\n\nQueremos verte de vuelta..."
+    }
+  }
+}
+```
+
+## Actualizar campaña
+
+Solo campañas en estado `draft` pueden ser modificadas.
+
+```bash
+PUT /api/v1/campaigns/:id
+```
+
+### Body
+
+```json
+{
+  "name": "Reactivación enero - v2",
+  "template": {
+    "subject": "¡{{name}}, tenemos algo especial para ti!",
+    "body": "Actualizado..."
+  }
+}
+```
+
+## Programar envío
+
+```bash
+POST /api/v1/campaigns/:id/schedule
+```
+
+### Body
+
+```json
+{
+  "scheduledAt": "2026-01-25T10:00:00Z"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "camp_001",
+  "status": "scheduled",
+  "scheduledAt": "2026-01-25T10:00:00Z"
+}
+```
+
+## Enviar campaña
+
+Envía la campaña inmediatamente.
+
+```bash
+POST /api/v1/campaigns/:id/send
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "camp_001",
+  "status": "sending",
+  "startedAt": "2026-01-20T11:00:00Z",
+  "targetCount": 45,
+  "estimatedCompletion": "2026-01-20T11:05:00Z"
+}
+```
+
+<Callout type="info">
+El envío es asíncrono. Use el endpoint de detalle o webhooks para monitorear el progreso.
+</Callout>
+
+## Cancelar campaña
+
+Solo campañas `scheduled` o `sending` pueden cancelarse.
+
+```bash
+POST /api/v1/campaigns/:id/cancel
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "camp_001",
+  "status": "cancelled",
+  "cancelledAt": "2026-01-20T10:30:00Z",
+  "stats": {
+    "sent": 15,
+    "cancelled": 30
+  }
+}
+```
+
+## Ver logs de envío
+
+```bash
+GET /api/v1/campaigns/:id/logs
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `status` | `string` | `sent`, `delivered`, `opened`, `clicked`, `bounced` |
+| `channel` | `string` | `email`, `whatsapp` |
+| `page` | `number` | Página |
+| `limit` | `number` | Resultados por página |
+
+### Respuesta
+
+```json
+{
+  "campaignId": "camp_001",
+  "data": [
+    {
+      "id": "log_001",
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "clientEmail": "juan@example.com",
+      "channel": "email",
+      "status": "opened",
+      "sentAt": "2026-01-15T10:00:05Z",
+      "deliveredAt": "2026-01-15T10:00:08Z",
+      "openedAt": "2026-01-15T10:15:00Z",
+      "clickedAt": "2026-01-15T10:16:30Z"
+    },
+    {
+      "id": "log_002",
+      "clientId": "cli_002",
+      "clientName": "Ana López",
+      "clientEmail": "ana@example.com",
+      "channel": "email",
+      "status": "bounced",
+      "sentAt": "2026-01-15T10:00:06Z",
+      "bouncedAt": "2026-01-15T10:00:10Z",
+      "bounceReason": "mailbox_not_found"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}
+```
+
+## Duplicar campaña
+
+```bash
+POST /api/v1/campaigns/:id/duplicate
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "camp_copy001",
+  "name": "Reactivación enero 2026 (copia)",
+  "status": "draft",
+  "createdAt": "2026-01-20T12:00:00Z"
+}
+```
+
+## Templates predefinidos
+
+```bash
+GET /api/v1/campaigns/templates
+```
+
+### Respuesta
+
+```json
+{
+  "templates": [
+    {
+      "id": "tpl_reactivation",
+      "name": "Reactivación de clientes",
+      "description": "Para clientes inactivos",
+      "channels": ["email", "whatsapp"],
+      "template": {
+        "subject": "¡Te extrañamos, {{name}}!",
+        "body": "Hola {{name}},\n\nHace {{daysSinceLastSession}} días..."
+      }
+    },
+    {
+      "id": "tpl_promotion",
+      "name": "Promoción especial",
+      "description": "Ofertas y descuentos",
+      "channels": ["email", "whatsapp"],
+      "template": {
+        "subject": "Oferta especial para ti, {{name}}",
+        "body": "Hola {{name}},\n\nTenemos una oferta..."
+      }
+    },
+    {
+      "id": "tpl_birthday",
+      "name": "Cumpleaños",
+      "description": "Felicitación de cumpleaños",
+      "channels": ["email", "whatsapp"],
+      "template": {
+        "subject": "¡Feliz cumpleaños, {{name}}!",
+        "body": "Hola {{name}},\n\nEl equipo de {{organizationName}}..."
+      }
+    }
+  ]
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `campaign.sent` | Campaña enviada completamente |
+| `campaign.email.delivered` | Email entregado |
+| `campaign.email.opened` | Email abierto |
+| `campaign.email.clicked` | Click en email |
+| `campaign.whatsapp.delivered` | WhatsApp entregado |
+| `campaign.whatsapp.read` | WhatsApp leído |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "campaign.sent",
+  "data": {
+    "campaignId": "camp_001",
+    "campaignName": "Reactivación enero 2026",
+    "stats": {
+      "sent": 45,
+      "delivered": 43,
+      "bounced": 2
+    },
+    "sentAt": "2026-01-15T10:05:00Z"
+  },
+  "timestamp": "2026-01-15T10:05:01Z"
+}
+```

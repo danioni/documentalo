@@ -1,0 +1,518 @@
+---
+title: Logs de Comunicación
+description: Historial de comunicaciones por email y WhatsApp en Coordinalo
+---
+
+# Logs de Comunicación
+
+Los logs de comunicación registran todas las interacciones enviadas a clientes a través de email (Resend) y WhatsApp (Evolution API), permitiendo auditoría y troubleshooting.
+
+## Modelo de datos
+
+```typescript
+interface CommunicationLog {
+  id: string;
+  clientId: string;
+  channel: 'email' | 'whatsapp';
+  type: 'session_reminder' | 'payment_reminder' | 'campaign' |
+        'manual' | 'confirmation' | 'reactivation' | 'receipt';
+  status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed' | 'bounced';
+  sentAt: string;
+  deliveredAt?: string;
+  readAt?: string;
+  content: CommunicationContent;
+  metadata: CommunicationMetadata;
+  error?: CommunicationError;
+}
+
+interface CommunicationContent {
+  subject?: string;
+  body: string;
+  templateId?: string;
+}
+
+interface CommunicationMetadata {
+  sessionId?: string;
+  ventaId?: string;
+  campaignId?: string;
+  providerId?: string;
+  externalId?: string;
+}
+
+interface CommunicationError {
+  code: string;
+  message: string;
+  timestamp: string;
+}
+```
+
+## Estados de comunicación
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Pendiente** | `pending` | En cola de envío |
+| **Enviado** | `sent` | Enviado al proveedor (Resend/Evolution) |
+| **Entregado** | `delivered` | Confirmación de entrega |
+| **Leído** | `read` | Mensaje abierto/leído |
+| **Fallido** | `failed` | Error en envío |
+| **Rebotado** | `bounced` | Email rebotado |
+
+## Logs de Email
+
+### Listar logs de email
+
+```bash
+GET /api/v1/communication/email-logs
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `clientId` | `string` | Filtrar por cliente |
+| `type` | `string` | Tipo de comunicación |
+| `status` | `string` | Estado del envío |
+| `campaignId` | `string` | Filtrar por campaña |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "email_001",
+      "clientId": "cli_001",
+      "client": {
+        "id": "cli_001",
+        "name": "Juan Pérez",
+        "email": "juan@example.com"
+      },
+      "channel": "email",
+      "type": "session_reminder",
+      "status": "delivered",
+      "content": {
+        "subject": "Recordatorio: Tu sesión de kinesiología",
+        "body": "Hola Juan, te recordamos tu sesión...",
+        "templateId": "tpl_session_reminder"
+      },
+      "metadata": {
+        "sessionId": "sess_001",
+        "providerId": "prov_001",
+        "externalId": "resend_abc123"
+      },
+      "sentAt": "2026-01-20T08:00:00Z",
+      "deliveredAt": "2026-01-20T08:00:05Z",
+      "openedAt": "2026-01-20T09:15:00Z"
+    },
+    {
+      "id": "email_002",
+      "clientId": "cli_002",
+      "client": {
+        "id": "cli_002",
+        "name": "Ana López",
+        "email": "ana@invalid-domain.com"
+      },
+      "channel": "email",
+      "type": "campaign",
+      "status": "bounced",
+      "content": {
+        "subject": "¡Oferta especial para ti!",
+        "body": "Hola Ana...",
+        "templateId": "tpl_campaign"
+      },
+      "metadata": {
+        "campaignId": "camp_001",
+        "externalId": "resend_def456"
+      },
+      "sentAt": "2026-01-15T10:00:06Z",
+      "error": {
+        "code": "bounce_hard",
+        "message": "Mailbox does not exist",
+        "timestamp": "2026-01-15T10:00:10Z"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 1250,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 63
+  },
+  "summary": {
+    "total": 1250,
+    "delivered": 1180,
+    "opened": 850,
+    "bounced": 45,
+    "failed": 25
+  }
+}
+```
+
+## Logs de WhatsApp
+
+### Listar logs de WhatsApp
+
+```bash
+GET /api/v1/communication/whatsapp-logs
+```
+
+### Parámetros de query
+
+Mismos parámetros que email-logs.
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "wa_001",
+      "clientId": "cli_001",
+      "client": {
+        "id": "cli_001",
+        "name": "Juan Pérez",
+        "phone": "+56912345678"
+      },
+      "channel": "whatsapp",
+      "type": "confirmation",
+      "status": "read",
+      "content": {
+        "body": "Hola Juan, tienes una sesión agendada para mañana...",
+        "templateId": "tpl_confirmation"
+      },
+      "metadata": {
+        "sessionId": "sess_001",
+        "externalId": "evolution_xyz789",
+        "instanceName": "coordinalo-main"
+      },
+      "sentAt": "2026-01-19T10:00:00Z",
+      "deliveredAt": "2026-01-19T10:00:02Z",
+      "readAt": "2026-01-19T10:05:00Z",
+      "response": {
+        "text": "Sí, confirmo",
+        "receivedAt": "2026-01-19T10:06:00Z"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 890,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 45
+  },
+  "summary": {
+    "total": 890,
+    "delivered": 875,
+    "read": 820,
+    "failed": 15
+  }
+}
+```
+
+## Detalle de comunicación
+
+```bash
+GET /api/v1/communication/logs/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "email_001",
+  "clientId": "cli_001",
+  "client": {
+    "id": "cli_001",
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "phone": "+56912345678"
+  },
+  "channel": "email",
+  "type": "session_reminder",
+  "status": "delivered",
+  "content": {
+    "subject": "Recordatorio: Tu sesión de kinesiología",
+    "body": "Hola Juan,\n\nTe recordamos que tienes una sesión de kinesiología programada para mañana 21 de enero a las 10:00.\n\nTe esperamos.\n\nSaludos,\nCentro de Kinesiología",
+    "templateId": "tpl_session_reminder",
+    "html": "<html>...</html>"
+  },
+  "metadata": {
+    "sessionId": "sess_001",
+    "session": {
+      "id": "sess_001",
+      "startTime": "2026-01-21T10:00:00Z",
+      "service": "Sesión de kinesiología"
+    },
+    "providerId": "prov_001",
+    "provider": {
+      "id": "prov_001",
+      "name": "María González"
+    },
+    "externalId": "resend_abc123"
+  },
+  "timeline": [
+    {
+      "event": "created",
+      "timestamp": "2026-01-20T07:59:55Z"
+    },
+    {
+      "event": "sent",
+      "timestamp": "2026-01-20T08:00:00Z"
+    },
+    {
+      "event": "delivered",
+      "timestamp": "2026-01-20T08:00:05Z"
+    },
+    {
+      "event": "opened",
+      "timestamp": "2026-01-20T09:15:00Z",
+      "metadata": {
+        "userAgent": "Mozilla/5.0...",
+        "ip": "xxx.xxx.xxx.xxx"
+      }
+    }
+  ],
+  "createdAt": "2026-01-20T07:59:55Z"
+}
+```
+
+## Historial por cliente
+
+```bash
+GET /api/v1/clients/:clientId/communication-history
+```
+
+### Respuesta
+
+```json
+{
+  "clientId": "cli_001",
+  "client": {
+    "id": "cli_001",
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "phone": "+56912345678"
+  },
+  "summary": {
+    "totalCommunications": 45,
+    "byChannel": {
+      "email": 30,
+      "whatsapp": 15
+    },
+    "byType": {
+      "session_reminder": 20,
+      "confirmation": 10,
+      "campaign": 8,
+      "receipt": 5,
+      "payment_reminder": 2
+    },
+    "deliveryRate": 97.8,
+    "openRate": 72.5
+  },
+  "recent": [
+    {
+      "id": "email_001",
+      "channel": "email",
+      "type": "session_reminder",
+      "status": "delivered",
+      "subject": "Recordatorio: Tu sesión de kinesiología",
+      "sentAt": "2026-01-20T08:00:00Z"
+    }
+  ]
+}
+```
+
+## Configuración de canales
+
+### Obtener configuración
+
+```bash
+GET /api/v1/communication/config
+```
+
+### Respuesta
+
+```json
+{
+  "email": {
+    "enabled": true,
+    "provider": "resend",
+    "fromEmail": "notificaciones@micentro.com",
+    "fromName": "Centro de Kinesiología",
+    "replyTo": "contacto@micentro.com",
+    "status": "active",
+    "lastCheck": "2026-01-20T10:00:00Z"
+  },
+  "whatsapp": {
+    "enabled": true,
+    "provider": "evolution",
+    "instanceName": "coordinalo-main",
+    "phoneNumber": "+56912345678",
+    "status": "connected",
+    "lastCheck": "2026-01-20T10:00:00Z"
+  },
+  "preferences": {
+    "defaultChannel": "whatsapp",
+    "fallbackEnabled": true,
+    "fallbackChannel": "email",
+    "quietHours": {
+      "enabled": true,
+      "start": "22:00",
+      "end": "08:00",
+      "timezone": "America/Santiago"
+    }
+  }
+}
+```
+
+### Actualizar configuración
+
+```bash
+PUT /api/v1/communication/config
+```
+
+### Body
+
+```json
+{
+  "email": {
+    "fromName": "Mi Centro de Salud",
+    "replyTo": "info@micentro.com"
+  },
+  "preferences": {
+    "defaultChannel": "email",
+    "quietHours": {
+      "enabled": true,
+      "start": "21:00",
+      "end": "09:00"
+    }
+  }
+}
+```
+
+## Reenviar comunicación
+
+```bash
+POST /api/v1/communication/logs/:id/resend
+```
+
+### Body (opcional)
+
+```json
+{
+  "channel": "whatsapp",
+  "customMessage": "Mensaje alternativo"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "originalId": "email_001",
+  "newId": "email_002",
+  "channel": "whatsapp",
+  "status": "sent",
+  "sentAt": "2026-01-20T11:00:00Z"
+}
+```
+
+## Estadísticas de comunicación
+
+```bash
+GET /api/v1/communication/stats
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio |
+| `to` | `string` | Fecha fin |
+| `groupBy` | `string` | `day`, `week`, `month` |
+
+### Respuesta
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "totals": {
+    "sent": 2500,
+    "delivered": 2400,
+    "opened": 1800,
+    "clicked": 450,
+    "bounced": 75,
+    "failed": 25
+  },
+  "rates": {
+    "deliveryRate": 96.0,
+    "openRate": 75.0,
+    "clickRate": 18.75,
+    "bounceRate": 3.0
+  },
+  "byChannel": {
+    "email": {
+      "sent": 1500,
+      "delivered": 1425,
+      "opened": 1100,
+      "bounced": 50
+    },
+    "whatsapp": {
+      "sent": 1000,
+      "delivered": 975,
+      "read": 900
+    }
+  },
+  "byType": {
+    "session_reminder": { "sent": 800, "delivered": 780 },
+    "confirmation": { "sent": 500, "delivered": 490 },
+    "campaign": { "sent": 600, "delivered": 550 },
+    "payment_reminder": { "sent": 200, "delivered": 195 }
+  },
+  "daily": [
+    {
+      "date": "2026-01-31",
+      "sent": 85,
+      "delivered": 82,
+      "opened": 60
+    }
+  ]
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `communication.sent` | Mensaje enviado |
+| `communication.delivered` | Mensaje entregado |
+| `communication.opened` | Email abierto |
+| `communication.clicked` | Click en enlace |
+| `communication.bounced` | Email rebotado |
+| `communication.failed` | Fallo en envío |
+| `whatsapp.response` | Respuesta recibida de WhatsApp |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "communication.bounced",
+  "data": {
+    "logId": "email_002",
+    "clientId": "cli_002",
+    "clientEmail": "ana@invalid-domain.com",
+    "channel": "email",
+    "bounceType": "hard",
+    "reason": "Mailbox does not exist",
+    "timestamp": "2026-01-15T10:00:10Z"
+  },
+  "timestamp": "2026-01-15T10:00:11Z"
+}
+```

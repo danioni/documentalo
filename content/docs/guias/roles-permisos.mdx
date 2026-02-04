@@ -1,0 +1,87 @@
+---
+title: Roles y Permisos
+description: Sistema de control de acceso en Coordinalo
+---
+
+# Roles y Permisos
+
+Coordinalo implementa un sistema de roles para controlar el acceso a funcionalidades.
+
+## Roles predefinidos
+
+### Admin
+Acceso completo a todas las funcionalidades:
+- Gestión de organización
+- Configuración de finanzas
+- Todos los reportes
+- Gestión de usuarios y roles
+- Configuración de integraciones
+
+### Provider (Proveedor)
+Acceso limitado a su trabajo:
+- Ver solo su agenda
+- Sus clientes asignados
+- Marcar sesiones como completadas
+- Ver sus ganancias
+- Sincronizar su calendario
+
+### Receptionist (Recepcionista)
+Gestión operativa:
+- Agendar sesiones
+- Gestionar clientes
+- Registrar cobros
+- Ver agenda de todos los proveedores
+- Sin acceso a reportes financieros
+
+### Client (Cliente)
+Solo su portal:
+- Ver su plan de tratamiento
+- Agendar sus sesiones
+- Ver sus pagos
+- Sin acceso al panel administrativo
+
+## Matriz de permisos
+
+| Recurso | Admin | Provider | Receptionist | Client |
+|---------|-------|----------|--------------|--------|
+| Sesiones (todas) | ✅ | ❌ | ✅ | ❌ |
+| Sesiones (propias) | ✅ | ✅ | ✅ | ✅ |
+| Clientes | ✅ | Solo asignados | ✅ | Solo perfil |
+| Finanzas | ✅ | Solo ganancias | ❌ | Solo pagos |
+| Reportes | ✅ | ❌ | ❌ | ❌ |
+| Configuración | ✅ | ❌ | ❌ | ❌ |
+| Campañas | ✅ | ❌ | ❌ | ❌ |
+
+## Crear usuario con rol
+
+```bash
+POST /api/v1/organization/users
+```
+
+```json
+{
+  "email": "nuevo@ejemplo.com",
+  "name": "Nuevo Usuario",
+  "role": "receptionist",
+  "permissions": {
+    "canManagePayments": true,
+    "canViewAllProviders": true
+  }
+}
+```
+
+## Permisos personalizados
+
+```bash
+PUT /api/v1/organization/users/:userId/permissions
+```
+
+```json
+{
+  "canManagePayments": true,
+  "canViewFinancialReports": false,
+  "canManageCampaigns": false,
+  "canEditOrganization": false,
+  "providerIds": ["prov_001", "prov_002"]
+}
+```

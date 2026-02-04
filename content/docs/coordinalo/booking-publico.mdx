@@ -1,0 +1,123 @@
+---
+title: Booking Público
+description: API pública para reservas online en Coordinalo
+---
+
+# Booking Público
+
+El booking público permite a clientes reservar sesiones sin autenticación a través de una página web personalizada.
+
+## Endpoints públicos (sin auth)
+
+### Obtener información de agenda
+
+```bash
+GET /api/v1/public/agenda/:agendaSlug
+```
+
+```json
+{
+  "id": "agenda_001",
+  "slug": "centro-kinesiologia",
+  "title": "Centro de Kinesiología",
+  "description": "Reserva tu sesión online",
+  "logo": "https://...",
+  "services": [
+    {
+      "id": "serv_001",
+      "name": "Sesión de kinesiología",
+      "duration": 60,
+      "price": 50000
+    }
+  ],
+  "providers": [
+    {
+      "id": "prov_001",
+      "name": "María González",
+      "avatar": "https://..."
+    }
+  ],
+  "settings": {
+    "requirePayment": false,
+    "maxAdvanceDays": 30,
+    "minAdvanceHours": 24
+  }
+}
+```
+
+### Obtener slots disponibles
+
+```bash
+GET /api/v1/public/agenda/:agendaSlug/slots
+```
+
+Query params: `serviceId`, `providerId`, `date`, `from`, `to`
+
+```json
+{
+  "date": "2026-01-21",
+  "slots": [
+    { "time": "09:00", "available": true, "providerId": "prov_001" },
+    { "time": "10:00", "available": true, "providerId": "prov_001" },
+    { "time": "11:00", "available": false }
+  ]
+}
+```
+
+### Reservar sesión
+
+```bash
+POST /api/v1/public/agenda/:agendaSlug/book
+```
+
+```json
+{
+  "serviceId": "serv_001",
+  "providerId": "prov_001",
+  "date": "2026-01-21",
+  "time": "10:00",
+  "client": {
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "phone": "+56912345678"
+  },
+  "notes": "Primera visita"
+}
+```
+
+Respuesta:
+```json
+{
+  "bookingId": "book_abc123",
+  "sessionId": "sess_001",
+  "status": "confirmed",
+  "confirmationCode": "ABC123",
+  "session": {
+    "date": "2026-01-21",
+    "time": "10:00",
+    "service": "Sesión de kinesiología",
+    "provider": "María González"
+  }
+}
+```
+
+## Configuración de agenda pública
+
+```bash
+PUT /api/v1/organization/public-agenda
+```
+
+```json
+{
+  "enabled": true,
+  "slug": "centro-kinesiologia",
+  "title": "Centro de Kinesiología",
+  "settings": {
+    "requirePayment": false,
+    "confirmationMethod": "auto",
+    "maxAdvanceDays": 30,
+    "minAdvanceHours": 24,
+    "allowProviderSelection": true
+  }
+}
+```

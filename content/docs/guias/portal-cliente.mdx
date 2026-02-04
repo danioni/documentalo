@@ -1,0 +1,87 @@
+---
+title: Portal del Cliente
+description: Experiencia del cliente en su portal personalizado
+---
+
+# Portal del Cliente
+
+El portal del cliente permite a los usuarios ver su plan de tratamiento, agendar sesiones, revisar historial y consultar pagos.
+
+## Acceso al portal
+
+Los clientes acceden mediante un token único:
+
+```
+https://app.coordinalo.com/clientes/[token]
+```
+
+El token se envía por email/WhatsApp al crear el cliente o bajo demanda.
+
+## Funcionalidades
+
+### Ver plan de tratamiento
+- Sesiones programadas
+- Sesiones completadas
+- Sesiones pendientes de agendar
+
+### Agendar sesiones
+- Seleccionar fecha y hora disponibles
+- Elegir proveedor (si está habilitado)
+- Confirmar reserva
+
+### Historial
+- Todas las sesiones pasadas
+- Notas del proveedor (si están compartidas)
+- Fechas y servicios
+
+### Pagos
+- Saldo pendiente
+- Historial de pagos
+- Descargar recibos
+- Pagar online (MercadoPago)
+
+## Configurar portal
+
+```bash
+PUT /api/v1/organization/client-portal/settings
+```
+
+```json
+{
+  "enabled": true,
+  "allowSelfBooking": true,
+  "allowProviderSelection": false,
+  "showPaymentHistory": true,
+  "showProviderNotes": false,
+  "branding": {
+    "logo": "https://...",
+    "primaryColor": "#4CAF50"
+  }
+}
+```
+
+## Generar acceso para cliente
+
+```bash
+POST /api/v1/clients/:clientId/portal-access
+```
+
+```json
+{
+  "sendVia": ["email", "whatsapp"],
+  "expiresIn": "30d"
+}
+```
+
+Respuesta:
+```json
+{
+  "portalUrl": "https://app.coordinalo.com/clientes/abc123xyz",
+  "token": "abc123xyz",
+  "expiresAt": "2026-02-20T10:00:00Z",
+  "sentTo": {
+    "email": "juan@example.com",
+    "whatsapp": "+56912345678"
+  }
+}
+```

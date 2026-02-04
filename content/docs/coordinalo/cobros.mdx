@@ -1,0 +1,374 @@
+---
+title: Cobros
+description: Registrar y gestionar cobros de ventas en Coordinalo
+---
+
+# Cobros
+
+Los cobros representan los pagos recibidos de clientes por las ventas de servicios. Coordinalo soporta múltiples métodos de pago incluyendo integración con MercadoPago.
+
+## Modelo de datos
+
+```typescript
+interface Cobro {
+  id: string;
+  ventaId: string;
+  amount: number;
+  paymentMethod: 'efectivo' | 'transferencia' | 'mercadopago' | 'tarjeta';
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+  mercadopagoId?: string;
+  reference?: string;
+  paidAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+## Estados de cobro
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Pendiente** | `pendiente` | Cobro registrado, esperando confirmación |
+| **Aprobado** | `aprobado` | Pago confirmado y acreditado |
+| **Rechazado** | `rechazado` | Pago rechazado o fallido |
+
+## Listar cobros
+
+```bash
+GET /api/v1/cobros
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `ventaId` | `string` | Filtrar por venta |
+| `clientId` | `string` | Filtrar por cliente |
+| `status` | `string` | Estado: `pendiente`, `aprobado`, `rechazado` |
+| `paymentMethod` | `string` | Método de pago |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "cob_abc123",
+      "ventaId": "sale_xyz789",
+      "amount": 100000,
+      "paymentMethod": "mercadopago",
+      "status": "aprobado",
+      "mercadopagoId": "mp_12345678",
+      "paidAt": "2026-01-15T14:30:00Z",
+      "createdAt": "2026-01-15T14:25:00Z",
+      "venta": {
+        "id": "sale_xyz789",
+        "totalPrice": 200000
+      },
+      "client": {
+        "id": "cli_789ghi",
+        "name": "Juan Pérez"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 89,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 5
+  }
+}
+```
+
+## Registrar cobro
+
+```bash
+POST /api/v1/cobros
+```
+
+### Body
+
+```json
+{
+  "ventaId": "sale_xyz789",
+  "amount": 100000,
+  "paymentMethod": "transferencia",
+  "reference": "Transferencia Banco Estado #12345"
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "cob_new456",
+  "ventaId": "sale_xyz789",
+  "amount": 100000,
+  "paymentMethod": "transferencia",
+  "status": "pendiente",
+  "reference": "Transferencia Banco Estado #12345",
+  "createdAt": "2026-01-20T10:00:00Z"
+}
+```
+
+<Callout type="info">
+Los cobros manuales (efectivo, transferencia) se crean en estado `pendiente`. Use el endpoint de aprobación para confirmarlos.
+</Callout>
+
+## Obtener detalle de cobro
+
+```bash
+GET /api/v1/cobros/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "cob_abc123",
+  "ventaId": "sale_xyz789",
+  "amount": 100000,
+  "paymentMethod": "mercadopago",
+  "status": "aprobado",
+  "mercadopagoId": "mp_12345678",
+  "reference": null,
+  "paidAt": "2026-01-15T14:30:00Z",
+  "createdAt": "2026-01-15T14:25:00Z",
+  "updatedAt": "2026-01-15T14:30:00Z",
+  "venta": {
+    "id": "sale_xyz789",
+    "clientId": "cli_789ghi",
+    "totalPrice": 200000,
+    "status": "agendado"
+  },
+  "client": {
+    "id": "cli_789ghi",
+    "name": "Juan Pérez",
+    "email": "juan@example.com"
+  },
+  "receipt": {
+    "id": "rec_abc123",
+    "number": "001-00234",
+    "url": "https://receipts.coordinalo.com/rec_abc123.pdf"
+  }
+}
+```
+
+## Aprobar cobro
+
+Para cobros manuales (efectivo, transferencia), use este endpoint para confirmar la recepción del pago.
+
+```bash
+POST /api/v1/cobros/:id/approve
+```
+
+### Body (opcional)
+
+```json
+{
+  "reference": "Comprobante de transferencia adjunto",
+  "paidAt": "2026-01-20T09:00:00Z"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "cob_new456",
+  "status": "aprobado",
+  "paidAt": "2026-01-20T09:00:00Z",
+  "updatedAt": "2026-01-20T10:15:00Z"
+}
+```
+
+## Rechazar cobro
+
+```bash
+POST /api/v1/cobros/:id/reject
+```
+
+### Body
+
+```json
+{
+  "reason": "Transferencia no encontrada"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "cob_new456",
+  "status": "rechazado",
+  "rejectedAt": "2026-01-20T10:30:00Z",
+  "rejectionReason": "Transferencia no encontrada"
+}
+```
+
+## Integración con MercadoPago
+
+Los cobros vía MercadoPago se procesan automáticamente a través de webhooks.
+
+### Crear preferencia de pago
+
+```bash
+POST /api/v1/cobros/mercadopago/preference
+```
+
+### Body
+
+```json
+{
+  "ventaId": "sale_xyz789",
+  "amount": 100000,
+  "description": "Pago parcial - Sesiones de kinesiología"
+}
+```
+
+### Respuesta
+
+```json
+{
+  "preferenceId": "pref_12345",
+  "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=pref_12345",
+  "sandboxInitPoint": "https://sandbox.mercadopago.cl/checkout/v1/redirect?pref_id=pref_12345"
+}
+```
+
+### Webhook de MercadoPago
+
+Cuando MercadoPago notifica un pago aprobado, Coordinalo:
+
+1. Crea automáticamente un registro de cobro
+2. Lo marca como `aprobado`
+3. Actualiza el balance de la venta
+4. Genera el recibo electrónico
+
+```json
+{
+  "event": "payment.approved",
+  "data": {
+    "cobroId": "cob_auto123",
+    "ventaId": "sale_xyz789",
+    "amount": 100000,
+    "mercadopagoId": "mp_12345678",
+    "approvedAt": "2026-01-15T14:30:00Z"
+  }
+}
+```
+
+<Callout type="info">
+Ver la [guía de integración con MercadoPago](/docs/guias/mercadopago-chile) para configuración detallada.
+</Callout>
+
+## Recibos
+
+Coordinalo genera recibos automáticamente para cobros aprobados.
+
+### Obtener recibo
+
+```bash
+GET /api/v1/cobros/:id/receipt
+```
+
+### Respuesta
+
+```json
+{
+  "id": "rec_abc123",
+  "cobroId": "cob_abc123",
+  "number": "001-00234",
+  "amount": 100000,
+  "issuedAt": "2026-01-15T14:30:00Z",
+  "downloadUrl": "https://receipts.coordinalo.com/rec_abc123.pdf",
+  "client": {
+    "name": "Juan Pérez",
+    "email": "juan@example.com"
+  }
+}
+```
+
+### Reenviar recibo por email
+
+```bash
+POST /api/v1/cobros/:id/receipt/send
+```
+
+### Body (opcional)
+
+```json
+{
+  "email": "otro-email@example.com"
+}
+```
+
+## Resumen de cobros
+
+### Por cliente
+
+```bash
+GET /api/v1/clients/:clientId/cobros/summary
+```
+
+```json
+{
+  "clientId": "cli_789ghi",
+  "totalPaid": 350000,
+  "totalPending": 50000,
+  "cobrosCount": 4,
+  "lastPaymentAt": "2026-01-15T14:30:00Z"
+}
+```
+
+### Por período
+
+```bash
+GET /api/v1/cobros/summary?from=2026-01-01&to=2026-01-31
+```
+
+```json
+{
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "total": 2500000,
+  "byMethod": {
+    "mercadopago": 1500000,
+    "transferencia": 800000,
+    "efectivo": 200000
+  },
+  "cobrosCount": 45
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `cobro.created` | Nuevo cobro registrado |
+| `cobro.approved` | Cobro aprobado/confirmado |
+| `cobro.rejected` | Cobro rechazado |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "cobro.approved",
+  "data": {
+    "cobroId": "cob_abc123",
+    "ventaId": "sale_xyz789",
+    "clientId": "cli_789ghi",
+    "amount": 100000,
+    "paymentMethod": "mercadopago",
+    "approvedAt": "2026-01-15T14:30:00Z"
+  },
+  "timestamp": "2026-01-15T14:30:01Z"
+}
+```

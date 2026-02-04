@@ -1,0 +1,481 @@
+---
+title: WhatsApp con Evolution API
+description: Integración de WhatsApp Business vía Evolution API en Coordinalo
+---
+
+# WhatsApp con Evolution API
+
+Coordinalo integra WhatsApp Business a través de [Evolution API](https://doc.evolution-api.com/), permitiendo enviar recordatorios, confirmaciones y campañas a clientes.
+
+## Requisitos previos
+
+- Instancia de Evolution API configurada
+- Número de WhatsApp Business verificado
+- API Key de Evolution
+
+## Configuración inicial
+
+### Conectar WhatsApp
+
+```bash
+POST /api/v1/organization/whatsapp/connect
+```
+
+### Body
+
+```json
+{
+  "evolutionApiUrl": "https://evolution.tudominio.com",
+  "apiKey": "tu-api-key-de-evolution",
+  "instanceName": "coordinalo-org"
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "status": "connecting",
+  "instanceName": "coordinalo-org",
+  "qrCode": "data:image/png;base64,iVBORw0KGgo...",
+  "expiresAt": "2026-01-20T10:05:00Z"
+}
+```
+
+<Callout type="info">
+Escanea el código QR con tu teléfono para vincular WhatsApp Business.
+</Callout>
+
+### Verificar estado de conexión
+
+```bash
+GET /api/v1/organization/whatsapp/status
+```
+
+### Respuesta
+
+```json
+{
+  "status": "connected",
+  "instanceName": "coordinalo-org",
+  "phoneNumber": "+56912345678",
+  "connectedAt": "2026-01-20T10:02:00Z",
+  "lastActivity": "2026-01-20T15:30:00Z",
+  "stats": {
+    "messagesSentToday": 45,
+    "messagesReceivedToday": 12,
+    "activeConversations": 8
+  }
+}
+```
+
+### Estados de conexión
+
+| Estado | Código | Descripción |
+|--------|--------|-------------|
+| **Desconectado** | `disconnected` | No hay sesión activa |
+| **Conectando** | `connecting` | Esperando escaneo de QR |
+| **Conectado** | `connected` | WhatsApp vinculado y activo |
+| **Error** | `error` | Error de conexión |
+
+## Enviar mensaje a cliente
+
+### Enviar mensaje directo
+
+```bash
+POST /api/v1/clients/:clientId/send-whatsapp
+```
+
+### Body
+
+```json
+{
+  "message": "Hola Juan, te recordamos tu sesión de mañana a las 10:00."
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "msg_abc123",
+  "clientId": "cli_001",
+  "phone": "+56912345678",
+  "message": "Hola Juan, te recordamos tu sesión de mañana a las 10:00.",
+  "status": "sent",
+  "sentAt": "2026-01-20T10:00:00Z",
+  "externalId": "evolution_xyz789"
+}
+```
+
+### Enviar con template
+
+```bash
+POST /api/v1/clients/:clientId/send-whatsapp
+```
+
+### Body
+
+```json
+{
+  "template": "session_reminder",
+  "variables": {
+    "service": "kinesiología",
+    "date": "21 de enero",
+    "time": "10:00"
+  }
+}
+```
+
+## Templates disponibles
+
+### Listar templates
+
+```bash
+GET /api/v1/organization/whatsapp/templates
+```
+
+### Respuesta
+
+```json
+{
+  "templates": [
+    {
+      "id": "session_reminder",
+      "name": "Recordatorio de sesión",
+      "body": "Hola {{name}}, te recordamos tu sesión de {{service}} para el {{date}} a las {{time}}.",
+      "variables": ["name", "service", "date", "time"],
+      "category": "reminder"
+    },
+    {
+      "id": "session_confirmation",
+      "name": "Confirmación de sesión",
+      "body": "Hola {{name}}, tienes una sesión de {{service}} agendada para el {{date}} a las {{time}}.\n\n¿Confirmas tu asistencia?\n\nResponde SÍ o NO",
+      "variables": ["name", "service", "date", "time"],
+      "category": "confirmation"
+    },
+    {
+      "id": "payment_reminder",
+      "name": "Recordatorio de pago",
+      "body": "Hola {{name}}, te recordamos que tienes un saldo pendiente de {{amount}}.\n\nPuedes pagar en: {{paymentUrl}}",
+      "variables": ["name", "amount", "paymentUrl"],
+      "category": "payment"
+    },
+    {
+      "id": "welcome",
+      "name": "Bienvenida",
+      "body": "¡Hola {{name}}! Bienvenido/a a {{organizationName}}.\n\nAgenda tu próxima sesión en: {{bookingUrl}}",
+      "variables": ["name", "organizationName", "bookingUrl"],
+      "category": "onboarding"
+    }
+  ]
+}
+```
+
+### Crear template personalizado
+
+```bash
+POST /api/v1/organization/whatsapp/templates
+```
+
+### Body
+
+```json
+{
+  "id": "custom_promo",
+  "name": "Promoción personalizada",
+  "body": "Hola {{name}}, tenemos una oferta especial: {{offerDescription}}.\n\nVálido hasta {{expirationDate}}.\n\nReserva: {{bookingUrl}}",
+  "variables": ["name", "offerDescription", "expirationDate", "bookingUrl"],
+  "category": "marketing"
+}
+```
+
+### Actualizar template
+
+```bash
+PUT /api/v1/organization/whatsapp/templates/:templateId
+```
+
+### Body
+
+```json
+{
+  "body": "Hola {{name}}, tu sesión de {{service}} está confirmada para {{date}} a las {{time}}. ¡Te esperamos!",
+  "name": "Confirmación de sesión v2"
+}
+```
+
+## Webhooks de Evolution
+
+Coordinalo recibe webhooks de Evolution API para rastrear el estado de los mensajes.
+
+### Configurar webhook en Evolution
+
+```bash
+POST /api/v1/organization/whatsapp/webhook-config
+```
+
+### Respuesta
+
+```json
+{
+  "webhookUrl": "https://api.coordinalo.com/webhooks/evolution/org_abc123",
+  "secret": "whsec_xyz789",
+  "events": [
+    "messages.upsert",
+    "messages.update",
+    "connection.update"
+  ]
+}
+```
+
+### Eventos recibidos
+
+#### Mensaje entregado
+
+```json
+{
+  "event": "messages.update",
+  "data": {
+    "key": {
+      "remoteJid": "56912345678@s.whatsapp.net",
+      "id": "msg_abc123"
+    },
+    "update": {
+      "status": 3
+    }
+  }
+}
+```
+
+| Status | Significado |
+|--------|-------------|
+| 1 | Pendiente |
+| 2 | Enviado al servidor |
+| 3 | Entregado |
+| 4 | Leído |
+
+#### Mensaje recibido (respuesta del cliente)
+
+```json
+{
+  "event": "messages.upsert",
+  "data": {
+    "key": {
+      "remoteJid": "56912345678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "msg_response_001"
+    },
+    "message": {
+      "conversation": "Sí, confirmo mi asistencia"
+    },
+    "messageTimestamp": 1705754400
+  }
+}
+```
+
+## Respuestas automáticas
+
+### Configurar respuestas automáticas
+
+```bash
+PUT /api/v1/organization/whatsapp/auto-responses
+```
+
+### Body
+
+```json
+{
+  "enabled": true,
+  "responses": [
+    {
+      "trigger": "confirmation",
+      "keywords": ["sí", "si", "confirmo", "ok", "dale"],
+      "action": "confirm_session",
+      "reply": "¡Perfecto! Tu sesión está confirmada. Te esperamos."
+    },
+    {
+      "trigger": "cancellation",
+      "keywords": ["no", "cancelar", "no puedo"],
+      "action": "cancel_session",
+      "reply": "Entendido. Tu sesión ha sido cancelada. Puedes reagendar en {{bookingUrl}}"
+    },
+    {
+      "trigger": "greeting",
+      "keywords": ["hola", "buenos días", "buenas"],
+      "action": "none",
+      "reply": "¡Hola! Soy el asistente de {{organizationName}}. ¿En qué puedo ayudarte?\n\nPuedes agendar en: {{bookingUrl}}"
+    }
+  ],
+  "defaultResponse": {
+    "enabled": true,
+    "message": "Gracias por tu mensaje. Un miembro de nuestro equipo te responderá pronto.",
+    "delay": 60
+  }
+}
+```
+
+## Conversaciones
+
+### Listar conversaciones activas
+
+```bash
+GET /api/v1/organization/whatsapp/conversations
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "conv_001",
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "phone": "+56912345678",
+      "lastMessage": {
+        "content": "Sí, confirmo mi asistencia",
+        "fromClient": true,
+        "timestamp": "2026-01-20T14:30:00Z"
+      },
+      "unreadCount": 1,
+      "status": "active"
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "unread": 3
+  }
+}
+```
+
+### Ver historial de conversación
+
+```bash
+GET /api/v1/clients/:clientId/whatsapp/messages
+```
+
+### Respuesta
+
+```json
+{
+  "clientId": "cli_001",
+  "phone": "+56912345678",
+  "messages": [
+    {
+      "id": "msg_001",
+      "content": "Hola Juan, te recordamos tu sesión de mañana a las 10:00.",
+      "fromClient": false,
+      "status": "read",
+      "timestamp": "2026-01-20T08:00:00Z"
+    },
+    {
+      "id": "msg_002",
+      "content": "Sí, confirmo mi asistencia",
+      "fromClient": true,
+      "timestamp": "2026-01-20T14:30:00Z"
+    }
+  ]
+}
+```
+
+## Envío masivo
+
+### Enviar a múltiples clientes
+
+```bash
+POST /api/v1/organization/whatsapp/bulk-send
+```
+
+### Body
+
+```json
+{
+  "clientIds": ["cli_001", "cli_002", "cli_003"],
+  "template": "custom_promo",
+  "variables": {
+    "offerDescription": "20% de descuento en tu próxima sesión",
+    "expirationDate": "31 de enero"
+  },
+  "delay": 5
+}
+```
+
+<Callout type="warning">
+Los envíos masivos tienen un delay configurable entre mensajes para evitar bloqueos de WhatsApp. Mínimo recomendado: 5 segundos.
+</Callout>
+
+### Respuesta
+
+```json
+{
+  "batchId": "batch_abc123",
+  "status": "processing",
+  "total": 3,
+  "scheduled": [
+    { "clientId": "cli_001", "scheduledAt": "2026-01-20T10:00:00Z" },
+    { "clientId": "cli_002", "scheduledAt": "2026-01-20T10:00:05Z" },
+    { "clientId": "cli_003", "scheduledAt": "2026-01-20T10:00:10Z" }
+  ]
+}
+```
+
+## Desconectar WhatsApp
+
+```bash
+POST /api/v1/organization/whatsapp/disconnect
+```
+
+### Respuesta
+
+```json
+{
+  "status": "disconnected",
+  "disconnectedAt": "2026-01-20T16:00:00Z"
+}
+```
+
+## Troubleshooting
+
+### Reconectar sesión
+
+```bash
+POST /api/v1/organization/whatsapp/reconnect
+```
+
+### Reiniciar instancia
+
+```bash
+POST /api/v1/organization/whatsapp/restart
+```
+
+### Logs de depuración
+
+```bash
+GET /api/v1/organization/whatsapp/debug-logs
+```
+
+```json
+{
+  "logs": [
+    {
+      "level": "info",
+      "message": "Message sent successfully",
+      "timestamp": "2026-01-20T10:00:00Z",
+      "details": {
+        "messageId": "msg_abc123",
+        "to": "+56912345678"
+      }
+    },
+    {
+      "level": "error",
+      "message": "Failed to send message",
+      "timestamp": "2026-01-20T10:05:00Z",
+      "details": {
+        "error": "Phone number not on WhatsApp",
+        "to": "+56900000000"
+      }
+    }
+  ]
+}
+```

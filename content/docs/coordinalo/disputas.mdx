@@ -1,0 +1,89 @@
+---
+title: Sistema de Disputas
+description: Gestión de disputas y reclamos en Coordinalo
+---
+
+# Sistema de Disputas
+
+Las disputas permiten gestionar situaciones conflictivas como no-shows, cancelaciones tardías, problemas de calidad o facturación.
+
+## Modelo de datos
+
+```typescript
+interface Dispute {
+  id: string;
+  sessionId: string;
+  clientId: string;
+  type: 'no_show' | 'cancellation' | 'quality' | 'billing';
+  status: 'open' | 'in_review' | 'resolved';
+  resolution?: 'refund' | 'credit' | 'no_action';
+  messages: DisputeMessage[];
+  createdAt: string;
+}
+```
+
+## Listar disputas
+
+```bash
+GET /api/v1/disputes
+```
+
+Query params: `status`, `type`, `clientId`, `from`, `to`
+
+```json
+{
+  "data": [
+    {
+      "id": "disp_001",
+      "sessionId": "sess_001",
+      "clientId": "cli_001",
+      "clientName": "Juan Pérez",
+      "type": "no_show",
+      "status": "open",
+      "createdAt": "2026-01-20T12:00:00Z"
+    }
+  ]
+}
+```
+
+## Crear disputa
+
+```bash
+POST /api/v1/disputes
+```
+
+```json
+{
+  "sessionId": "sess_001",
+  "type": "no_show",
+  "description": "Cliente no asistió a la sesión programada"
+}
+```
+
+## Resolver disputa
+
+```bash
+PUT /api/v1/disputes/:id/resolve
+```
+
+```json
+{
+  "resolution": "refund",
+  "refundAmount": 50000,
+  "notes": "Reembolso completo por no-show justificado"
+}
+```
+
+## Flujo de disputas
+
+```
+1. Cliente no asiste → Sistema crea disputa automática
+2. Admin revisa evidencia
+3. Resolución: reembolso, crédito, o sin acción
+```
+
+| Resolución | Código | Descripción |
+|------------|--------|-------------|
+| Reembolso | `refund` | Devolver dinero al cliente |
+| Crédito | `credit` | Sesión de reemplazo |
+| Sin acción | `no_action` | Cerrar sin compensación |

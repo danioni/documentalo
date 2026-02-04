@@ -1,0 +1,542 @@
+---
+title: Catálogo de Servicios
+description: Gestión de servicios y categorías en Coordinalo
+---
+
+# Catálogo de Servicios
+
+El catálogo permite definir los servicios que ofrece la organización, sus precios, duración y qué proveedores pueden realizarlos.
+
+## Modelo de datos
+
+```typescript
+interface Servicio {
+  id: string;
+  name: string;
+  description: string;
+  categoryId: string;
+  duration: number;
+  price: number;
+  isActive: boolean;
+  assignedProviders: string[];
+  settings: ServiceSettings;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ServiceSettings {
+  requiresConfirmation: boolean;
+  allowOnlineBooking: boolean;
+  advanceBookingDays: number;
+  minAdvanceHours: number;
+  cancellationPolicy: {
+    allowCancellation: boolean;
+    hoursBeforeSession: number;
+    refundPercentage: number;
+  };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  order: number;
+  servicesCount: number;
+}
+```
+
+## Listar servicios
+
+```bash
+GET /api/v1/services
+```
+
+### Parámetros de query
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `categoryId` | `string` | Filtrar por categoría |
+| `providerId` | `string` | Servicios de un proveedor específico |
+| `isActive` | `boolean` | Solo servicios activos |
+| `search` | `string` | Buscar por nombre |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Ejemplo de respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "serv_001",
+      "name": "Sesión de kinesiología",
+      "description": "Evaluación y tratamiento kinesiológico personalizado",
+      "categoryId": "cat_salud",
+      "category": {
+        "id": "cat_salud",
+        "name": "Salud",
+        "color": "#4CAF50"
+      },
+      "duration": 60,
+      "price": 50000,
+      "isActive": true,
+      "assignedProviders": ["prov_001", "prov_002"],
+      "providersCount": 2,
+      "createdAt": "2025-06-01T10:00:00Z"
+    },
+    {
+      "id": "serv_002",
+      "name": "Masoterapia",
+      "description": "Masaje terapéutico de relajación",
+      "categoryId": "cat_bienestar",
+      "category": {
+        "id": "cat_bienestar",
+        "name": "Bienestar",
+        "color": "#2196F3"
+      },
+      "duration": 45,
+      "price": 35000,
+      "isActive": true,
+      "assignedProviders": ["prov_003"],
+      "providersCount": 1,
+      "createdAt": "2025-06-15T14:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 15,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+## Crear servicio
+
+```bash
+POST /api/v1/services
+```
+
+### Body
+
+```json
+{
+  "name": "Evaluación postural",
+  "description": "Análisis completo de postura y recomendaciones",
+  "categoryId": "cat_salud",
+  "duration": 45,
+  "price": 40000,
+  "isActive": true,
+  "assignedProviders": ["prov_001", "prov_002"],
+  "settings": {
+    "requiresConfirmation": true,
+    "allowOnlineBooking": true,
+    "advanceBookingDays": 30,
+    "minAdvanceHours": 24,
+    "cancellationPolicy": {
+      "allowCancellation": true,
+      "hoursBeforeSession": 24,
+      "refundPercentage": 100
+    }
+  }
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "serv_new001",
+  "name": "Evaluación postural",
+  "description": "Análisis completo de postura y recomendaciones",
+  "categoryId": "cat_salud",
+  "duration": 45,
+  "price": 40000,
+  "isActive": true,
+  "assignedProviders": ["prov_001", "prov_002"],
+  "settings": {
+    "requiresConfirmation": true,
+    "allowOnlineBooking": true,
+    "advanceBookingDays": 30,
+    "minAdvanceHours": 24,
+    "cancellationPolicy": {
+      "allowCancellation": true,
+      "hoursBeforeSession": 24,
+      "refundPercentage": 100
+    }
+  },
+  "createdAt": "2026-01-20T10:00:00Z"
+}
+```
+
+## Obtener detalle de servicio
+
+```bash
+GET /api/v1/services/:id
+```
+
+### Respuesta
+
+```json
+{
+  "id": "serv_001",
+  "name": "Sesión de kinesiología",
+  "description": "Evaluación y tratamiento kinesiológico personalizado",
+  "categoryId": "cat_salud",
+  "category": {
+    "id": "cat_salud",
+    "name": "Salud",
+    "color": "#4CAF50"
+  },
+  "duration": 60,
+  "price": 50000,
+  "isActive": true,
+  "assignedProviders": [
+    {
+      "id": "prov_001",
+      "name": "María González",
+      "avatar": "https://..."
+    },
+    {
+      "id": "prov_002",
+      "name": "Carlos Ruiz",
+      "avatar": "https://..."
+    }
+  ],
+  "settings": {
+    "requiresConfirmation": true,
+    "allowOnlineBooking": true,
+    "advanceBookingDays": 30,
+    "minAdvanceHours": 24,
+    "cancellationPolicy": {
+      "allowCancellation": true,
+      "hoursBeforeSession": 24,
+      "refundPercentage": 100
+    }
+  },
+  "stats": {
+    "totalSessions": 450,
+    "lastMonthSessions": 42,
+    "averageRating": 4.8,
+    "revenue": {
+      "total": 22500000,
+      "lastMonth": 2100000
+    }
+  },
+  "createdAt": "2025-06-01T10:00:00Z",
+  "updatedAt": "2026-01-15T16:00:00Z"
+}
+```
+
+## Actualizar servicio
+
+```bash
+PUT /api/v1/services/:id
+```
+
+### Body
+
+```json
+{
+  "name": "Sesión de kinesiología premium",
+  "price": 55000,
+  "duration": 75
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "serv_001",
+  "name": "Sesión de kinesiología premium",
+  "price": 55000,
+  "duration": 75,
+  "updatedAt": "2026-01-20T11:00:00Z"
+}
+```
+
+<Callout type="info">
+Actualizar el precio no afecta ventas existentes. Solo aplica a nuevas ventas.
+</Callout>
+
+## Activar/Desactivar servicio
+
+```bash
+POST /api/v1/services/:id/toggle-active
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "serv_001",
+  "isActive": false,
+  "updatedAt": "2026-01-20T12:00:00Z"
+}
+```
+
+<Callout type="warning">
+Los servicios desactivados no aparecen en el booking público ni pueden ser agendados.
+</Callout>
+
+## Asignar proveedores
+
+```bash
+PUT /api/v1/services/:id/providers
+```
+
+### Body
+
+```json
+{
+  "providerIds": ["prov_001", "prov_002", "prov_003"]
+}
+```
+
+### Respuesta exitosa (200)
+
+```json
+{
+  "id": "serv_001",
+  "assignedProviders": ["prov_001", "prov_002", "prov_003"],
+  "updatedAt": "2026-01-20T13:00:00Z"
+}
+```
+
+---
+
+# Categorías
+
+## Listar categorías
+
+```bash
+GET /api/v1/categories
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "cat_salud",
+      "name": "Salud",
+      "description": "Servicios de salud y rehabilitación",
+      "color": "#4CAF50",
+      "order": 1,
+      "servicesCount": 5,
+      "isActive": true
+    },
+    {
+      "id": "cat_bienestar",
+      "name": "Bienestar",
+      "description": "Servicios de bienestar y relajación",
+      "color": "#2196F3",
+      "order": 2,
+      "servicesCount": 3,
+      "isActive": true
+    }
+  ]
+}
+```
+
+## Crear categoría
+
+```bash
+POST /api/v1/categories
+```
+
+### Body
+
+```json
+{
+  "name": "Deportivo",
+  "description": "Servicios para deportistas",
+  "color": "#FF9800",
+  "order": 3
+}
+```
+
+### Respuesta exitosa (201)
+
+```json
+{
+  "id": "cat_deportivo",
+  "name": "Deportivo",
+  "description": "Servicios para deportistas",
+  "color": "#FF9800",
+  "order": 3,
+  "servicesCount": 0,
+  "isActive": true,
+  "createdAt": "2026-01-20T14:00:00Z"
+}
+```
+
+## Actualizar categoría
+
+```bash
+PUT /api/v1/categories/:id
+```
+
+### Body
+
+```json
+{
+  "name": "Deportivo y Fitness",
+  "color": "#E65100"
+}
+```
+
+## Eliminar categoría
+
+```bash
+DELETE /api/v1/categories/:id
+```
+
+<Callout type="warning">
+Solo se pueden eliminar categorías sin servicios asociados.
+</Callout>
+
+## Reordenar categorías
+
+```bash
+PUT /api/v1/categories/reorder
+```
+
+### Body
+
+```json
+{
+  "order": ["cat_salud", "cat_deportivo", "cat_bienestar"]
+}
+```
+
+---
+
+# Precios especiales
+
+## Listar precios especiales
+
+```bash
+GET /api/v1/services/:id/special-prices
+```
+
+### Respuesta
+
+```json
+{
+  "serviceId": "serv_001",
+  "specialPrices": [
+    {
+      "id": "sp_001",
+      "type": "provider",
+      "providerId": "prov_002",
+      "providerName": "Carlos Ruiz",
+      "price": 45000,
+      "reason": "Proveedor en formación"
+    },
+    {
+      "id": "sp_002",
+      "type": "package",
+      "minQuantity": 4,
+      "price": 45000,
+      "discount": 10,
+      "reason": "Descuento por paquete de 4+"
+    }
+  ]
+}
+```
+
+## Crear precio especial
+
+```bash
+POST /api/v1/services/:id/special-prices
+```
+
+### Body (precio por proveedor)
+
+```json
+{
+  "type": "provider",
+  "providerId": "prov_003",
+  "price": 48000,
+  "reason": "Tarifa especialista senior"
+}
+```
+
+### Body (precio por paquete)
+
+```json
+{
+  "type": "package",
+  "minQuantity": 8,
+  "price": 42000,
+  "reason": "Descuento por paquete de 8+"
+}
+```
+
+---
+
+# Servicios para API pública
+
+## Listar servicios públicos
+
+Endpoint sin autenticación para mostrar en booking público.
+
+```bash
+GET /api/v1/public/agenda/:agendaSlug/services
+```
+
+### Respuesta
+
+```json
+{
+  "data": [
+    {
+      "id": "serv_001",
+      "name": "Sesión de kinesiología",
+      "description": "Evaluación y tratamiento kinesiológico personalizado",
+      "category": "Salud",
+      "duration": 60,
+      "price": 50000,
+      "formattedPrice": "$50.000",
+      "availableProviders": 2
+    }
+  ]
+}
+```
+
+## Webhooks
+
+| Evento | Descripción |
+|--------|-------------|
+| `service.created` | Nuevo servicio creado |
+| `service.updated` | Servicio actualizado |
+| `service.deactivated` | Servicio desactivado |
+| `category.created` | Nueva categoría creada |
+
+### Ejemplo de webhook
+
+```json
+{
+  "event": "service.updated",
+  "data": {
+    "serviceId": "serv_001",
+    "serviceName": "Sesión de kinesiología premium",
+    "changes": {
+      "price": {
+        "old": 50000,
+        "new": 55000
+      },
+      "duration": {
+        "old": 60,
+        "new": 75
+      }
+    },
+    "updatedAt": "2026-01-20T11:00:00Z"
+  },
+  "timestamp": "2026-01-20T11:00:01Z"
+}
+```
