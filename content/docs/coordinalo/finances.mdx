@@ -1,0 +1,222 @@
+---
+title: Finanzas y Comisiones
+description: Revenue share, comisiones automáticas y facturación en Coordinalo
+---
+
+# Finanzas y Comisiones
+
+Coordinalo automatiza el cálculo de comisiones y revenue share entre la organización y los proveedores (profesionales).
+
+## Revenue Share
+
+El modelo de revenue share permite definir cómo se distribuyen los ingresos de cada sesión entre la organización y el proveedor.
+
+### Configurar comisión de proveedor
+
+```bash
+PUT /api/v1/providers/:providerId/commission
+```
+
+```json
+{
+  "type": "percentage",
+  "value": 70
+}
+```
+
+En este ejemplo, el proveedor recibe el **70%** del valor de cada sesión y la organización retiene el **30%**.
+
+### Tipos de comisión
+
+| Tipo | Descripción | Ejemplo |
+|------|-------------|---------|
+| `percentage` | Porcentaje del valor de la sesión | 70% para el proveedor |
+| `fixed` | Monto fijo por sesión | $15.000 CLP por sesión |
+| `tiered` | Porcentaje escalonado por volumen | 60% hasta 20 sesiones, 70% después |
+
+## Cálculo automático
+
+Las comisiones se calculan automáticamente cuando una sesión se marca como **entregada** (`completed`).
+
+```typescript
+interface SessionPayment {
+  sessionId: string;
+  servicePrice: number;        // Precio del servicio
+  providerCommission: number;  // Monto para el proveedor
+  organizationAmount: number;  // Monto para la organización
+  calculatedAt: string;        // Timestamp del cálculo
+}
+```
+
+### Ejemplo de cálculo
+
+```json
+{
+  "sessionId": "sess_123abc",
+  "servicePrice": 50000,
+  "providerCommission": 35000,
+  "organizationAmount": 15000,
+  "calculatedAt": "2026-01-15T11:05:00Z"
+}
+```
+
+<Callout type="info">
+El cálculo se dispara automáticamente via webhook `session.completed`. No requiere intervención manual.
+</Callout>
+
+## Reportes financieros
+
+### Resumen por proveedor
+
+```bash
+GET /api/v1/reports/providers/:providerId/earnings
+```
+
+**Parámetros:**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `format` | `string` | `json`, `excel`, `pdf` |
+
+**Respuesta:**
+
+```json
+{
+  "providerId": "prov_456def",
+  "providerName": "María González",
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  },
+  "summary": {
+    "totalSessions": 45,
+    "completedSessions": 42,
+    "totalRevenue": 2100000,
+    "providerEarnings": 1470000,
+    "organizationEarnings": 630000
+  }
+}
+```
+
+### Resumen de organización
+
+```bash
+GET /api/v1/reports/organization/earnings
+```
+
+Retorna el consolidado de todos los proveedores con totales de la organización.
+
+## Facturación automática (Chile)
+
+Coordinalo genera boletas electrónicas automáticamente vía integración con el SII.
+
+### Configurar facturación
+
+```bash
+POST /api/v1/organization/billing/setup
+```
+
+```json
+{
+  "provider": "sii",
+  "rut": "76.XXX.XXX-X",
+  "certificatePath": "/path/to/certificate.pfx",
+  "environment": "production"
+}
+```
+
+### Generar boleta
+
+```bash
+POST /api/v1/billing/boleta
+```
+
+```json
+{
+  "sessionId": "sess_123abc",
+  "clientRut": "12.345.678-9",
+  "emitOnComplete": true
+}
+```
+
+<Callout type="warning">
+La integración con SII requiere certificado digital vigente y estar habilitado como emisor electrónico.
+</Callout>
+
+## Pagos con MercadoPago
+
+Coordinalo integra MercadoPago para cobros online.
+
+### Crear preferencia de pago
+
+```bash
+POST /api/v1/payments/preference
+```
+
+```json
+{
+  "sessionId": "sess_123abc",
+  "amount": 50000,
+  "currency": "CLP",
+  "description": "Sesión de kinesiología - María González"
+}
+```
+
+### Webhook de pago completado
+
+```json
+{
+  "event": "payment.approved",
+  "data": {
+    "sessionId": "sess_123abc",
+    "paymentId": "pay_xyz789",
+    "amount": 50000,
+    "method": "credit_card",
+    "approvedAt": "2026-01-15T09:30:00Z"
+  }
+}
+```
+
+<Callout type="info">
+Ver la [guía de integración con MercadoPago](/docs/guias/mercadopago-chile) para configuración detallada.
+</Callout>
+
+## Liquidación de pagos
+
+### Obtener liquidación pendiente
+
+```bash
+GET /api/v1/providers/:providerId/settlement
+```
+
+```json
+{
+  "providerId": "prov_456def",
+  "pendingAmount": 350000,
+  "sessionsCount": 10,
+  "oldestSession": "2026-01-10",
+  "sessions": [
+    {
+      "id": "sess_123abc",
+      "date": "2026-01-15",
+      "amount": 35000
+    }
+  ]
+}
+```
+
+### Marcar como liquidado
+
+```bash
+POST /api/v1/providers/:providerId/settlement/mark-paid
+```
+
+```json
+{
+  "sessionIds": ["sess_123abc", "sess_456def"],
+  "paymentMethod": "transfer",
+  "reference": "Transferencia 15/01/2026"
+}
+```

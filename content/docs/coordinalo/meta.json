@@ -5,6 +5,7 @@
     "modules",
     "sessions",
     "clients",
-    "availability"
+    "availability",
+    "finances"
   ]
 }
