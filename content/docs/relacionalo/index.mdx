@@ -1,0 +1,326 @@
+---
+title: "Relaciónalo — API de CRM y gestión de clientes"
+description: "Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas para organizaciones de servicios."
+---
+
+# Relaciónalo
+
+Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas.
+
+Relaciónalo es el módulo CRM del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos core y gestiona la relación completa con el cliente: desde su primera reserva online hasta las comunicaciones de seguimiento post-sesión.
+
+---
+
+## Conceptos clave
+
+### Cliente
+
+Persona que recibe servicios de la organización (paciente, alumno, cliente). Cada cliente pertenece a una organización y tiene un identificador único.
+
+```typescript
+interface Client {
+  id: string;
+  organization_id: string;
+  name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  tags?: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### Ficha de cliente
+
+Vista consolidada que agrupa toda la información de un cliente en un solo lugar:
+
+| Sección | Contenido |
+|---------|-----------|
+| **Datos personales** | Nombre, email, teléfono, tags |
+| **Historial de sesiones** | Todas las sesiones pasadas y futuras |
+| **Métricas** | Total de sesiones, tasa de asistencia, LTV |
+| **Saldo** | Sesiones disponibles, comprometidas, consumidas |
+| **Comunicaciones** | Historial de WhatsApp y email |
+
+### Portal de reservas
+
+Página pública donde los clientes agendan sesiones online 24/7, sin necesidad de contactar a la organización. Cada organización tiene su propio portal con URL personalizada.
+
+```
+https://coordinalo.com/{slug}/explorar
+```
+
+El portal muestra los servicios disponibles, permite seleccionar profesional y horario, y confirma la reserva automáticamente.
+
+### Comunicaciones automáticas
+
+Mensajes enviados automáticamente a clientes vía WhatsApp Business y email. Cubren todo el ciclo de vida de la sesión:
+
+| Momento | Comunicación | Canal |
+|---------|-------------|-------|
+| Al reservar | Confirmación de reserva | WhatsApp + Email |
+| 48h antes | Solicitud de confirmación | WhatsApp |
+| 24h antes | Recordatorio | WhatsApp + Email |
+| 2h antes | Recordatorio final | WhatsApp |
+| Post-sesión | Seguimiento | WhatsApp |
+| Inactividad (30d) | Reactivación | WhatsApp + Email |
+
+---
+
+## Endpoints
+
+Todos los endpoints usan el prefijo `/api/organizations/{slug}/relacionalo`.
+
+### Clientes
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/clients` | Listar clientes |
+| `POST` | `/clients` | Crear cliente |
+| `GET` | `/clients/{id}` | Detalle con historial completo |
+| `PATCH` | `/clients/{id}` | Actualizar datos |
+
+#### Parámetros de query (listar clientes)
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `search` | `string` | Buscar por nombre, email o teléfono |
+| `tags` | `string` | Filtrar por tags (separados por coma) |
+| `last_session_from` | `string` | Última sesión desde (ISO 8601) |
+| `last_session_to` | `string` | Última sesión hasta (ISO 8601) |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Portal de reservas
+
+Endpoints públicos (no requieren autenticación).
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/{slug}/explorar` | Servicios disponibles públicamente |
+| `GET` | `/{slug}/explorar/disponibilidad` | Horarios disponibles |
+| `POST` | `/{slug}/explorar/reservar` | Crear reserva desde portal |
+
+#### Parámetros de disponibilidad
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `service_id` | `string` | Servicio a consultar |
+| `provider_id` | `string` | Profesional (opcional) |
+| `date` | `string` | Fecha específica (ISO 8601) |
+| `from` | `string` | Rango desde |
+| `to` | `string` | Rango hasta |
+
+### Comunicaciones
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/whatsapp/send` | Enviar mensaje WhatsApp |
+| `GET` | `/whatsapp/templates` | Templates aprobados disponibles |
+| `POST` | `/whatsapp/webhook` | Webhook de respuestas entrantes |
+
+---
+
+## Flujo del cliente
+
+El ciclo de vida completo del cliente en Relaciónalo:
+
+```
+┌────────────────────┐
+│  Cliente descubre   │
+│  portal de reservas │
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Agenda online     │  ← Selecciona servicio, profesional, horario
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Recibe            │  ← WhatsApp + Email automático
+│  confirmación      │
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Recordatorio      │  ← 48h: confirmación · 24h: recordatorio · 2h: último aviso
+│  automático        │
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Asiste a sesión   │  ← Status: confirmed → delivered
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Mensaje           │  ← "¿Cómo te fue?" + link para agendar siguiente
+│  post-sesión       │
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Historial queda   │  ← Sesión, pago, comunicaciones registradas
+│  en ficha          │
+└─────────┬──────────┘
+          ▼
+┌────────────────────┐
+│  Próxima reserva   │  ← Si pasan 30d sin actividad → reactivación automática
+│  sugerida          │
+└────────────────────┘
+```
+
+Cada paso genera registros en la ficha del cliente: sesiones, pagos y comunicaciones quedan trazadas.
+
+---
+
+## Templates WhatsApp
+
+Relaciónalo incluye 11 templates pre-aprobados por Meta, listos para usar. Los templates usan variables dinámicas que se reemplazan automáticamente.
+
+| # | Template | Canal | Trigger | Variables |
+|---|----------|-------|---------|-----------|
+| 1 | Confirmación de reserva | WhatsApp | Al crear reserva | `{{name}}`, `{{service}}`, `{{date}}`, `{{time}}`, `{{provider}}` |
+| 2 | Solicitud de confirmación | WhatsApp | 48h antes | `{{name}}`, `{{service}}`, `{{date}}`, `{{time}}` |
+| 3 | Recordatorio 24h | WhatsApp + Email | 24h antes | `{{name}}`, `{{service}}`, `{{date}}`, `{{time}}`, `{{location}}` |
+| 4 | Recordatorio 2h | WhatsApp | 2h antes | `{{name}}`, `{{time}}` |
+| 5 | Cancelación por cliente | WhatsApp | Al cancelar | `{{name}}`, `{{service}}`, `{{date}}` |
+| 6 | Cancelación por organización | WhatsApp | Al cancelar (org) | `{{name}}`, `{{service}}`, `{{date}}`, `{{reason}}` |
+| 7 | Reagendamiento | WhatsApp | Al reagendar | `{{name}}`, `{{old_date}}`, `{{new_date}}`, `{{new_time}}` |
+| 8 | Seguimiento post-sesión | WhatsApp | 1h post-sesión | `{{name}}`, `{{service}}`, `{{provider}}`, `{{booking_url}}` |
+| 9 | Recordatorio de pago | WhatsApp + Email | X días post-vencimiento | `{{name}}`, `{{amount}}`, `{{payment_url}}` |
+| 10 | Reactivación | WhatsApp + Email | 30d sin actividad | `{{name}}`, `{{days_inactive}}`, `{{booking_url}}` |
+| 11 | Bienvenida | WhatsApp | Al crear cliente | `{{name}}`, `{{organization}}`, `{{booking_url}}` |
+
+Los templates deben ser pre-aprobados por Meta antes de poder usarse en WhatsApp Business. Coordinalo incluye estos 11 templates listos para usar con la integración de [Evolution API](/docs/integraciones/whatsapp-evolution).
+
+### Ejemplo de template
+
+```json
+{
+  "template_id": "tpl_session_reminder_24h",
+  "name": "Recordatorio 24h",
+  "channel": "whatsapp",
+  "body": "Hola {{name}}, te recordamos que mañana {{date}} a las {{time}} tienes tu sesión de {{service}} con {{provider}}.\n\nTe esperamos en {{location}}.\n\n¿Podrás asistir? Responde SÍ o NO.",
+  "variables": ["name", "date", "time", "service", "provider", "location"],
+  "status": "approved"
+}
+```
+
+---
+
+## Ejemplo: Ficha de cliente con historial
+
+```bash
+GET /api/organizations/clinica-salud/relacionalo/clients/cli_789
+```
+
+**Respuesta (200)**:
+
+```json
+{
+  "id": "cli_789",
+  "name": "Juan",
+  "last_name": "Pérez",
+  "email": "juan.perez@ejemplo.com",
+  "phone": "+56912345678",
+  "tags": ["kinesiologia", "convenio-isapre"],
+  "notes": "Paciente derivado por Dr. Muñoz. Lesión de rodilla derecha.",
+  "created_at": "2024-03-15T10:00:00-03:00",
+  "stats": {
+    "total_sessions": 24,
+    "completed_sessions": 22,
+    "cancelled_sessions": 2,
+    "attendance_rate": 0.917,
+    "total_spent": 1200000,
+    "first_session": "2024-03-20T10:00:00-03:00",
+    "last_session": "2025-01-10T11:00:00-03:00"
+  },
+  "balance": {
+    "available": 3,
+    "committed": 1,
+    "consumed": 6
+  },
+  "recent_sessions": [
+    {
+      "id": "ses_101",
+      "service": "Sesión de kinesiología",
+      "provider": "Dra. García",
+      "starts_at": "2025-01-10T11:00:00-03:00",
+      "status": "delivered"
+    },
+    {
+      "id": "ses_102",
+      "service": "Sesión de kinesiología",
+      "provider": "Dra. García",
+      "starts_at": "2025-01-17T11:00:00-03:00",
+      "status": "scheduled"
+    }
+  ],
+  "recent_communications": [
+    {
+      "id": "comm_201",
+      "channel": "whatsapp",
+      "type": "session_reminder",
+      "status": "read",
+      "sent_at": "2025-01-09T11:00:00-03:00",
+      "body": "Hola Juan, te recordamos que mañana tienes tu sesión..."
+    },
+    {
+      "id": "comm_202",
+      "channel": "whatsapp",
+      "type": "confirmation",
+      "status": "read",
+      "sent_at": "2025-01-08T11:00:00-03:00",
+      "response": {
+        "text": "Sí, confirmo",
+        "received_at": "2025-01-08T11:05:00-03:00"
+      }
+    }
+  ]
+}
+```
+
+La ficha incluye en una sola llamada: datos personales, métricas históricas, saldo actual de sesiones, sesiones recientes y últimas comunicaciones.
+
+---
+
+## Relación con otros módulos
+
+Relaciónalo se integra con los otros dos módulos de Coordinalo:
+
+| Módulo | Relación con Relaciónalo |
+|--------|--------------------------|
+| **[Coordinalo](/docs/coordinalo)** (Operaciones) | Las sesiones agendadas se vinculan al cliente en su ficha |
+| **[Planifícalo](/docs/planificalo)** (Finanzas) | Las ventas y saldos del cliente se muestran en la ficha |
+
+### Webhooks de CRM
+
+Relaciónalo emite eventos que pueden consumirse vía webhooks:
+
+| Evento | Descripción |
+|--------|-------------|
+| `client.created` | Nuevo cliente registrado |
+| `client.updated` | Datos de cliente actualizados |
+| `booking.created` | Reserva creada desde portal público |
+| `booking.cancelled` | Reserva cancelada por cliente |
+| `communication.sent` | Mensaje enviado (WhatsApp/email) |
+| `communication.delivered` | Mensaje entregado |
+| `communication.read` | Mensaje leído (WhatsApp) |
+| `whatsapp.response` | Respuesta recibida de cliente |
+
+---
+
+## Documentación detallada
+
+Para endpoints completos con request/response de cada operación, consulta la documentación granular dentro de [Coordinalo](/docs/coordinalo):
+
+<Cards>
+  <Card title="Clientes" href="/docs/coordinalo/clients" description="CRUD de clientes y ficha completa" />
+  <Card title="Booking público" href="/docs/coordinalo/booking-publico" description="Portal de reservas online" />
+  <Card title="Recordatorios" href="/docs/coordinalo/recordatorios" description="Configuración de mensajes automáticos" />
+  <Card title="Logs de comunicación" href="/docs/coordinalo/communication-logs" description="Historial de WhatsApp y email" />
+  <Card title="Campañas" href="/docs/coordinalo/campanias" description="Comunicaciones masivas segmentadas" />
+  <Card title="Audiencias" href="/docs/coordinalo/audiencias" description="Segmentación de clientes" />
+</Cards>
+
+---
+
+Relaciónalo es parte de [Coordinalo](/docs/coordinalo), el módulo de operaciones del ecosistema Digitalo.
