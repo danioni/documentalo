@@ -1,0 +1,370 @@
+---
+title: "Servicialo — El estándar abierto para servicios profesionales"
+description: "Protocolo que define cómo AI agents y aplicaciones interactúan con organizaciones de servicios. Compatible con MCP (Model Context Protocol)."
+---
+
+import { Callout, Card, Cards } from 'fumadocs-ui/components/callout';
+
+# Servicialo
+
+<div className="mb-8 flex flex-wrap gap-2">
+  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Draft v0.4</span>
+  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">MCP Compatible</span>
+  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">Open Standard</span>
+</div>
+
+Protocolo que define cómo AI agents y aplicaciones interactúan con organizaciones de servicios profesionales. Compatible con [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+
+---
+
+## ¿Qué es Servicialo?
+
+Servicialo define un **set estandarizado de operaciones** para gestionar servicios profesionales: agendamiento, pagos, clientes y notificaciones.
+
+Es un estándar abierto, no un producto. Cualquier plataforma puede implementar la especificación para exponer sus servicios de manera uniforme a aplicaciones y AI agents.
+
+### Principios de diseño
+
+| Principio | Descripción |
+|-----------|-------------|
+| **Interoperable** | Cualquier plataforma puede implementar el estándar |
+| **AI-native** | Diseñado para ser consumido por AI agents vía MCP |
+| **Dominio acotado** | Cubre exclusivamente servicios profesionales |
+| **Incremental** | Cada versión agrega capacidades sin romper las anteriores |
+
+### ¿Por qué un estándar?
+
+Hoy, cada plataforma de servicios profesionales (clínicas, consultorios, salones, academias) expone APIs propietarias. Un AI agent que quiera agendar una cita necesita integrarse con cada una por separado.
+
+Servicialo resuelve esto definiendo una interfaz común. Un agent que implementa Servicialo puede interactuar con **cualquier** plataforma compatible.
+
+**Coordinalo** es la implementación de referencia.
+
+---
+
+## Tools estándar
+
+Servicialo define cuatro grupos de tools que toda implementación debe exponer:
+
+### Scheduling
+
+Tools para gestionar el ciclo de vida de las sesiones.
+
+| Tool | Descripción | Parámetros |
+|------|-------------|------------|
+| `scheduling.check_availability()` | Consultar horarios disponibles | `provider_id`, `service_id`, `date_range` |
+| `scheduling.book()` | Agendar una sesión | `provider_id`, `client_id`, `service_id`, `datetime` |
+| `scheduling.reschedule()` | Reagendar sesión existente | `session_id`, `new_datetime` |
+| `scheduling.cancel()` | Cancelar sesión | `session_id`, `reason?` |
+
+### Payments
+
+Tools para gestionar el flujo financiero asociado a los servicios.
+
+| Tool | Descripción | Parámetros |
+|------|-------------|------------|
+| `payments.get_balance()` | Consultar saldo de un cliente | `client_id` |
+| `payments.charge()` | Registrar cobro | `client_id`, `amount`, `method`, `session_id?` |
+| `payments.record()` | Registrar pago recibido | `client_id`, `amount`, `reference` |
+
+### Clients
+
+Tools para gestionar el directorio de clientes de la organización.
+
+| Tool | Descripción | Parámetros |
+|------|-------------|------------|
+| `clients.list()` | Listar clientes de la organización | `page?`, `limit?`, `search?` |
+| `clients.get()` | Obtener detalle de un cliente | `client_id` |
+| `clients.create()` | Crear nuevo cliente | `name`, `email?`, `phone?` |
+
+### Notifications
+
+Tools para comunicaciones con clientes a través de múltiples canales.
+
+| Tool | Descripción | Parámetros |
+|------|-------------|------------|
+| `notifications.send()` | Enviar notificación | `client_id`, `channel`, `template`, `data` |
+
+Canales soportados: `whatsapp`, `email`, `sms`.
+
+---
+
+## Versiones de la especificación
+
+Servicialo sigue un esquema de versionamiento incremental. Cada versión agrega un dominio funcional.
+
+### v0.1 — Core
+
+Entidades base del protocolo.
+
+- **Organización**: Entidad raíz que agrupa profesionales, clientes y servicios
+- **Profesional**: Persona que ofrece servicios dentro de una organización
+- **Cliente**: Persona que recibe servicios
+- **Servicio**: Tipo de servicio ofrecido (ej: "Sesión de kinesiología")
+- **Sesión**: Instancia de un servicio agendado entre profesional y cliente
+
+### v0.2 — Derivaciones
+
+Referrals entre organizaciones y profesionales.
+
+- **Derivación**: Solicitud de transferencia de un cliente de un profesional/organización a otro
+- **Red de derivaciones**: Grafo de relaciones entre organizaciones que se derivan clientes
+- Trazabilidad completa del flujo de derivación
+
+### v0.3 — Reputación
+
+Sistema de calidad y métricas.
+
+- **Métricas de servicio**: Tasa de asistencia, puntualidad, satisfacción
+- **Calificaciones**: Rating bidireccional (cliente ↔ profesional)
+- **Indicadores de calidad**: Agregados a nivel organización y profesional
+
+### v0.4 — Liquidación *(versión actual)*
+
+Reparto de ingresos y acuerdos financieros.
+
+- **Acuerdo financiero**: Contrato que define cómo se reparten los ingresos entre organización y profesional
+- **Movimiento financiero**: Registro de cada transacción asociada a una sesión
+- **Liquidación**: Proceso de cierre periódico que calcula compensaciones netas
+- **Compensación**: Monto final a pagar/cobrar a cada parte
+
+---
+
+## Entidades del protocolo
+
+El modelo de datos de Servicialo define las siguientes relaciones:
+
+```
+┌──────────────┐       tiene        ┌───────────────┐
+│ Organización │───────────────────▶│ Profesionales │
+└──────────────┘                    └───────┬───────┘
+                                            │ ofrecen
+                                            ▼
+                                    ┌───────────────┐
+                                    │   Servicios   │
+                                    └───────┬───────┘
+                                            │
+┌──────────────┐      agendan       ┌───────▼───────┐
+│   Clientes   │───────────────────▶│   Sesiones    │
+└──────────────┘                    └───────┬───────┘
+                                            │ generan
+                                            ▼
+                                    ┌───────────────┐
+                                    │  Movimientos  │
+                                    │  financieros  │
+                                    └───────┬───────┘
+                                            │ se liquidan via
+                                            ▼
+                                    ┌───────────────┐
+                                    │   Acuerdos    │
+                                    │  financieros  │
+                                    └───────────────┘
+```
+
+### Schema de entidades (v0.4)
+
+```typescript
+interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  timezone: string;
+  created_at: string; // ISO 8601
+}
+
+interface Professional {
+  id: string;
+  organization_id: string;
+  name: string;
+  email: string;
+  specialties: string[];
+  active: boolean;
+}
+
+interface Client {
+  id: string;
+  organization_id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+interface Service {
+  id: string;
+  organization_id: string;
+  name: string;
+  duration_minutes: number;
+  price: number;
+  currency: string; // ISO 4217
+}
+
+interface Session {
+  id: string;
+  organization_id: string;
+  professional_id: string;
+  client_id: string;
+  service_id: string;
+  status: 'projected' | 'scheduled' | 'confirmed' | 'delivered' | 'cancelled';
+  starts_at: string; // ISO 8601
+  ends_at: string;   // ISO 8601
+}
+
+interface FinancialAgreement {
+  id: string;
+  organization_id: string;
+  professional_id: string;
+  type: 'fixed' | 'percentage' | 'tiered';
+  value: number;
+  effective_from: string; // ISO 8601
+  effective_until?: string;
+}
+
+interface FinancialMovement {
+  id: string;
+  session_id: string;
+  type: 'charge' | 'payment' | 'adjustment';
+  amount: number;
+  currency: string;
+  created_at: string;
+}
+```
+
+---
+
+## Implementaciones
+
+### Coordinalo
+
+<div className="flex items-center gap-2 mb-4">
+  <span className="rounded-full bg-green-500/10 border border-green-500/30 px-3 py-1 text-xs font-medium text-green-400">Live</span>
+</div>
+
+Primera implementación comercial del estándar Servicialo. Gestión integral para clínicas y centros de servicios profesionales en Chile.
+
+- **URL**: [coordinalo.com](https://coordinalo.com)
+- **Cobertura**: Tools de Scheduling, Payments, Clients y Notifications
+- **Versión del protocolo**: v0.4
+- **Entorno**: Producción
+
+### Implementa Servicialo
+
+¿Quieres implementar el estándar en tu plataforma? Servicialo es abierto y cualquier organización puede adoptarlo.
+
+Contacta al equipo en [Grupo Digitalo](https://grupodigitalo.com) para soporte técnico y certificación de compatibilidad.
+
+---
+
+## MCP Server
+
+Servicialo expone sus tools como un servidor MCP, permitiendo que AI agents interactúen con servicios profesionales de forma nativa.
+
+**Namespace**: `com.servicialo/professional-services`
+
+### Configuración
+
+Agrega el servidor a tu `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "servicialo": {
+      "command": "npx",
+      "args": ["-y", "@servicialo/mcp-server"],
+      "env": {
+        "SERVICIALO_API_KEY": "tu_api_key",
+        "SERVICIALO_ORG_ID": "org_01"
+      }
+    }
+  }
+}
+```
+
+### Ejemplo: Agendar una cita vía AI agent
+
+Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es el flujo completo para agendar una cita:
+
+**1. Consultar disponibilidad**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "scheduling.check_availability",
+    "arguments": {
+      "provider_id": "prov_01",
+      "service_id": "svc_01",
+      "date_range": {
+        "from": "2025-01-20",
+        "to": "2025-01-24"
+      }
+    }
+  }
+}
+```
+
+**Respuesta:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"available_slots\":[{\"date\":\"2025-01-20\",\"times\":[\"09:00\",\"10:00\",\"14:00\"]},{\"date\":\"2025-01-21\",\"times\":[\"11:00\",\"15:00\"]}]}"
+      }
+    ]
+  }
+}
+```
+
+**2. Agendar la sesión**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "scheduling.book",
+    "arguments": {
+      "provider_id": "prov_01",
+      "client_id": "cli_01",
+      "service_id": "svc_01",
+      "datetime": "2025-01-20T09:00:00-03:00"
+    }
+  }
+}
+```
+
+**Respuesta:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"session\":{\"id\":\"ses_01\",\"status\":\"scheduled\",\"starts_at\":\"2025-01-20T09:00:00-03:00\",\"ends_at\":\"2025-01-20T09:45:00-03:00\",\"provider\":\"Dra. García\",\"client\":\"María López\",\"service\":\"Sesión de kinesiología\"}}"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Links
+
+- [Especificación completa v0.4](/spec/v0.4) *(próximamente)*
+- [GitHub](https://github.com/grupodigitalo/servicialo) *(próximamente)*
+- [Grupo Digitalo](https://grupodigitalo.com)
+
+---
+
+Servicialo es un estándar abierto mantenido por [Grupo Digitalo](https://grupodigitalo.com).
