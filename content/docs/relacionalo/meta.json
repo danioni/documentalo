@@ -1,6 +1,13 @@
 {
   "title": "Relaciónalo",
   "pages": [
-    "index"
+    "index",
+    "---CRM---",
+    "clients",
+    "audiencias",
+    "campanias",
+    "recordatorios",
+    "communication-logs",
+    "disputas"
   ]
 }

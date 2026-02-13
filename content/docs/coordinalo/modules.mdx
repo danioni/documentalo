@@ -53,7 +53,7 @@ Gestión del día a día: sesiones, disponibilidad y catálogo de servicios.
 
 ## Relaciónalo (CRM)
 
-Gestión de clientes y comunicaciones.
+Gestión de clientes y comunicaciones. [Ver documentación completa →](/docs/relacionalo)
 
 ### Alcance
 
@@ -74,21 +74,15 @@ Gestión de clientes y comunicaciones.
 - **Comunicaciones**: Log de todas las interacciones
 - **Disputas**: Gestión de reclamos y resoluciones
 
-### Métricas de cliente
-
-| Métrica | Descripción |
-|---------|-------------|
-| `totalSessions` | Total de sesiones agendadas |
-| `completedSessions` | Sesiones entregadas |
-| `cancelledSessions` | Sesiones canceladas |
-| `totalSpent` | Gasto total (LTV) |
-| `attendanceRate` | Tasa de asistencia |
+<Cards>
+  <Card title="Ver documentación de Relaciónalo →" href="/docs/relacionalo" description="API de CRM: clientes, comunicaciones automáticas y portal de reservas" />
+</Cards>
 
 ---
 
 ## Planifícalo (Finanzas)
 
-Gestión financiera: ingresos, egresos y reportes.
+Gestión financiera: ingresos, egresos y reportes. [Ver documentación completa →](/docs/planificalo)
 
 ### Alcance
 
@@ -108,20 +102,9 @@ Gestión financiera: ingresos, egresos y reportes.
 - **Nóminas**: Cálculo automático de comisiones
 - **Estados financieros**: Reportes de ingresos, egresos y utilidad
 
-### Modelo de comisiones
-
-```typescript
-interface SessionPayment {
-  sessionId: string;
-  totalAmount: number;           // Precio cobrado al cliente
-  providerCommission: number;    // Porcentaje para el profesional
-  organizationAmount: number;    // Margen de la organización
-}
-```
-
-<Callout type="info">
-Las comisiones se calculan automáticamente al marcar una sesión como entregada.
-</Callout>
+<Cards>
+  <Card title="Ver documentación de Planifícalo →" href="/docs/planificalo" description="API financiera: ventas, comisiones, cobros y liquidaciones" />
+</Cards>
 
 ---
 

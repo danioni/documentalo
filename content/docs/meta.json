@@ -2,10 +2,10 @@
   "title": "Documentación",
   "pages": [
     "---Productos---",
-    "coordinalo",
-    "planificalo",
-    "relacionalo",
     "servicialo",
+    "planificalo",
+    "coordinalo",
+    "relacionalo",
     "---Recursos---",
     "guias",
     "integraciones"

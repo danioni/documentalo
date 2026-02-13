@@ -1,6 +1,13 @@
 {
   "title": "Planifícalo",
   "pages": [
-    "index"
+    "index",
+    "---Finanzas---",
+    "finances",
+    "ventas",
+    "cobros",
+    "pagos-proveedores",
+    "nominas",
+    "estados-financieros"
   ]
 }

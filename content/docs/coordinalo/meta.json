@@ -3,25 +3,11 @@
   "pages": [
     "index",
     "modules",
-    "---Coordinalo (Operaciones)---",
+    "---Operaciones---",
     "sessions",
     "availability",
     "booking-publico",
     "catalogo",
-    "sugerencias-asignacion",
-    "---Relaciónalo (CRM)---",
-    "clients",
-    "audiencias",
-    "campanias",
-    "recordatorios",
-    "communication-logs",
-    "disputas",
-    "---Planifícalo (Finanzas)---",
-    "finances",
-    "ventas",
-    "cobros",
-    "pagos-proveedores",
-    "nominas",
-    "estados-financieros"
+    "sugerencias-asignacion"
   ]
 }
