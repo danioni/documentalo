@@ -31,6 +31,7 @@ Es un estándar abierto, no un producto. Cualquier plataforma puede implementar 
 | **AI-native** | Diseñado para ser consumido por AI agents vía MCP |
 | **Dominio acotado** | Cubre exclusivamente servicios profesionales |
 | **Incremental** | Cada versión agrega capacidades sin romper las anteriores |
+| **Agnóstico al origen** | Servicialo no asume quién inicia una acción. Un paciente reservando por WhatsApp, una secretaria agendando por teléfono, un kinesiólogo programando un control, y un AI agent operando vía MCP son todos actores válidos del protocolo. Cada operación registra quién la ejecutó y, opcionalmente, en nombre de quién. |
 
 ### ¿Por qué un estándar?
 
@@ -42,9 +43,38 @@ Servicialo resuelve esto definiendo una interfaz común. Un agent que implementa
 
 ---
 
+## Conceptos fundamentales
+
+### Actor
+
+Cualquier entidad que inicia o ejecuta una acción en el sistema. Servicialo es agnóstico al origen de las acciones — una sesión puede ser creada por un cliente, un profesional, un administrador o un AI agent. Todas las operaciones del protocolo registran quién las inició.
+
+```typescript
+interface Actor {
+  type: 'client' | 'provider' | 'organization' | 'agent';
+  id: string;
+  on_behalf_of?: {              // cuando alguien actúa por otro
+    type: 'client' | 'provider' | 'organization';
+    id: string;
+  };
+}
+```
+
+#### Ejemplos de actores
+
+| Situación | Actor |
+|-----------|-------|
+| Paciente reserva online | `{type: "client", id: "pac_123"}` |
+| Admin agenda para paciente | `{type: "organization", id: "org_1", on_behalf_of: {type: "client", id: "pac_123"}}` |
+| Kinesiólogo programa seguimiento | `{type: "provider", id: "pro_456"}` |
+| AI agent agenda vía MCP | `{type: "agent", id: "claude", on_behalf_of: {type: "client", id: "pac_123"}}` |
+| Clínica derivadora solicita hora | `{type: "organization", id: "org_2", on_behalf_of: {type: "client", id: "pac_789"}}` |
+
+---
+
 ## Tools estándar
 
-Servicialo define cuatro grupos de tools que toda implementación debe exponer:
+Servicialo define cuatro grupos de tools que toda implementación debe exponer. **Todos los tools reciben `actor` como parámetro requerido** para registrar quién inicia cada operación.
 
 ### Scheduling
 
@@ -53,9 +83,33 @@ Tools para gestionar el ciclo de vida de las sesiones.
 | Tool | Descripción | Parámetros |
 |------|-------------|------------|
 | `scheduling.check_availability()` | Consultar horarios disponibles | `provider_id`, `service_id`, `date_range` |
-| `scheduling.book()` | Agendar una sesión | `provider_id`, `client_id`, `service_id`, `datetime` |
-| `scheduling.reschedule()` | Reagendar sesión existente | `session_id`, `new_datetime` |
-| `scheduling.cancel()` | Cancelar sesión | `session_id`, `reason?` |
+| `scheduling.book()` | Agendar una sesión | `organization_id`, `service_id`, `provider_id`, `client_id`, `starts_at`, `actor` |
+| `scheduling.reschedule()` | Reagendar sesión existente | `session_id`, `new_datetime`, `actor` |
+| `scheduling.cancel()` | Cancelar sesión | `session_id`, `reason?`, `actor` |
+
+#### `scheduling.book()` — Detalle
+
+```typescript
+// scheduling.book()
+// Crea una nueva sesión
+
+Request: {
+  organization_id: string,
+  service_id: string,
+  provider_id: string,
+  client_id: string,
+  starts_at: ISO8601,
+  actor: Actor               // quién inicia la reserva
+}
+
+Response: {
+  session: Session,
+  status: 'confirmed' | 'pending_confirmation',
+  confirmation_required_from?: Actor  // null si auto-confirm
+}
+```
+
+El campo `status` en la respuesta permite que cada organización defina su política: **auto-confirmación** (el portal confirma al instante) o **confirmación manual** (requiere que el profesional o admin apruebe).
 
 ### Payments
 
@@ -64,8 +118,8 @@ Tools para gestionar el flujo financiero asociado a los servicios.
 | Tool | Descripción | Parámetros |
 |------|-------------|------------|
 | `payments.get_balance()` | Consultar saldo de un cliente | `client_id` |
-| `payments.charge()` | Registrar cobro | `client_id`, `amount`, `method`, `session_id?` |
-| `payments.record()` | Registrar pago recibido | `client_id`, `amount`, `reference` |
+| `payments.charge()` | Registrar cobro | `client_id`, `amount`, `method`, `session_id?`, `actor` |
+| `payments.record()` | Registrar pago recibido | `client_id`, `amount`, `reference`, `actor` |
 
 ### Clients
 
@@ -75,7 +129,7 @@ Tools para gestionar el directorio de clientes de la organización.
 |------|-------------|------------|
 | `clients.list()` | Listar clientes de la organización | `page?`, `limit?`, `search?` |
 | `clients.get()` | Obtener detalle de un cliente | `client_id` |
-| `clients.create()` | Crear nuevo cliente | `name`, `email?`, `phone?` |
+| `clients.create()` | Crear nuevo cliente | `name`, `email?`, `phone?`, `actor` |
 
 ### Notifications
 
@@ -83,7 +137,7 @@ Tools para comunicaciones con clientes a través de múltiples canales.
 
 | Tool | Descripción | Parámetros |
 |------|-------------|------------|
-| `notifications.send()` | Enviar notificación | `client_id`, `channel`, `template`, `data` |
+| `notifications.send()` | Enviar notificación | `client_id`, `channel`, `template`, `data`, `actor` |
 
 Canales soportados: `whatsapp`, `email`, `sms`.
 
@@ -144,10 +198,10 @@ El modelo de datos de Servicialo define las siguientes relaciones:
                                     │   Servicios   │
                                     └───────┬───────┘
                                             │
-┌──────────────┐      agendan       ┌───────▼───────┐
-│   Clientes   │───────────────────▶│   Sesiones    │
-└──────────────┘                    └───────┬───────┘
-                                            │ generan
+┌──────────────┐  participan en     ┌───────▼───────┐   iniciadas por   ┌──────────┐
+│   Clientes   │◄──────────────────▶│   Sesiones    │◄─────────────────│  Actores  │
+│  (reciben)   │                    └───────┬───────┘  (cualquier tipo) └──────────┘
+└──────────────┘                            │ generan
                                             ▼
                                     ┌───────────────┐
                                     │  Movimientos  │
@@ -160,6 +214,18 @@ El modelo de datos de Servicialo define las siguientes relaciones:
                                     │  financieros  │
                                     └───────────────┘
 ```
+
+> **Sesiones son el punto de encuentro entre Clientes y Profesionales**, no una acción unidireccional. Cualquier Actor autorizado puede crear, modificar o cancelar una sesión.
+
+### Relaciones many-to-many
+
+Servicialo soporta relaciones many-to-many entre las entidades core:
+
+- Un **Profesional** puede pertenecer a múltiples **Organizaciones**
+- Un **Cliente** puede ser atendido por múltiples **Organizaciones**
+- Un **Profesional** puede ofrecer múltiples **Servicios**, y un **Servicio** puede ser entregado por múltiples **Profesionales**
+
+Esto es fundamental para soportar derivaciones entre organizaciones y profesionales que operan en múltiples centros.
 
 ### Schema de entidades (v0.4)
 
@@ -201,12 +267,38 @@ interface Service {
 interface Session {
   id: string;
   organization_id: string;
-  professional_id: string;
-  client_id: string;
   service_id: string;
-  status: 'projected' | 'scheduled' | 'confirmed' | 'delivered' | 'cancelled';
-  starts_at: string; // ISO 8601
-  ends_at: string;   // ISO 8601
+  provider_id: string;
+  client_id: string;
+
+  // Cuándo y dónde
+  starts_at: ISO8601;
+  ends_at: ISO8601;
+  modality: 'in_person' | 'remote' | 'home_visit';
+  location?: string;
+
+  // Quién la creó
+  initiated_by: Actor;
+
+  // Estado
+  status: 'created' | 'confirmed' | 'reminded' | 'in_progress'
+        | 'completed' | 'no_show' | 'cancelled' | 'rescheduled';
+
+  // Trazabilidad
+  status_history: Array<{
+    from: string;
+    to: string;
+    changed_by: Actor;
+    changed_at: ISO8601;
+    reason?: string;
+  }>;
+
+  // Referencias
+  previous_session_id?: string;  // si fue reagendada
+  referral_source?: {            // si viene de derivación
+    organization_id: string;
+    provider_id?: string;
+  };
 }
 
 interface FinancialAgreement {
@@ -228,6 +320,34 @@ interface FinancialMovement {
   created_at: string;
 }
 ```
+
+---
+
+## Ciclo de vida de una sesión
+
+Cada sesión transita por estados bien definidos. Todas las transiciones registran el Actor que las ejecutó.
+
+```
+created ──► confirmed ──► reminded ──► in_progress ──► completed
+    │           │             │              │
+    │           │             │              └──► no_show
+    │           │             │
+    └───────────┴─────────────┴──► cancelled
+                │
+                └──► rescheduled (crea nueva sesión)
+```
+
+### Transiciones permitidas por actor
+
+| Transición | Client | Provider | Organization | Agent |
+|------------|--------|----------|--------------|-------|
+| `created → confirmed` | ✗ | ✓ | ✓ | ✓* |
+| `confirmed → cancelled` | ✓ | ✓ | ✓ | ✓* |
+| `confirmed → rescheduled` | ✓ | ✓ | ✓ | ✓* |
+| `in_progress → completed` | ✗ | ✓ | ✓ | ✗ |
+| `in_progress → no_show` | ✗ | ✓ | ✓ | ✗ |
+
+\* Agent hereda permisos de `on_behalf_of`
 
 ---
 
@@ -293,11 +413,11 @@ Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es 
   "params": {
     "name": "scheduling.check_availability",
     "arguments": {
-      "provider_id": "prov_01",
-      "service_id": "svc_01",
+      "provider_id": "pro_paula",
+      "service_id": "srv_kinesiologia",
       "date_range": {
-        "from": "2025-01-20",
-        "to": "2025-01-24"
+        "from": "2026-02-14",
+        "to": "2026-02-18"
       }
     }
   }
@@ -314,7 +434,7 @@ Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es 
     "content": [
       {
         "type": "text",
-        "text": "{\"available_slots\":[{\"date\":\"2025-01-20\",\"times\":[\"09:00\",\"10:00\",\"14:00\"]},{\"date\":\"2025-01-21\",\"times\":[\"11:00\",\"15:00\"]}]}"
+        "text": "{\"available_slots\":[{\"date\":\"2026-02-14\",\"times\":[\"09:00\",\"10:00\",\"14:00\"]},{\"date\":\"2026-02-16\",\"times\":[\"11:00\",\"15:00\"]}]}"
       }
     ]
   }
@@ -325,16 +445,23 @@ Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es 
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 2,
   "method": "tools/call",
   "params": {
     "name": "scheduling.book",
     "arguments": {
-      "provider_id": "prov_01",
-      "client_id": "cli_01",
-      "service_id": "svc_01",
-      "datetime": "2025-01-20T09:00:00-03:00"
+      "organization_id": "org_mamapro",
+      "service_id": "srv_kinesiologia",
+      "provider_id": "pro_paula",
+      "client_id": "cli_maria",
+      "starts_at": "2026-02-14T10:00:00-03:00",
+      "actor": {
+        "type": "agent",
+        "id": "claude_mcp",
+        "on_behalf_of": {
+          "type": "client",
+          "id": "cli_maria"
+        }
+      }
     }
   }
 }
@@ -350,7 +477,7 @@ Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es 
     "content": [
       {
         "type": "text",
-        "text": "{\"session\":{\"id\":\"ses_01\",\"status\":\"scheduled\",\"starts_at\":\"2025-01-20T09:00:00-03:00\",\"ends_at\":\"2025-01-20T09:45:00-03:00\",\"provider\":\"Dra. García\",\"client\":\"María López\",\"service\":\"Sesión de kinesiología\"}}"
+        "text": "{\"session\":{\"id\":\"ses_01\",\"status\":\"confirmed\",\"starts_at\":\"2026-02-14T10:00:00-03:00\",\"ends_at\":\"2026-02-14T10:45:00-03:00\",\"provider\":\"Paula Méndez\",\"client\":\"María López\",\"service\":\"Sesión de kinesiología\",\"initiated_by\":{\"type\":\"agent\",\"id\":\"claude_mcp\",\"on_behalf_of\":{\"type\":\"client\",\"id\":\"cli_maria\"}}},\"status\":\"confirmed\",\"confirmation_required_from\":null}"
       }
     ]
   }
