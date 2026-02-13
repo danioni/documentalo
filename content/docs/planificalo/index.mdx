@@ -1,0 +1,438 @@
+---
+title: "Planifícalo — API de gestión financiera y liquidaciones"
+description: "Ventas, asignaciones, comisiones y flujo de caja para organizaciones de servicios profesionales."
+---
+
+# Planifícalo
+
+Ventas, asignaciones, comisiones y flujo de caja para organizaciones de servicios.
+
+Planifícalo es el módulo financiero del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos core y gestiona todo el ciclo económico: desde la venta de un paquete de sesiones hasta la liquidación de comisiones al profesional.
+
+---
+
+## Conceptos clave
+
+### Venta (Sale)
+
+Paquete de sesiones vendido a un cliente. Una venta representa el compromiso comercial entre la organización y el cliente.
+
+```typescript
+interface Sale {
+  id: string;
+  organization_id: string;
+  client_id: string;
+  service_id: string;
+  quantity: number;        // Número de sesiones
+  unit_price: number;      // Precio por sesión
+  total_price: number;     // quantity × unit_price
+  status: 'projected' | 'scheduled' | 'completed' | 'refunded';
+  created_at: string;
+}
+```
+
+**Ejemplo**: Un cliente compra 10 sesiones de kinesiología a $50.000 CLP cada una. Se crea una venta por $500.000.
+
+### Asignación (Assignment)
+
+Vínculo entre una venta y un profesional. Define quién atiende las sesiones y qué porcentaje de comisión recibe.
+
+```typescript
+interface Assignment {
+  id: string;
+  sale_id: string;
+  provider_id: string;
+  session_price: number;         // Precio por sesión para esta asignación
+  commission_type: 'percentage' | 'fixed' | 'tiered';
+  commission_value: number;      // Ej: 70 (= 70%)
+  provider_earnings: number;     // Calculado: monto para el profesional
+  organization_earnings: number; // Calculado: monto para la organización
+}
+```
+
+**Ejemplo**: La venta de 10 sesiones se asigna a la Dra. García con 70% de comisión. Por cada sesión de $50.000, ella recibe $35.000 y la organización retiene $15.000.
+
+### Sesión financiera
+
+Registro financiero generado cuando una sesión se marca como completada. Vincula la sesión operativa con su impacto económico.
+
+```typescript
+interface FinancialSession {
+  id: string;
+  session_id: string;        // Referencia a la sesión en Coordinalo
+  assignment_id: string;
+  service_price: number;
+  provider_commission: number;
+  organization_amount: number;
+  status: 'pending' | 'settled';
+  completed_at: string;
+}
+```
+
+### Liquidación
+
+Cálculo periódico de cuánto se le debe a cada profesional. Agrupa todas las sesiones financieras pendientes de un período y genera el monto neto a pagar.
+
+```typescript
+interface Settlement {
+  id: string;
+  provider_id: string;
+  period_from: string;
+  period_to: string;
+  sessions_count: number;
+  gross_amount: number;      // Total bruto
+  deductions: number;        // Deducciones (impuestos, adelantos)
+  bonuses: number;           // Bonos (desempeño, referidos)
+  net_amount: number;        // Monto neto a pagar
+  status: 'draft' | 'approved' | 'paid';
+}
+```
+
+### Sistema de saldos
+
+Cada venta mantiene un saldo con tres estados que reflejan el uso de las sesiones:
+
+| Estado | Descripción | Ejemplo |
+|--------|-------------|---------|
+| **Disponible** | Sesiones pagadas, no agendadas | Cliente pagó 10 sesiones, no ha reservado ninguna |
+| **Comprometido** | Sesiones agendadas, no completadas | 3 sesiones tienen fecha y hora asignada |
+| **Consumido** | Sesiones completadas | 2 sesiones ya fueron atendidas |
+
+```
+Disponible ──▶ Comprometido ──▶ Consumido
+  (pagado,       (agendado,       (sesión
+  no usado)      pendiente)       completada)
+```
+
+El saldo total siempre es: `Disponible + Comprometido + Consumido = Cantidad vendida`.
+
+---
+
+## Endpoints
+
+Todos los endpoints usan el prefijo `/api/organizations/{slug}/planificalo`.
+
+### Ventas
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/sales` | Listar ventas |
+| `POST` | `/sales` | Crear venta |
+| `GET` | `/sales/{id}` | Detalle de venta |
+
+#### Parámetros de query (listar ventas)
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `client_id` | `string` | Filtrar por cliente |
+| `provider_id` | `string` | Filtrar por profesional |
+| `status` | `string` | `projected`, `scheduled`, `completed`, `refunded` |
+| `from` | `string` | Fecha inicio (ISO 8601) |
+| `to` | `string` | Fecha fin (ISO 8601) |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Asignaciones
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/assignments` | Listar asignaciones |
+| `POST` | `/assignments` | Crear asignación |
+
+#### Parámetros de query (listar asignaciones)
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `sale_id` | `string` | Filtrar por venta |
+| `provider_id` | `string` | Filtrar por profesional |
+| `page` | `number` | Página (default: 1) |
+| `limit` | `number` | Resultados por página (default: 20) |
+
+### Proveedores (financiero)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/providers` | Listar proveedores con datos financieros |
+| `GET` | `/providers/{id}` | Detalle financiero de un profesional |
+
+La respuesta incluye métricas financieras agregadas por proveedor:
+
+```json
+{
+  "id": "prov_456",
+  "name": "Dra. García",
+  "financial_summary": {
+    "total_sessions": 142,
+    "total_revenue": 7100000,
+    "total_commissions": 4970000,
+    "pending_settlement": 350000,
+    "commission_rate": 0.70
+  }
+}
+```
+
+### Dashboard
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/dashboard` | Métricas financieras agregadas |
+
+Retorna un resumen financiero de la organización:
+
+```json
+{
+  "period": {
+    "from": "2025-01-01",
+    "to": "2025-01-31"
+  },
+  "revenue": {
+    "total": 15200000,
+    "by_service": [
+      { "service": "Kinesiología", "amount": 8500000 },
+      { "service": "Psicología", "amount": 4200000 },
+      { "service": "Nutrición", "amount": 2500000 }
+    ]
+  },
+  "commissions": {
+    "total_paid": 10640000,
+    "total_pending": 780000
+  },
+  "sessions": {
+    "completed": 304,
+    "scheduled": 89,
+    "cancelled": 12
+  },
+  "balance": {
+    "available": 3200000,
+    "committed": 4450000,
+    "consumed": 15200000
+  }
+}
+```
+
+---
+
+## Flujo financiero
+
+El flujo completo desde la compra del cliente hasta el pago al profesional:
+
+```
+┌─────────────────┐
+│  Cliente paga    │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Venta creada   │  ← quantity, unit_price, total_price
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Asignación a   │  ← provider_id, commission_type, commission_value
+│  profesional    │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Sesiones se    │  ← Saldo: Disponible → Comprometido → Consumido
+│  completan      │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Sesión         │  ← provider_commission + organization_amount
+│  financiera     │
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Liquidación    │  ← gross - deductions + bonuses = net
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  Profesional    │
+│  recibe pago    │
+└─────────────────┘
+```
+
+Cada paso es trazable. Desde cualquier liquidación se puede navegar hasta la sesión, la asignación y la venta original.
+
+---
+
+## Modelos de compensación
+
+Planifícalo soporta tres modelos de compensación que cubren los esquemas más comunes en organizaciones de servicios:
+
+### Comisión pura
+
+El profesional recibe un porcentaje del valor de cada sesión. La organización retiene el resto.
+
+```json
+{
+  "commission_type": "percentage",
+  "commission_value": 70
+}
+```
+
+| Sesión ($50.000) | Profesional | Organización |
+|------------------|-------------|-------------|
+| Comisión 70% | $35.000 | $15.000 |
+
+### Salario fijo + comisión variable
+
+El profesional tiene un salario base mensual. Además, recibe comisión por las sesiones que superen un umbral.
+
+```json
+{
+  "commission_type": "tiered",
+  "commission_value": 60,
+  "tiers": [
+    { "from": 0, "to": 20, "rate": 0 },
+    { "from": 21, "to": null, "rate": 60 }
+  ],
+  "base_salary": 500000
+}
+```
+
+| Concepto | Monto |
+|----------|-------|
+| Salario base | $500.000 |
+| Sesiones 1–20 | Incluidas en salario |
+| Sesiones 21+ (a $50.000, 60%) | $30.000 c/u |
+
+### Arriendo de box
+
+El profesional paga un monto fijo mensual a la organización por el uso del espacio. Todo el ingreso de sus sesiones es para él.
+
+```json
+{
+  "commission_type": "fixed",
+  "commission_value": -300000
+}
+```
+
+| Concepto | Profesional | Organización |
+|----------|-------------|-------------|
+| Ingresos por sesiones | 100% | — |
+| Arriendo mensual | -$300.000 | +$300.000 |
+
+El valor negativo indica un cargo fijo del profesional hacia la organización.
+
+---
+
+## Ejemplo: Crear venta con asignación
+
+### 1. Crear la venta
+
+```bash
+POST /api/organizations/clinica-salud/planificalo/sales
+```
+
+```json
+{
+  "client_id": "cli_789",
+  "service_id": "svc_kinesio",
+  "quantity": 10,
+  "unit_price": 50000,
+  "notes": "Paquete de 10 sesiones de kinesiología"
+}
+```
+
+**Respuesta (201)**:
+
+```json
+{
+  "id": "sale_abc123",
+  "client_id": "cli_789",
+  "service_id": "svc_kinesio",
+  "quantity": 10,
+  "unit_price": 50000,
+  "total_price": 500000,
+  "status": "projected",
+  "balance": {
+    "available": 10,
+    "committed": 0,
+    "consumed": 0
+  },
+  "created_at": "2025-01-15T14:30:00-03:00"
+}
+```
+
+### 2. Asignar a profesional
+
+```bash
+POST /api/organizations/clinica-salud/planificalo/assignments
+```
+
+```json
+{
+  "sale_id": "sale_abc123",
+  "provider_id": "prov_garcia",
+  "session_price": 50000,
+  "commission_type": "percentage",
+  "commission_value": 70
+}
+```
+
+**Respuesta (201)**:
+
+```json
+{
+  "id": "assign_xyz456",
+  "sale_id": "sale_abc123",
+  "provider_id": "prov_garcia",
+  "provider_name": "Dra. García",
+  "session_price": 50000,
+  "commission_type": "percentage",
+  "commission_value": 70,
+  "per_session": {
+    "provider_earnings": 35000,
+    "organization_earnings": 15000
+  },
+  "projected_total": {
+    "provider_earnings": 350000,
+    "organization_earnings": 150000
+  },
+  "created_at": "2025-01-15T14:32:00-03:00"
+}
+```
+
+A partir de este punto, cada vez que una sesión de esta venta se marca como completada, el sistema genera automáticamente la sesión financiera correspondiente y actualiza el saldo de la venta.
+
+---
+
+## Relación con otros módulos
+
+Planifícalo se integra con los otros dos módulos de Coordinalo:
+
+| Módulo | Relación con Planifícalo |
+|--------|--------------------------|
+| **[Coordinalo](/docs/coordinalo)** (Operaciones) | Las sesiones completadas disparan la creación de sesiones financieras |
+| **[Relaciónalo](/docs/coordinalo/clients)** (CRM) | Los clientes que compran ventas se gestionan desde el CRM |
+
+### Webhooks financieros
+
+Planifícalo emite eventos que pueden consumirse vía webhooks:
+
+| Evento | Descripción |
+|--------|-------------|
+| `sale.created` | Nueva venta registrada |
+| `sale.completed` | Todas las sesiones de la venta completadas |
+| `assignment.created` | Profesional asignado a una venta |
+| `session.financial_created` | Sesión financiera generada (sesión completada) |
+| `settlement.generated` | Liquidación calculada para un profesional |
+| `settlement.paid` | Liquidación pagada |
+
+---
+
+## Documentación detallada
+
+Para endpoints completos con request/response de cada operación, consulta la documentación granular dentro de [Coordinalo](/docs/coordinalo):
+
+<Cards>
+  <Card title="Ventas" href="/docs/coordinalo/ventas" description="CRUD completo de ventas con ejemplos" />
+  <Card title="Finanzas y Comisiones" href="/docs/coordinalo/finances" description="Revenue share, cálculo automático y reportes" />
+  <Card title="Nóminas" href="/docs/coordinalo/nominas" description="Generación y gestión de nóminas" />
+  <Card title="Estados financieros" href="/docs/coordinalo/estados-financieros" description="Reportes consolidados" />
+  <Card title="Cobros" href="/docs/coordinalo/cobros" description="Cobros con MercadoPago" />
+  <Card title="Pagos a proveedores" href="/docs/coordinalo/pagos-proveedores" description="Liquidación y pagos" />
+</Cards>
+
+---
+
+Planifícalo es parte de [Coordinalo](/docs/coordinalo), el módulo de operaciones del ecosistema Digitalo.
