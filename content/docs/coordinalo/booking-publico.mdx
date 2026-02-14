@@ -9,7 +9,7 @@ description: API pública para reservas online en Coordinalo
 
 El booking público permite a clientes reservar sesiones sin autenticación a través de una página web personalizada.
 
-## Endpoints públicos (sin auth)
+## Endpoints públicos (sin autenticación)
 
 ### Obtener información de agenda
 
@@ -53,7 +53,7 @@ GET /api/v1/public/agenda/:agendaSlug
 GET /api/v1/public/agenda/:agendaSlug/slots
 ```
 
-Query params: `serviceId`, `providerId`, `date`, `from`, `to`
+Parámetros de consulta: `serviceId`, `providerId`, `date`, `from`, `to`
 
 ```json
 {

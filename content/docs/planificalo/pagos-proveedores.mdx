@@ -5,7 +5,7 @@ description: Liquidación y pagos a proveedores en Coordinalo
 
 # Pagos a Proveedores
 
-Coordinalo gestiona la liquidación de pagos a proveedores (profesionales) basándose en las sesiones completadas y el modelo de revenue share configurado.
+Coordinalo gestiona la liquidación de pagos a proveedores (profesionales) basándose en las sesiones completadas y el modelo de reparto de ingresos configurado.
 
 ## Modelo de datos
 
@@ -48,7 +48,7 @@ Consulta el monto pendiente de pago para un proveedor.
 GET /api/v1/providers/:providerId/settlement
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -107,7 +107,7 @@ Registra el pago de la liquidación a un proveedor.
 POST /api/v1/providers/:providerId/settlement/mark-paid
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -144,7 +144,7 @@ Al marcar sesiones como pagadas, estas ya no aparecerán en futuras consultas de
 GET /api/v1/payments
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -252,7 +252,7 @@ GET /api/v1/payments/:id
 GET /api/v1/providers/:providerId/payments/summary
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -300,7 +300,7 @@ Genera un documento de liquidación para el proveedor.
 POST /api/v1/providers/:providerId/settlement/export
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -336,7 +336,7 @@ POST /api/v1/providers/:providerId/settlement/export
 PUT /api/v1/providers/:providerId/bank-info
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {

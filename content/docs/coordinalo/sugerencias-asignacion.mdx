@@ -5,7 +5,7 @@ description: Sistema de sugerencias inteligentes para asignar proveedores
 
 # Sugerencias de Asignación
 
-El sistema sugiere automáticamente proveedores para sesiones basándose en disponibilidad, expertise, carga de trabajo y preferencias del cliente.
+El sistema sugiere automáticamente proveedores para sesiones basándose en disponibilidad, especialización, carga de trabajo y preferencias del cliente.
 
 ## Modelo de datos
 
@@ -25,7 +25,7 @@ interface AssignmentSuggestion {
 | Factor | Peso | Descripción |
 |--------|------|-------------|
 | Disponibilidad | 30% | Proveedor tiene el horario libre |
-| Expertise | 25% | Especialista en el servicio |
+| Especialización | 25% | Especialista en el servicio |
 | Carga de trabajo | 20% | Balance de sesiones |
 | Historial | 15% | Cliente prefiere este proveedor |
 | Proximidad | 10% | Ubicación si aplica |

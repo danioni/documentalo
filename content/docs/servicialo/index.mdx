@@ -8,9 +8,9 @@ import { Callout, Card, Cards } from 'fumadocs-ui/components/callout';
 # Servicialo
 
 <div className="mb-8 flex flex-wrap gap-2">
-  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Draft v0.4</span>
-  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">MCP Compatible</span>
-  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">Open Standard</span>
+  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Borrador v0.4</span>
+  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">Compatible con MCP</span>
+  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">Estándar abierto</span>
 </div>
 
 Protocolo que define cómo AI agents y aplicaciones interactúan con organizaciones de servicios profesionales. Compatible con [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
@@ -19,7 +19,7 @@ Protocolo que define cómo AI agents y aplicaciones interactúan con organizacio
 
 ## ¿Qué es Servicialo?
 
-Servicialo define un **set estandarizado de operaciones** para gestionar servicios profesionales: agendamiento, pagos, clientes y notificaciones.
+Servicialo define un **conjunto estandarizado de operaciones** para gestionar servicios profesionales: agendamiento, pagos, clientes y notificaciones.
 
 Es un estándar abierto, no un producto. Cualquier plataforma puede implementar la especificación para exponer sus servicios de manera uniforme a aplicaciones y AI agents.
 
@@ -28,7 +28,7 @@ Es un estándar abierto, no un producto. Cualquier plataforma puede implementar 
 | Principio | Descripción |
 |-----------|-------------|
 | **Interoperable** | Cualquier plataforma puede implementar el estándar |
-| **AI-native** | Diseñado para ser consumido por AI agents vía MCP |
+| **Nativo para IA** | Diseñado para ser consumido por agentes de IA vía MCP |
 | **Dominio acotado** | Cubre exclusivamente servicios profesionales |
 | **Incremental** | Cada versión agrega capacidades sin romper las anteriores |
 | **Agnóstico al origen** | Servicialo no asume quién inicia una acción. Un paciente reservando por WhatsApp, una secretaria agendando por teléfono, un kinesiólogo programando un control, y un AI agent operando vía MCP son todos actores válidos del protocolo. Cada operación registra quién la ejecutó y, opcionalmente, en nombre de quién. |
@@ -72,16 +72,16 @@ interface Actor {
 
 ---
 
-## Tools estándar
+## Herramientas estándar
 
-Servicialo define cuatro grupos de tools que toda implementación debe exponer. **Todos los tools reciben `actor` como parámetro requerido** para registrar quién inicia cada operación.
+Servicialo define cuatro grupos de herramientas que toda implementación debe exponer. **Todas las herramientas reciben `actor` como parámetro requerido** para registrar quién inicia cada operación.
 
-### Scheduling
+### Agendamiento (Scheduling)
 
-Tools para gestionar el ciclo de vida de las sesiones.
+Herramientas para gestionar el ciclo de vida de las sesiones.
 
-| Tool | Descripción | Parámetros |
-|------|-------------|------------|
+| Herramienta | Descripción | Parámetros |
+|-------------|-------------|------------|
 | `scheduling.check_availability()` | Consultar horarios disponibles | `provider_id`, `service_id`, `date_range` |
 | `scheduling.book()` | Agendar una sesión | `organization_id`, `service_id`, `provider_id`, `client_id`, `starts_at`, `actor` |
 | `scheduling.reschedule()` | Reagendar sesión existente | `session_id`, `new_datetime`, `actor` |
@@ -111,32 +111,32 @@ Response: {
 
 El campo `status` en la respuesta permite que cada organización defina su política: **auto-confirmación** (el portal confirma al instante) o **confirmación manual** (requiere que el profesional o admin apruebe).
 
-### Payments
+### Pagos (Payments)
 
-Tools para gestionar el flujo financiero asociado a los servicios.
+Herramientas para gestionar el flujo financiero asociado a los servicios.
 
-| Tool | Descripción | Parámetros |
-|------|-------------|------------|
+| Herramienta | Descripción | Parámetros |
+|-------------|-------------|------------|
 | `payments.get_balance()` | Consultar saldo de un cliente | `client_id` |
 | `payments.charge()` | Registrar cobro | `client_id`, `amount`, `method`, `session_id?`, `actor` |
 | `payments.record()` | Registrar pago recibido | `client_id`, `amount`, `reference`, `actor` |
 
-### Clients
+### Clientes (Clients)
 
-Tools para gestionar el directorio de clientes de la organización.
+Herramientas para gestionar el directorio de clientes de la organización.
 
-| Tool | Descripción | Parámetros |
-|------|-------------|------------|
+| Herramienta | Descripción | Parámetros |
+|-------------|-------------|------------|
 | `clients.list()` | Listar clientes de la organización | `page?`, `limit?`, `search?` |
 | `clients.get()` | Obtener detalle de un cliente | `client_id` |
 | `clients.create()` | Crear nuevo cliente | `name`, `email?`, `phone?`, `actor` |
 
-### Notifications
+### Notificaciones (Notifications)
 
-Tools para comunicaciones con clientes a través de múltiples canales.
+Herramientas para comunicaciones con clientes a través de múltiples canales.
 
-| Tool | Descripción | Parámetros |
-|------|-------------|------------|
+| Herramienta | Descripción | Parámetros |
+|-------------|-------------|------------|
 | `notifications.send()` | Enviar notificación | `client_id`, `channel`, `template`, `data`, `actor` |
 
 Canales soportados: `whatsapp`, `email`, `sms`.
@@ -147,7 +147,7 @@ Canales soportados: `whatsapp`, `email`, `sms`.
 
 Servicialo sigue un esquema de versionamiento incremental. Cada versión agrega un dominio funcional.
 
-### v0.1 — Core
+### v0.1 — Base
 
 Entidades base del protocolo.
 
@@ -159,7 +159,7 @@ Entidades base del protocolo.
 
 ### v0.2 — Derivaciones
 
-Referrals entre organizaciones y profesionales.
+Derivaciones entre organizaciones y profesionales.
 
 - **Derivación**: Solicitud de transferencia de un cliente de un profesional/organización a otro
 - **Red de derivaciones**: Grafo de relaciones entre organizaciones que se derivan clientes
@@ -170,7 +170,7 @@ Referrals entre organizaciones y profesionales.
 Sistema de calidad y métricas.
 
 - **Métricas de servicio**: Tasa de asistencia, puntualidad, satisfacción
-- **Calificaciones**: Rating bidireccional (cliente ↔ profesional)
+- **Calificaciones**: Puntuación bidireccional (cliente ↔ profesional)
 - **Indicadores de calidad**: Agregados a nivel organización y profesional
 
 ### v0.4 — Liquidación *(versión actual)*
@@ -217,9 +217,9 @@ El modelo de datos de Servicialo define las siguientes relaciones:
 
 > **Sesiones son el punto de encuentro entre Clientes y Profesionales**, no una acción unidireccional. Cualquier Actor autorizado puede crear, modificar o cancelar una sesión.
 
-### Relaciones many-to-many
+### Relaciones de muchos a muchos
 
-Servicialo soporta relaciones many-to-many entre las entidades core:
+Servicialo soporta relaciones de muchos a muchos entre las entidades principales:
 
 - Un **Profesional** puede pertenecer a múltiples **Organizaciones**
 - Un **Cliente** puede ser atendido por múltiples **Organizaciones**
@@ -227,7 +227,7 @@ Servicialo soporta relaciones many-to-many entre las entidades core:
 
 Esto es fundamental para soportar derivaciones entre organizaciones y profesionales que operan en múltiples centros.
 
-### Schema de entidades (v0.4)
+### Esquema de entidades (v0.4)
 
 ```typescript
 interface Organization {
@@ -356,13 +356,13 @@ created ──► confirmed ──► reminded ──► in_progress ──► c
 ### Coordinalo
 
 <div className="flex items-center gap-2 mb-4">
-  <span className="rounded-full bg-green-500/10 border border-green-500/30 px-3 py-1 text-xs font-medium text-green-400">Live</span>
+  <span className="rounded-full bg-green-500/10 border border-green-500/30 px-3 py-1 text-xs font-medium text-green-400">En producción</span>
 </div>
 
 Primera implementación comercial del estándar Servicialo. Gestión integral para clínicas y centros de servicios profesionales en Chile.
 
 - **URL**: [coordinalo.com](https://coordinalo.com)
-- **Cobertura**: Tools de Scheduling, Payments, Clients y Notifications
+- **Cobertura**: Agendamiento, Pagos, Clientes y Notificaciones
 - **Versión del protocolo**: v0.4
 - **Entorno**: Producción
 
@@ -374,9 +374,9 @@ Contacta al equipo en [Grupo Digitalo](https://grupodigitalo.com) para soporte t
 
 ---
 
-## MCP Server
+## Servidor MCP
 
-Servicialo expone sus tools como un servidor MCP, permitiendo que AI agents interactúen con servicios profesionales de forma nativa.
+Servicialo expone sus herramientas como un servidor MCP, permitiendo que agentes de IA interactúen con servicios profesionales de forma nativa.
 
 **Namespace**: `com.servicialo/professional-services`
 
@@ -399,9 +399,9 @@ Agrega el servidor a tu `claude_desktop_config.json`:
 }
 ```
 
-### Ejemplo: Agendar una cita vía AI agent
+### Ejemplo: Agendar una cita vía agente de IA
 
-Un AI agent puede usar los tools de Servicialo para gestionar sesiones. Este es el flujo completo para agendar una cita:
+Un agente de IA puede usar las herramientas de Servicialo para gestionar sesiones. Este es el flujo completo para agendar una cita:
 
 **1. Consultar disponibilidad**
 

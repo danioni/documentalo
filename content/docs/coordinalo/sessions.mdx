@@ -13,7 +13,7 @@ Las sesiones son el corazón de Coordinalo. Representan una cita entre un provee
 GET /api/v1/sessions
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -61,7 +61,7 @@ GET /api/v1/sessions
 POST /api/v1/sessions
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -87,7 +87,7 @@ POST /api/v1/sessions
 
 ## Estados de sesión
 
-Coordinalo rastrea las sesiones a través del siguiente flujo:
+Coordinalo lleva el seguimiento de las sesiones a través del siguiente flujo:
 
 ```
 Proyectado → Programado → Confirmado → Entregado
@@ -113,7 +113,7 @@ Las confirmaciones por WhatsApp requieren integración con la API de WhatsApp Bu
 
 ## Webhooks
 
-Coordinalo puede notificar cambios de estado via webhooks:
+Coordinalo puede notificar cambios de estado mediante notificaciones automáticas (webhooks):
 
 ```json
 {

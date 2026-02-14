@@ -50,7 +50,7 @@ proyectado → agendado → realizado
 GET /api/v1/sales
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -120,7 +120,7 @@ GET /api/v1/sales
 POST /api/v1/sales
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -226,7 +226,7 @@ GET /api/v1/sales/:id
 PUT /api/v1/sales/:id
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -261,7 +261,7 @@ DELETE /api/v1/sales/:id
 
 ### Respuesta exitosa (204)
 
-No content.
+Sin contenido en la respuesta.
 
 <Callout type="warning">
 Solo se pueden eliminar ventas en estado `proyectado` sin sesiones asociadas.
@@ -273,7 +273,7 @@ Solo se pueden eliminar ventas en estado `proyectado` sin sesiones asociadas.
 POST /api/v1/sales/:id/refund
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {

@@ -3,7 +3,7 @@ title: Nóminas
 description: Generación y gestión de nóminas para proveedores en Coordinalo
 ---
 
-# Nóminas (Payroll)
+# Nóminas
 
 El módulo de nóminas permite generar reportes consolidados de pagos a proveedores por período, facilitando la gestión contable y el cumplimiento de obligaciones laborales.
 
@@ -60,7 +60,7 @@ interface PayrollBonus {
 GET /api/v1/payroll/records
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -114,7 +114,7 @@ Genera registros de nómina para todos los proveedores activos en un período.
 POST /api/v1/payroll/generate
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -275,7 +275,7 @@ POST /api/v1/payroll/records/:id/approve
 POST /api/v1/payroll/records/:id/mark-paid
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -305,7 +305,7 @@ POST /api/v1/payroll/records/:id/mark-paid
 POST /api/v1/payroll/records/:id/deductions
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -334,7 +334,7 @@ POST /api/v1/payroll/records/:id/deductions
 POST /api/v1/payroll/records/:id/bonuses
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -363,7 +363,7 @@ POST /api/v1/payroll/records/:id/bonuses
 POST /api/v1/payroll/records/:id/export
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -396,7 +396,7 @@ POST /api/v1/payroll/records/:id/export
 POST /api/v1/payroll/export-batch
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -426,7 +426,7 @@ POST /api/v1/payroll/export-batch
 PUT /api/v1/organization/payroll/settings
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {

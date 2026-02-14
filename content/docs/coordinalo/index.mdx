@@ -38,7 +38,7 @@ Tipo de servicio ofrecido (ej: "Sesión de kinesiología", "Consultoría legal",
 
 | Rol | Descripción | Acceso |
 |-----|-------------|--------|
-| **Admin** | Gestiona toda la organización | Dashboard, reportes, configuración, visibilidad completa |
+| **Admin** | Gestiona toda la organización | Panel de control, reportes, configuración, visibilidad completa |
 | **Proveedor** | Profesional que atiende clientes | Agenda personal, sesiones diarias, gestión de clientes |
 | **Cliente** | Recibe los servicios | Portal de citas, pagos pendientes, historial |
 
@@ -71,11 +71,11 @@ curl -X GET "https://coordinalo.com/api/v1/sessions" \
 
 ## Estructura de módulos
 
-Coordinalo se organiza en tres módulos **MECE** (Mutuamente Excluyentes, Colectivamente Exhaustivos):
+Coordinalo se organiza en tres módulos **sin solapamiento, que juntos cubren todo**:
 
 | Módulo | Dominio | Contenido |
 |--------|---------|-----------|
-| **Coordinalo** | Operaciones | Sesiones, disponibilidad, servicios, booking |
+| **Coordinalo** | Operaciones | Sesiones, disponibilidad, servicios, reservas |
 | **[Relaciónalo](/docs/relacionalo)** | CRM | Clientes, audiencias, campañas, comunicaciones |
 | **[Planifícalo](/docs/planificalo)** | Finanzas | Ventas, cobros, pagos, nóminas, reportes |
 

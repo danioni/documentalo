@@ -1,11 +1,11 @@
 ---
 title: Estados Financieros
-description: Reportes P&L, balance y resúmenes financieros en Coordinalo
+description: Estado de resultados, balance y resúmenes financieros en Coordinalo
 ---
 
 # Estados Financieros
 
-Coordinalo genera reportes financieros automatizados para analizar la salud financiera de la organización, incluyendo estado de resultados (P&L), balances y resúmenes mensuales.
+Coordinalo genera reportes financieros automatizados para analizar la salud financiera de la organización, incluyendo estado de resultados (pérdidas y ganancias), balances y resúmenes mensuales.
 
 ## Modelo de datos
 
@@ -53,7 +53,7 @@ interface MonthlySummary {
 }
 ```
 
-## Estado de Resultados (P&L)
+## Estado de Resultados (Pérdidas y Ganancias)
 
 Obtiene el estado de pérdidas y ganancias para un período.
 
@@ -61,7 +61,7 @@ Obtiene el estado de pérdidas y ganancias para un período.
 GET /api/v1/reports/pnl
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -147,7 +147,7 @@ GET /api/v1/reports/pnl
 }
 ```
 
-## P&L por servicio
+## Estado de resultados por servicio
 
 ```bash
 GET /api/v1/reports/pnl/by-service
@@ -199,7 +199,7 @@ Muestra las cuentas por cobrar de clientes.
 GET /api/v1/reports/balance/clients
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -320,7 +320,7 @@ GET /api/v1/reports/balance/providers
 GET /api/v1/reports/monthly-summary
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -379,7 +379,7 @@ GET /api/v1/reports/monthly-summary
 GET /api/v1/reports/cashflow
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -421,7 +421,7 @@ GET /api/v1/reports/cashflow
 }
 ```
 
-## KPIs del negocio
+## Indicadores clave del negocio
 
 ```bash
 GET /api/v1/reports/kpis
@@ -481,7 +481,7 @@ GET /api/v1/reports/kpis
 POST /api/v1/reports/export
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -508,7 +508,7 @@ POST /api/v1/reports/export
 
 | Reporte | Código | Descripción |
 |---------|--------|-------------|
-| Estado de Resultados | `pnl` | P&L completo con breakdown |
+| Estado de Resultados | `pnl` | Pérdidas y ganancias completo con desglose |
 | Balance de clientes | `client_balance` | Cuentas por cobrar |
 | Balance de proveedores | `provider_balance` | Cuentas por pagar |
 | Resumen mensual | `monthly_summary` | Métricas mensuales |
@@ -522,7 +522,7 @@ Proceso de cierre contable mensual.
 POST /api/v1/reports/close-month
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {

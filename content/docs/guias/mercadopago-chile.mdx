@@ -7,7 +7,7 @@ description: Guía completa para integrar pagos con MercadoPago en aplicaciones 
 
 Guía paso a paso para integrar MercadoPago en tu aplicación, con consideraciones específicas para Chile.
 
-## Prerequisitos
+## Prerrequisitos
 
 1. Cuenta de MercadoPago Chile verificada
 2. Credenciales de producción (Access Token, Public Key)
@@ -35,7 +35,7 @@ export const paymentClient = new Payment(client)
 ```
 
 <Callout type="warning">
-**Nunca expongas el Access Token en el frontend.** Solo usa la Public Key del lado del cliente.
+**Nunca expongas el Access Token en el lado del cliente (frontend).** Solo usa la Public Key en el navegador.
 </Callout>
 
 ## Crear preferencia de pago
@@ -126,7 +126,7 @@ function mapMercadoPagoStatus(mpStatus: string): string {
 }
 ```
 
-## Checkout en el frontend
+## Checkout en el lado del cliente
 
 ```tsx
 // components/MercadoPagoButton.tsx
@@ -198,7 +198,7 @@ payer: {
 }
 ```
 
-## Testing
+## Pruebas
 
 Usa las [tarjetas de prueba](https://www.mercadopago.cl/developers/es/docs/checkout-api/additional-content/test-cards):
 

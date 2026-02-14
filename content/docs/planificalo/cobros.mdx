@@ -38,7 +38,7 @@ interface Cobro {
 GET /api/v1/cobros
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -90,7 +90,7 @@ GET /api/v1/cobros
 POST /api/v1/cobros
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -166,7 +166,7 @@ Para cobros manuales (efectivo, transferencia), use este endpoint para confirmar
 POST /api/v1/cobros/:id/approve
 ```
 
-### Body (opcional)
+### Cuerpo de la solicitud (opcional)
 
 ```json
 {
@@ -192,7 +192,7 @@ POST /api/v1/cobros/:id/approve
 POST /api/v1/cobros/:id/reject
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -221,7 +221,7 @@ Los cobros vía MercadoPago se procesan automáticamente a través de webhooks.
 POST /api/v1/cobros/mercadopago/preference
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -300,7 +300,7 @@ GET /api/v1/cobros/:id/receipt
 POST /api/v1/cobros/:id/receipt/send
 ```
 
-### Body (opcional)
+### Cuerpo de la solicitud (opcional)
 
 ```json
 {

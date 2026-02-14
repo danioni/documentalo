@@ -61,7 +61,7 @@ const products = [
   {
     name: 'Relaciónalo',
     href: '/docs/relacionalo',
-    description: 'API de CRM y gestión de clientes',
+    description: 'API de gestión de clientes y comunicaciones',
     color: 'green',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -85,7 +85,7 @@ const guides = [
   {
     name: 'Guías',
     href: '/docs/guias',
-    description: 'Multi-tenancy, autenticación, webhooks y mejores prácticas',
+    description: 'Multi-inquilino, autenticación, webhooks y mejores prácticas',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
@@ -93,9 +93,9 @@ const guides = [
     ),
   },
   {
-    name: 'API Reference',
+    name: 'Referencia API',
     href: '/docs/api',
-    description: 'Referencia completa de endpoints y schemas',
+    description: 'Referencia completa de endpoints y esquemas',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
@@ -186,7 +186,7 @@ export default function HomePage() {
               Guías
             </a>
             <Link href="/docs/api" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
-              API Reference
+              Referencia API
             </Link>
           </div>
           <div className="flex items-center gap-3">
@@ -259,7 +259,7 @@ export default function HomePage() {
             { value: '200+', label: 'endpoints documentados' },
             { value: '4', label: 'productos' },
             { value: '100%', label: 'en español' },
-            { value: 'OpenAPI', label: 'specs' },
+            { value: 'OpenAPI', label: 'especificaciones' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-2xl font-bold text-white">{stat.value}</div>
@@ -457,7 +457,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li><Link href="/docs/guias" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Guías</Link></li>
                 <li><Link href="/docs/integraciones" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Integraciones</Link></li>
-                <li><Link href="/docs/api" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">API Reference</Link></li>
+                <li><Link href="/docs/api" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Referencia API</Link></li>
               </ul>
             </div>
             <div>

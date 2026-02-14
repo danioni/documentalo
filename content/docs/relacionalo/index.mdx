@@ -1,5 +1,5 @@
 ---
-title: "Relaciónalo — API de CRM y gestión de clientes"
+title: "Relaciónalo — API de gestión de clientes"
 description: "Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas para organizaciones de servicios."
 ---
 
@@ -7,7 +7,7 @@ description: "Clientes, historial de sesiones, comunicaciones automáticas y por
 
 Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas.
 
-Relaciónalo es el módulo CRM del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos core y gestiona la relación completa con el cliente: desde su primera reserva online hasta las comunicaciones de seguimiento post-sesión.
+Relaciónalo es el módulo de gestión de clientes del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos principales y gestiona la relación completa con el cliente: desde su primera reserva online hasta las comunicaciones de seguimiento post-sesión.
 
 ---
 
@@ -40,7 +40,7 @@ Vista consolidada que agrupa toda la información de un cliente en un solo lugar
 |---------|-----------|
 | **Datos personales** | Nombre, email, teléfono, tags |
 | **Historial de sesiones** | Todas las sesiones pasadas y futuras |
-| **Métricas** | Total de sesiones, tasa de asistencia, LTV |
+| **Métricas** | Total de sesiones, tasa de asistencia, valor del cliente |
 | **Saldo** | Sesiones disponibles, comprometidas, consumidas |
 | **Comunicaciones** | Historial de WhatsApp y email |
 
@@ -82,7 +82,7 @@ Todos los endpoints usan el prefijo `/api/organizations/{slug}/relacionalo`.
 | `GET` | `/clients/{id}` | Detalle con historial completo |
 | `PATCH` | `/clients/{id}` | Actualizar datos |
 
-#### Parámetros de query (listar clientes)
+#### Parámetros de consulta (listar clientes)
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -148,7 +148,7 @@ El ciclo de vida completo del cliente en Relaciónalo:
 └─────────┬──────────┘
           ▼
 ┌────────────────────┐
-│  Asiste a sesión   │  ← Status: confirmed → delivered
+│  Asiste a sesión   │  ← Estado: confirmado → entregado
 └─────────┬──────────┘
           ▼
 ┌────────────────────┐
@@ -311,7 +311,7 @@ Relaciónalo emite eventos que pueden consumirse vía webhooks:
 ## Documentación detallada
 
 <Cards>
-  <Card title="Clientes" href="/docs/relacionalo/clients" description="CRUD de clientes y ficha completa" />
+  <Card title="Clientes" href="/docs/relacionalo/clients" description="Gestión completa de clientes y ficha" />
   <Card title="Recordatorios" href="/docs/relacionalo/recordatorios" description="Configuración de mensajes automáticos" />
   <Card title="Logs de comunicación" href="/docs/relacionalo/communication-logs" description="Historial de WhatsApp y email" />
   <Card title="Campañas" href="/docs/relacionalo/campanias" description="Comunicaciones masivas segmentadas" />

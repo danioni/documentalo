@@ -5,7 +5,7 @@ description: Historial de comunicaciones por email y WhatsApp en Coordinalo
 
 # Logs de Comunicación
 
-Los logs de comunicación registran todas las interacciones enviadas a clientes a través de email (Resend) y WhatsApp (Evolution API), permitiendo auditoría y troubleshooting.
+Los registros de comunicación almacenan todas las interacciones enviadas a clientes a través de email (Resend) y WhatsApp (Evolution API), permitiendo auditoría y diagnóstico de problemas.
 
 ## Modelo de datos
 
@@ -65,7 +65,7 @@ interface CommunicationError {
 GET /api/v1/communication/email-logs
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -160,7 +160,7 @@ GET /api/v1/communication/email-logs
 GET /api/v1/communication/whatsapp-logs
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 Mismos parámetros que email-logs.
 
@@ -375,7 +375,7 @@ GET /api/v1/communication/config
 PUT /api/v1/communication/config
 ```
 
-### Body
+### Cuerpo de la solicitud
 
 ```json
 {
@@ -400,7 +400,7 @@ PUT /api/v1/communication/config
 POST /api/v1/communication/logs/:id/resend
 ```
 
-### Body (opcional)
+### Cuerpo de la solicitud (opcional)
 
 ```json
 {
@@ -427,7 +427,7 @@ POST /api/v1/communication/logs/:id/resend
 GET /api/v1/communication/stats
 ```
 
-### Parámetros de query
+### Parámetros de consulta
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|

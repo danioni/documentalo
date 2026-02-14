@@ -7,13 +7,13 @@ description: "Ventas, asignaciones, comisiones y flujo de caja para organizacion
 
 Ventas, asignaciones, comisiones y flujo de caja para organizaciones de servicios.
 
-Planifícalo es el módulo financiero del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos core y gestiona todo el ciclo económico: desde la venta de un paquete de sesiones hasta la liquidación de comisiones al profesional.
+Planifícalo es el módulo financiero del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos principales y gestiona todo el ciclo económico: desde la venta de un paquete de sesiones hasta la liquidación de comisiones al profesional.
 
 ---
 
 ## Conceptos clave
 
-### Venta (Sale)
+### Venta
 
 Paquete de sesiones vendido a un cliente. Una venta representa el compromiso comercial entre la organización y el cliente.
 
@@ -33,7 +33,7 @@ interface Sale {
 
 **Ejemplo**: Un cliente compra 10 sesiones de kinesiología a $50.000 CLP cada una. Se crea una venta por $500.000.
 
-### Asignación (Assignment)
+### Asignación
 
 Vínculo entre una venta y un profesional. Define quién atiende las sesiones y qué porcentaje de comisión recibe.
 
@@ -120,7 +120,7 @@ Todos los endpoints usan el prefijo `/api/organizations/{slug}/planificalo`.
 | `POST` | `/sales` | Crear venta |
 | `GET` | `/sales/{id}` | Detalle de venta |
 
-#### Parámetros de query (listar ventas)
+#### Parámetros de consulta (listar ventas)
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -139,7 +139,7 @@ Todos los endpoints usan el prefijo `/api/organizations/{slug}/planificalo`.
 | `GET` | `/assignments` | Listar asignaciones |
 | `POST` | `/assignments` | Crear asignación |
 
-#### Parámetros de query (listar asignaciones)
+#### Parámetros de consulta (listar asignaciones)
 
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -171,7 +171,7 @@ La respuesta incluye métricas financieras agregadas por proveedor:
 }
 ```
 
-### Dashboard
+### Panel de control
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
@@ -423,8 +423,8 @@ Planifícalo emite eventos que pueden consumirse vía webhooks:
 ## Documentación detallada
 
 <Cards>
-  <Card title="Finanzas y Comisiones" href="/docs/planificalo/finances" description="Revenue share, cálculo automático y reportes" />
-  <Card title="Ventas" href="/docs/planificalo/ventas" description="CRUD completo de ventas con ejemplos" />
+  <Card title="Finanzas y Comisiones" href="/docs/planificalo/finances" description="Reparto de ingresos, cálculo automático y reportes" />
+  <Card title="Ventas" href="/docs/planificalo/ventas" description="Operaciones completas de ventas con ejemplos" />
   <Card title="Cobros" href="/docs/planificalo/cobros" description="Cobros con MercadoPago" />
   <Card title="Pagos a proveedores" href="/docs/planificalo/pagos-proveedores" description="Liquidación y pagos" />
   <Card title="Nóminas" href="/docs/planificalo/nominas" description="Generación y gestión de nóminas" />

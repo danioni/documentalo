@@ -84,7 +84,7 @@ function verifySignature(payload, signature, secret) {
 
 ## Reintentos
 
-Coordinalo reintenta webhooks fallidos con backoff exponencial:
+Coordinalo reintenta webhooks fallidos con retroceso exponencial (backoff):
 - 1er reintento: 1 minuto
 - 2do reintento: 5 minutos
 - 3er reintento: 30 minutos

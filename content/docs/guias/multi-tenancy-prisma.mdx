@@ -1,23 +1,23 @@
 ---
-title: Multi-tenancy con Prisma y Next.js
-description: Cómo implementar una arquitectura multi-tenant usando Prisma ORM
+title: Multi-inquilino (multi-tenancy) con Prisma y Next.js
+description: Cómo implementar una arquitectura multi-inquilino usando Prisma ORM
 ---
 
-# Multi-tenancy con Prisma y Next.js
+# Multi-inquilino (multi-tenancy) con Prisma y Next.js
 
-Guía completa para implementar una arquitectura multi-tenant donde cada organización tiene sus datos aislados.
+Guía completa para implementar una arquitectura multi-inquilino donde cada organización tiene sus datos aislados.
 
-## ¿Qué es multi-tenancy?
+## ¿Qué es la arquitectura multi-inquilino?
 
-Multi-tenancy permite que múltiples organizaciones (tenants) usen la misma aplicación con datos completamente aislados entre sí.
+La arquitectura multi-inquilino (multi-tenancy) permite que múltiples organizaciones (inquilinos) usen la misma aplicación con datos completamente aislados entre sí.
 
 ### Estrategias comunes
 
 | Estrategia | Descripción | Pros | Contras |
 |------------|-------------|------|---------|
-| **Row-level** | Una DB, filtrado por `organizationId` | Simple, económico | Riesgo de data leak |
-| **Schema-level** | Una DB, un schema por tenant | Buen aislamiento | Complejidad media |
-| **Database-level** | Una DB por tenant | Máximo aislamiento | Costoso, difícil de mantener |
+| **Row-level** | Una DB, filtrado por `organizationId` | Simple, económico | Riesgo de fuga de datos |
+| **Schema-level** | Una DB, un esquema por inquilino | Buen aislamiento | Complejidad media |
+| **Database-level** | Una DB por inquilino | Máximo aislamiento | Costoso, difícil de mantener |
 
 Esta guía cubre **row-level tenancy**, la más común para SaaS.
 
@@ -123,9 +123,9 @@ export async function GET(
 }
 ```
 
-## Validación en middleware
+## Validación en capa intermedia (middleware)
 
-Para mayor seguridad, valida en middleware que el usuario pertenece a la org:
+Para mayor seguridad, valida en la capa intermedia (middleware) que el usuario pertenece a la org:
 
 ```typescript
 // middleware.ts
@@ -151,20 +151,20 @@ export async function middleware(request: NextRequest) {
 ## Errores comunes a evitar
 
 <Callout type="error">
-**Nunca hagas queries sin filtrar por organización.** Un simple `prisma.client.findMany()` sin `where: { organizationId }` expone datos de TODOS los tenants.
+**Nunca hagas consultas sin filtrar por organización.** Un simple `prisma.client.findMany()` sin `where: { organizationId }` expone datos de TODOS los inquilinos.
 </Callout>
 
 <Callout type="warning">
 **Cuidado con los includes.** Si haces `include: { sessions: true }`, asegúrate que las sesiones también estén filtradas o uses el contexto correcto.
 </Callout>
 
-## Testing
+## Pruebas
 
 ```typescript
 // tests/multi-tenancy.test.ts
 
-describe('Data isolation', () => {
-  it('org A cannot see org B clients', async () => {
+describe('Aislamiento de datos', () => {
+  it('org A no puede ver clientes de org B', async () => {
     const dbOrgA = getOrgPrisma('org_a_id')
     const dbOrgB = getOrgPrisma('org_b_id')
 
