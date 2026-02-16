@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo. Coordinalo, Planifícalo, Relaciónalo y más.',
   openGraph: {
     title: 'Documéntalo — APIs para digitalizar servicios profesionales',
-    description: 'Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
+    description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     url: 'https://documentalo.com',
     siteName: 'Documéntalo',
     locale: 'es_CL',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Documéntalo — APIs para digitalizar servicios profesionales',
-    description: 'Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
+    description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     images: ['/og/og-home.png'],
   },
   alternates: {
@@ -95,7 +95,7 @@ const guides = [
   {
     name: 'Referencia API',
     href: '/docs/api',
-    description: 'Referencia completa de endpoints y esquemas',
+    description: 'Referencia completa de rutas y esquemas',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
@@ -233,7 +233,7 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
-            Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.
+            Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
@@ -256,9 +256,9 @@ export default function HomePage() {
       <section className="border-y border-gray-800/60 bg-gray-900/50 px-4 py-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-8 sm:flex-row sm:gap-16">
           {[
-            { value: '200+', label: 'endpoints documentados' },
+            { value: '200+', label: 'rutas documentadas' },
             { value: '4', label: 'productos' },
-            { value: 'Multi-tenant', label: 'desde el día uno' },
+            { value: 'Multi-inquilino', label: 'desde el día uno' },
             { value: 'OpenAPI', label: 'especificaciones' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
@@ -276,7 +276,7 @@ export default function HomePage() {
             Productos documentados
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
-            Cada producto del ecosistema Digitalo tiene su documentación completa: endpoints, modelos de datos y ejemplos de uso.
+            Cada producto del ecosistema Digitalo tiene su documentación completa: rutas, modelos de datos y ejemplos de uso.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {products.map((product) => {
@@ -306,7 +306,7 @@ export default function HomePage() {
       <section id="guias" className="border-t border-gray-800/60 bg-gray-900/30 px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
-            Guías &amp; Integraciones
+            Guías e Integraciones
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
             Tutoriales paso a paso, patrones de arquitectura y guías de integración con servicios externos.
@@ -341,14 +341,14 @@ export default function HomePage() {
                 Para desarrolladores
               </h2>
               <p className="mb-6 text-gray-400">
-                APIs RESTful con autenticación Bearer, respuestas JSON consistentes y documentación en español. Integra el ecosistema Digitalo en tu aplicación.
+                APIs REST con tokens de acceso, respuestas JSON consistentes y documentación en español. Integra el ecosistema Digitalo en tu aplicación.
               </p>
               <ul className="space-y-3">
                 {[
-                  'Autenticación con API keys y Bearer tokens',
+                  'Autenticación con llaves de API y tokens de acceso',
                   'Respuestas JSON paginadas y tipadas',
                   'Webhooks para eventos en tiempo real',
-                  'SDKs y ejemplos de código',
+                  'Kits de desarrollo y ejemplos de código',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-gray-300">
                     <svg className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
