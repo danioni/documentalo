@@ -1,11 +1,12 @@
 {
   "title": "Documentación",
   "pages": [
-    "---Productos---",
-    "servicialo",
-    "planificalo",
+    "---APIs---",
     "coordinalo",
+    "planificalo",
     "relacionalo",
+    "---Protocolo---",
+    "servicialo",
     "---Recursos---",
     "guias",
     "integraciones"

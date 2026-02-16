@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   title: 'Documéntalo — Documentación técnica del ecosistema Digitalo',
   description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo. Coordinalo, Planifícalo, Relaciónalo y más.',
   openGraph: {
-    title: 'Documéntalo — Todo el ecosistema, documentado.',
-    description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo.',
+    title: 'Documéntalo — APIs para digitalizar servicios profesionales',
+    description: 'Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     url: 'https://documentalo.com',
     siteName: 'Documéntalo',
     locale: 'es_CL',
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Documéntalo — Todo el ecosistema, documentado.',
-    description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo.',
+    title: 'Documéntalo — APIs para digitalizar servicios profesionales',
+    description: 'Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     images: ['/og/og-home.png'],
   },
   alternates: {
@@ -26,31 +26,9 @@ export const metadata: Metadata = {
 
 const products = [
   {
-    name: 'Servicialo',
-    href: '/docs/servicialo',
-    description: 'Protocolo abierto para servicios profesionales',
-    color: 'amber',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Planifícalo',
-    href: '/docs/planificalo',
-    description: 'API de gestión financiera y liquidaciones',
-    color: 'purple',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-      </svg>
-    ),
-  },
-  {
     name: 'Coordinalo',
     href: '/docs/coordinalo',
-    description: 'API de agendamiento, sesiones y gestión de servicios',
+    description: 'Agenda sesiones, gestiona disponibilidad y asigna profesionales',
     color: 'blue',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -59,13 +37,35 @@ const products = [
     ),
   },
   {
+    name: 'Planifícalo',
+    href: '/docs/planificalo',
+    description: 'Cobra, paga y liquida comisiones automáticamente',
+    color: 'purple',
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+      </svg>
+    ),
+  },
+  {
     name: 'Relaciónalo',
     href: '/docs/relacionalo',
-    description: 'API de gestión de clientes y comunicaciones',
+    description: 'Gestiona clientes, audiencias y comunicaciones multicanal',
     color: 'green',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Servicialo',
+    href: '/docs/servicialo',
+    description: 'Protocolo estándar que define cómo modelar cualquier servicio profesional',
+    color: 'amber',
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
       </svg>
     ),
   },
@@ -133,7 +133,7 @@ const colorMap: Record<string, { border: string; bg: string; text: string; hover
 
 const codeExample = `// Obtener sesiones del día
 const response = await fetch(
-  'https://api.coordinalo.com/api/v1/sessions?date=2025-01-15',
+  'https://api.coordinalo.com/api/v1/sessions?date=2026-02-16',
   {
     headers: {
       'Authorization': 'Bearer tu_api_key',
@@ -224,16 +224,16 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-800 bg-gray-900 px-4 py-1.5 text-sm text-gray-400">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            Documentación técnica del ecosistema Digitalo
+            Documentación en español para desarrolladores LATAM
           </div>
           <h1 className="mb-6 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-            Todo el ecosistema,{' '}
+            APIs para digitalizar{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">
-              documentado.
+              servicios profesionales
             </span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
-            APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo.
+            Agendamiento, finanzas, CRM y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
@@ -258,7 +258,7 @@ export default function HomePage() {
           {[
             { value: '200+', label: 'endpoints documentados' },
             { value: '4', label: 'productos' },
-            { value: '100%', label: 'en español' },
+            { value: 'Multi-tenant', label: 'desde el día uno' },
             { value: 'OpenAPI', label: 'especificaciones' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
@@ -446,10 +446,10 @@ export default function HomePage() {
             <div>
               <h4 className="mb-3 text-sm font-semibold text-white">Productos</h4>
               <ul className="space-y-2">
-                <li><Link href="/docs/servicialo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Servicialo</Link></li>
-                <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planifícalo</Link></li>
                 <li><Link href="/docs/coordinalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</Link></li>
+                <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planifícalo</Link></li>
                 <li><Link href="/docs/relacionalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Relaciónalo</Link></li>
+                <li><Link href="/docs/servicialo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Servicialo</Link></li>
               </ul>
             </div>
             <div>
