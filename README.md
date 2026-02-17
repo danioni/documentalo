@@ -4,7 +4,7 @@ Hub central de documentación técnica en español para desarrolladores de LATAM
 
 ## Stack
 
-- [Next.js 15](https://nextjs.org/)
+- [Next.js 16](https://nextjs.org/)
 - [Fumadocs](https://fumadocs.vercel.app/)
 - [Tailwind CSS v4](https://tailwindcss.com/)
 
@@ -51,7 +51,9 @@ description: Descripción para SEO
 
 ## Deploy
 
-El sitio se despliega automáticamente a Cloudflare Pages en cada push a `main`.
+El sitio se despliega en [Vercel](https://vercel.com) automáticamente en cada push a `main`.
+
+Incluye [Vercel Analytics](https://vercel.com/analytics) y [Speed Insights](https://vercel.com/docs/speed-insights).
 
 ## Parte del ecosistema
 
