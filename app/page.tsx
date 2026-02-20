@@ -58,17 +58,6 @@ const products = [
       </svg>
     ),
   },
-  {
-    name: 'Servicialo',
-    href: '/docs/servicialo',
-    description: 'Protocolo estándar que define cómo modelar cualquier servicio profesional',
-    color: 'amber',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-      </svg>
-    ),
-  },
 ];
 
 const guides = [
@@ -122,12 +111,6 @@ const colorMap: Record<string, { border: string; bg: string; text: string; hover
     bg: 'bg-green-500/10',
     text: 'text-green-400',
     hoverBorder: 'hover:border-green-500/40',
-  },
-  amber: {
-    border: 'border-amber-500/20',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
-    hoverBorder: 'hover:border-amber-500/40',
   },
 };
 
@@ -257,8 +240,8 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-8 sm:flex-row sm:gap-16">
           {[
             { value: '200+', label: 'rutas documentadas' },
-            { value: '4', label: 'productos' },
-            { value: 'Multi-inquilino', label: 'desde el día uno' },
+            { value: '1', label: 'protocolo abierto' },
+            { value: '3', label: 'implementaciones' },
             { value: 'OpenAPI', label: 'especificaciones' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
@@ -269,16 +252,58 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Products grid */}
+      {/* Servicialo — the foundation */}
       <section id="productos" className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
-            Productos documentados
-          </h2>
-          <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
-            Cada producto del ecosistema Digitalo tiene su documentación completa: rutas, modelos de datos y ejemplos de uso.
+          {/* Servicialo block */}
+          <div className="relative mb-16 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-gray-900/80 to-gray-900/80">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-500/5 blur-3xl" />
+            <div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl" />
+            <div className="relative flex flex-col items-start gap-8 p-8 md:flex-row md:items-center md:p-12">
+              <div className="flex-1">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-medium tracking-wide text-amber-400 uppercase">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                  </svg>
+                  Protocolo abierto
+                </div>
+                <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                  Construido sobre Servicialo
+                </h2>
+                <p className="max-w-xl text-gray-400">
+                  Servicialo es el protocolo abierto que define cómo modelar cualquier servicio profesional. El ecosistema Digitalo es la implementación de referencia. Cualquier sistema puede implementarlo.
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                <a
+                  href="https://servicialo.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
+                >
+                  Ver especificación
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                  </svg>
+                </a>
+                <Link
+                  href="/docs/servicialo"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900"
+                >
+                  Ver documentación →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Reference implementations */}
+          <h3 className="mb-2 text-center text-2xl font-bold text-white md:text-3xl">
+            Implementaciones de referencia
+          </h3>
+          <p className="mx-auto mb-10 max-w-2xl text-center text-gray-400">
+            Cada producto implementa el protocolo Servicialo y tiene su documentación completa: rutas, modelos de datos y ejemplos de uso.
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             {products.map((product) => {
               const colors = colorMap[product.color];
               return (
@@ -298,6 +323,76 @@ export default function HomePage() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* What does it mean to implement Servicialo? */}
+      <section className="border-t border-gray-800/60 px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
+            ¿Qué significa implementar Servicialo?
+          </h2>
+          <p className="mx-auto mb-14 max-w-2xl text-center text-gray-400">
+            Adoptar el protocolo tiene consecuencias concretas sobre cómo tu sistema opera, se integra y escala.
+          </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Card 1 */}
+            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
+              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                Tu servicio habla el mismo idioma que cualquier AI agent
+              </h3>
+              <p className="text-sm leading-relaxed text-gray-400">
+                Cualquier LLM que entienda el protocolo puede operar tu negocio: agendar, cobrar, documentar — sin integración custom.
+              </p>
+            </div>
+            {/* Card 2 */}
+            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
+              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                Interoperabilidad nativa con el ecosistema Digitalo
+              </h3>
+              <p className="text-sm leading-relaxed text-gray-400">
+                Si implementas Servicialo, tus datos son compatibles con Coordinalo, Planifícalo, Relaciónalo y cualquier módulo futuro — sin migración.
+              </p>
+            </div>
+            {/* Card 3 */}
+            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
+              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                El ciclo de vida de tu servicio queda formalmente modelado
+              </h3>
+              <p className="text-sm leading-relaxed text-gray-400">
+                9 estados universales, 8 dimensiones, flujos de excepción incluidos. Deja de inventar cómo manejar cancelaciones, disputas o servicios parciales — el protocolo ya lo resuelve.
+              </p>
+            </div>
+            {/* Card 4 */}
+            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
+              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                Separación limpia entre protocolo e implementación
+              </h3>
+              <p className="text-sm leading-relaxed text-gray-400">
+                Puedes cambiar de proveedor, construir tu propio stack, o usar Digitalo. El estándar es tuyo — no te ata a ningún vendor.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -449,7 +544,6 @@ export default function HomePage() {
                 <li><Link href="/docs/coordinalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</Link></li>
                 <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planifícalo</Link></li>
                 <li><Link href="/docs/relacionalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Relaciónalo</Link></li>
-                <li><Link href="/docs/servicialo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Servicialo</Link></li>
               </ul>
             </div>
             <div>
@@ -463,6 +557,7 @@ export default function HomePage() {
             <div>
               <h4 className="mb-3 text-sm font-semibold text-white">Ecosistema</h4>
               <ul className="space-y-2">
+                <li><a href="https://servicialo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-amber-400/80 transition-colors hover:text-amber-300">Servicialo (estándar)</a></li>
                 <li><a href="https://coordinalo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</a></li>
                 <li><a href="https://grupodigitalo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Grupo Digitalo</a></li>
                 <li><a href="https://github.com/danioni/documentalo" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">GitHub</a></li>
