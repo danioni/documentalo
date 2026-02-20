@@ -1,0 +1,325 @@
+---
+title: Derivaciones
+description: Sistema de derivaciones entre profesionales y organizaciones en Coordinalo
+---
+
+# Derivaciones
+
+Las derivaciones permiten transferir clientes entre profesionales de la misma organización o hacia otras organizaciones de tu red. Es el mecanismo que habilita interconsultas, coberturas por vacaciones, cambios de terapeuta y redes de profesionales.
+
+## Tipos de derivación
+
+| Tipo | Alcance | Ejemplo |
+|------|---------|---------|
+| **Intra-org** | Profesional A &rarr; Profesional B (misma organización) | Kinesiólogo sale de vacaciones y deriva sus pacientes a un colega |
+| **Inter-org** | Organización A &rarr; Organización B (distintos sistemas) | Clínica de kinesiología deriva a un paciente para evaluación psicológica en otro centro |
+| **Con pagador externo** | Profesional A &rarr; Profesional B (autoriza FONASA/ISAPRE) | Médico deriva a kinesiólogo; el pagador autoriza la cobertura |
+
+### Derivación intra-org
+
+Transfiere sesiones entre profesionales de tu misma organización. El cliente mantiene continuidad y el historial queda registrado.
+
+### Derivación inter-org
+
+Conecta con otras organizaciones como socios de derivación. Define qué datos compartir: información básica, historial o notas clínicas. Toda derivación inter-org requiere **consentimiento explícito del cliente** y cumple con regulaciones de protección de datos.
+
+---
+
+## Casos de uso
+
+| Caso | Tipo | Descripción |
+|------|------|-------------|
+| **Vacaciones** | Intra-org | El profesional deriva sus pacientes a un colega de la organización mientras está ausente |
+| **Interconsultas** | Inter-org | Derivar a un especialista para evaluación o tratamiento específico |
+| **Cambio de terapeuta** | Intra-org | Cliente cambia de profesional dentro de la misma organización |
+| **Red de profesionales** | Inter-org | Grupos de profesionales que se refieren pacientes mutuamente |
+| **Franquicias** | Inter-org | Compartir clientes entre diferentes sucursales o sedes |
+
+---
+
+## Modelo de datos
+
+```typescript
+interface Referral {
+  id: string;
+  session_id?: string;              // sesión origen (si aplica)
+  from_provider_id: string;         // profesional que deriva
+  to_provider_id?: string;          // profesional destino (intra-org)
+  from_org_id: string;              // organización origen
+  to_org_id?: string;               // organización destino (inter-org)
+  client_id: string;                // cliente derivado
+  status: 'awaiting_consent'        // esperando consentimiento del cliente
+        | 'pending'                 // cliente consintió, esperando aceptación
+        | 'accepted'               // organización destino aceptó
+        | 'rejected'               // organización destino rechazó
+        | 'cancelled';             // cliente u origen canceló
+  reason?: string;                  // motivo de la derivación
+  clinical_context?: string;        // contexto clínico compartido
+  shared_data_permissions: {
+    basic_info: true;               // nombre, email, teléfono (siempre)
+    session_history: boolean;       // fechas, servicios, estados
+    clinical_notes: boolean;        // notas de profesionales (sensible)
+  };
+  consent_given_at?: string;        // ISO 8601
+  created_by: Actor;                // quién inició la derivación
+  created_at: string;               // ISO 8601
+}
+```
+
+El tipo `Actor` es el mismo definido en el [protocolo Servicialo](/docs/servicialo):
+
+```typescript
+interface Actor {
+  type: 'client' | 'provider' | 'organization' | 'agent';
+  id: string;
+  on_behalf_of?: {
+    type: 'client' | 'provider' | 'organization';
+    id: string;
+  };
+}
+```
+
+---
+
+## Endpoints REST
+
+### Crear derivación
+
+```bash
+POST /api/v1/referrals
+```
+
+**Cuerpo de la solicitud:**
+
+```json
+{
+  "clientId": "cli_789ghi",
+  "fromProviderId": "prov_456def",
+  "toOrgId": "org_destino_001",
+  "reason": "Evaluación traumatológica post-operatoria",
+  "clinicalContext": "Paciente con 8 sesiones de rehabilitación completadas, requiere evaluación especializada",
+  "sharedDataPermissions": {
+    "sessionHistory": true,
+    "clinicalNotes": false
+  }
+}
+```
+
+**Respuesta exitosa (201):**
+
+```json
+{
+  "id": "ref_001abc",
+  "clientId": "cli_789ghi",
+  "fromProviderId": "prov_456def",
+  "fromOrgId": "org_mamapro",
+  "toOrgId": "org_destino_001",
+  "status": "awaiting_consent",
+  "reason": "Evaluación traumatológica post-operatoria",
+  "createdAt": "2026-02-15T10:30:00-03:00"
+}
+```
+
+### Listar derivaciones
+
+```bash
+GET /api/v1/referrals
+```
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `direction` | `string` | `sent` (enviadas) o `received` (recibidas) |
+| `status` | `string` | Filtrar por estado |
+| `page` | `number` | Página |
+| `limit` | `number` | Resultados por página |
+
+**Ejemplo de respuesta:**
+
+```json
+{
+  "data": [
+    {
+      "id": "ref_001abc",
+      "clientName": "Juan Pérez",
+      "fromOrg": "Clínica KineVida",
+      "toOrg": "Centro Traumatológico Sur",
+      "status": "pending",
+      "reason": "Evaluación traumatológica post-operatoria",
+      "createdAt": "2026-02-15T10:30:00-03:00"
+    }
+  ],
+  "pagination": {
+    "total": 12,
+    "page": 1,
+    "limit": 20
+  }
+}
+```
+
+### Aceptar derivación
+
+```bash
+POST /api/v1/referrals/:id/accept
+```
+
+**Respuesta exitosa (200):**
+
+```json
+{
+  "id": "ref_001abc",
+  "status": "accepted",
+  "acceptedAt": "2026-02-16T09:00:00-03:00"
+}
+```
+
+Al aceptar, se crea automáticamente una copia del cliente en la organización destino con los datos autorizados.
+
+### Rechazar derivación
+
+```bash
+POST /api/v1/referrals/:id/reject
+```
+
+```json
+{
+  "reason": "No tenemos disponibilidad en las próximas 2 semanas"
+}
+```
+
+### Consultar estado de una derivación
+
+```bash
+GET /api/v1/referrals/:id
+```
+
+---
+
+## Estados de una derivación
+
+```
+┌─────────────────────┐
+│  awaiting_consent    │  Se envió email al cliente
+└──────────┬──────────┘
+           │ cliente consiente
+           ▼
+┌─────────────────────┐
+│      pending         │  Org destino debe aceptar/rechazar
+└──────┬─────────┬────┘
+       │         │
+       ▼         ▼
+┌───────────┐ ┌───────────┐
+│  accepted │ │  rejected │
+└───────────┘ └───────────┘
+
+* En cualquier punto antes de "accepted", el cliente u origen puede cancelar → cancelled
+```
+
+| Estado | Descripción | Siguiente paso |
+|--------|-------------|----------------|
+| **Esperando consentimiento** (`awaiting_consent`) | Se envió email al cliente | Cliente debe dar consentimiento |
+| **Pendiente** (`pending`) | Cliente consintió | Org destino debe aceptar/rechazar |
+| **Aceptada** (`accepted`) | Cliente copiado a org destino | Completado |
+| **Rechazada** (`rejected`) | Org destino no aceptó | Finalizado |
+| **Cancelada** (`cancelled`) | Cliente u origen canceló | Finalizado |
+
+---
+
+## Flujo completo
+
+### Derivación inter-organizacional (paso a paso)
+
+```
+Org Origen                  Cliente                  Org Destino
+    │                          │                          │
+    │  1. Crea derivación      │                          │
+    │  (POST /referrals)       │                          │
+    │─────────────────────────►│                          │
+    │                          │                          │
+    │          2. Email con link seguro                   │
+    │                          │                          │
+    │    3. Cliente consiente   │                          │
+    │    (aprueba qué datos    │                          │
+    │     se comparten)        │                          │
+    │◄─────────────────────────│                          │
+    │                          │                          │
+    │          4. Notificación a org destino              │
+    │─────────────────────────────────────────────────────►
+    │                          │                          │
+    │                          │    5. Org destino acepta │
+    │                          │    (POST /referrals/:id/ │
+    │                          │     accept)              │
+    │◄─────────────────────────────────────────────────────
+    │                          │                          │
+    │  Se crea copia del cliente con datos autorizados    │
+    │                          │                          │
+    │  6. Org destino agenda primera sesión               │
+    │                          │◄─────────────────────────│
+    │                          │                          │
+```
+
+### Derivación intra-org
+
+En una derivación intra-org el flujo es más simple: no requiere consentimiento del cliente (los datos ya están en la misma organización) ni aceptación de otra org. El profesional origen transfiere directamente al profesional destino, y las sesiones futuras se reasignan.
+
+---
+
+## Permisos de datos compartidos
+
+Al crear una conexión inter-org, defines exactamente qué información se puede compartir:
+
+| Nivel | Inclusión | Datos |
+|-------|-----------|-------|
+| **Información básica** | Siempre incluido | Nombre, email y teléfono del cliente |
+| **Historial de sesiones** | Opcional | Fechas, servicios y estados de sesiones anteriores |
+| **Notas clínicas** | Opcional (sensible) | Observaciones y notas de los profesionales |
+
+<Callout type="warn">
+Toda derivación inter-org requiere **consentimiento explícito** del cliente. Sin consentimiento, no se comparte nada. Esto cumple con la Ley 19.628 de Protección de Datos Personales de Chile.
+</Callout>
+
+---
+
+## Dónde encontrar las derivaciones en Coordinalo
+
+| Ubicación | Función |
+|-----------|---------|
+| **Dashboard Principal** | Widget que muestra derivaciones pendientes (enviadas y recibidas) y conexiones por aceptar |
+| **Settings &rarr; Red de Organizaciones** | Gestiona tus conexiones: invita organizaciones, acepta invitaciones, configura permisos |
+| **Relaciónalo &rarr; Derivaciones** | Lista completa de derivaciones enviadas y recibidas, con acciones para aceptar/rechazar |
+| **Perfil del Cliente &rarr; Botón "Derivar"** | Desde el perfil de cualquier cliente, inicia una derivación si tienes conexiones activas |
+
+---
+
+## Webhooks
+
+Coordinalo notifica cambios de estado de derivaciones mediante webhooks:
+
+```json
+{
+  "event": "referral.accepted",
+  "data": {
+    "referralId": "ref_001abc",
+    "previousStatus": "pending",
+    "newStatus": "accepted",
+    "acceptedAt": "2026-02-16T09:00:00-03:00"
+  }
+}
+```
+
+### Eventos disponibles
+
+| Evento | Descripción |
+|--------|-------------|
+| `referral.created` | Nueva derivación creada |
+| `referral.consent_given` | Cliente dio consentimiento |
+| `referral.accepted` | Organización destino aceptó |
+| `referral.rejected` | Organización destino rechazó |
+| `referral.cancelled` | Derivación cancelada |
+
+---
+
+## Relación con Servicialo
+
+<Callout type="info">
+El sistema de derivaciones de Coordinalo es la **implementación de referencia** del protocolo [Servicialo v0.2 — Derivaciones](/docs/servicialo#v02--derivaciones). El protocolo define el concepto de derivación y red de derivaciones; Coordinalo lo implementa con consentimiento del cliente, control granular de datos y trazabilidad completa.
+</Callout>
