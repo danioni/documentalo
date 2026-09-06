@@ -1,46 +1,62 @@
 ---
-title: Elige un producto para empezar
-description: Documentación técnica en español del ecosistema Digitalo para desarrolladores LATAM
+title: Documentalo
+description: Qué es Coordinalo y cómo se integra, en qué estado está el estándar propuesto Servicialo y qué es el protocolo de conectores Habilitalo
 ---
 
-# Documentalo
+Este sitio documenta lo que corre detrás de los productos de [Grupo Digitalo](https://grupodigitalo.com), para desarrolladores y para quien quiera entender qué hay detrás: cómo se integra Coordinalo, en qué estado está el estándar propuesto Servicialo y qué es el protocolo de conectores Habilitalo. Lo que es intención se dice como intención, con su estado y su fecha.
 
-Documentación técnica en español del ecosistema Digitalo — APIs de agendamiento, finanzas y gestión de clientes para negocios de servicios profesionales.
+## Coordinalo
 
-## APIs de producto
+Coordinalo es el producto SaaS en producción: un sistema para organizaciones que entregan servicios profesionales. Incluye tres productos activables, **Coordinalo** (operación), **Planificalo** (finanzas) y **Relacionalo** (clientes). Una organización nueva nace con Coordinalo activo y los otros dos disponibles; la activación es una transición única y no hay pausa ni downgrade. Ver [Productos y activación](/docs/coordinalo/productos).
 
-Tres módulos independientes que juntos cubren toda la operación de un negocio de servicios:
+Un tercero se integra por dos vías. Las dos viven en `coordinalo.com`; no existe el prefijo `/api/v1/`, y Planificalo y Relacionalo no tienen API pública propia: sus rutas son internas de la app y exigen sesión.
 
-| Módulo | Qué resuelve | Pregunta clave |
-|--------|-------------|----------------|
-| **Coordinalo** | Agendamiento y gestión de sesiones | ¿Qué, cuándo y quién? |
-| **Planificalo** | Finanzas, cobros y liquidaciones | ¿Cuánto cobramos y pagamos? |
-| **Relacionalo** | Gestión de clientes, audiencias y comunicaciones | ¿A quién y cómo comunicamos? |
+| Vía | Base | Credencial | Doc |
+|---|---|---|---|
+| REST Servicialo, por organización | `https://coordinalo.com/api/servicialo/{orgSlug}/…` | Descubrimiento (`services`, `availability`, `manifest`): sin credencial si la organización está publicada en Servicialo. Ciclo de vida (`sessions/{sessionId}` y sus transiciones): `X-Org-Api-Key: sk_admin_…` o `Authorization: Bearer sk_admin_…`. | [Servicialo → Implementaciones](/docs/servicialo#implementaciones) |
+| MCP (Streamable HTTP) | `https://coordinalo.com/api/mcp` | `X-Org-Api-Key: sk_admin_…`. En esta ruta `Authorization: Bearer` es el JWT de sesión de la app, no la API key. | [Servicialo → Dos servidores MCP](/docs/servicialo#dos-servidores-mcp) |
+
+La API key la emite un owner o admin de la organización y se muestra completa una sola vez. No hay OAuth para el MCP ni webhooks salientes.
 
 <Cards>
-  <Card title="Coordinalo API" href="/docs/coordinalo" description="Sesiones, disponibilidad, catálogo y asignación de profesionales" />
-  <Card title="Planificalo API" href="/docs/planificalo" description="Cobros, pagos, nóminas y estados financieros" />
-  <Card title="Relacionalo API" href="/docs/relacionalo" description="Clientes, audiencias, campañas y comunicaciones" />
+  <Card title="Coordinalo" href="/docs/coordinalo" description="Conceptos, operación y referencia" />
+  <Card title="Productos y activación" href="/docs/coordinalo/productos" description="Coordinalo, Planificalo y Relacionalo: qué incluye cada uno y cómo se activan" />
+  <Card title="Planificalo" href="/docs/planificalo" description="Finanzas: ventas, cobros, nóminas y reportes" />
+  <Card title="Relacionalo" href="/docs/relacionalo" description="Clientes, audiencias, campañas y comunicaciones" />
 </Cards>
 
-## Protocolo
+## Servicialo
 
-Servicialo es el estándar abierto que define cómo modelar cualquier servicio profesional. Los tres módulos de arriba implementan este protocolo.
+Servicialo es un estándar abierto **propuesto** de interoperabilidad para servicios profesionales, con licencia Apache-2.0. Estado: protocolo 0.10 en borrador, HTTP Profile 1.0.0, proceso de RFC (RFC-001) sin ratificar, RFC-005 en período final de comentarios hasta el 2026-09-13. Una implementación registrada: Coordinalo.
 
 <Cards>
-  <Card title="Servicialo" href="/docs/servicialo" description="Modelo de datos, ciclo de vida de sesiones y herramientas con trazabilidad" />
+  <Card title="Servicialo" href="/docs/servicialo" description="Qué es, estado, operaciones mínimas, implementaciones y servidores MCP" />
+  <Card title="Especificación" href="https://servicialo.com/spec" description="Texto normativo del protocolo, en inglés" />
+  <Card title="Repositorio" href="https://github.com/servicialo/mcp-server" description="Protocolo, manifest, HTTP Profile y servidor MCP del protocolo" />
+</Cards>
+
+## Habilitalo
+
+Habilitalo es un protocolo abierto de conectores para traer el historial desde otras fuentes: un manifiesto JSON declara la fuente de datos y los tipos de evento, y una función pura convierte los datos crudos en eventos canónicos. Su README declara licencia MIT. La documentación propia en este sitio está pendiente.
+
+<Cards>
+  <Card title="habilitalo/protocolo" href="https://github.com/habilitalo/protocolo" description="Repositorio del protocolo" />
 </Cards>
 
 ## Recursos
 
+Guías e integraciones que existen hoy y no están retiradas.
+
 <Cards>
-  <Card title="Guías" href="/docs/guias" description="Tutoriales paso a paso: multi-inquilino, webhooks, autenticación" />
-  <Card title="Integraciones" href="/docs/integraciones" description="WhatsApp, MercadoPago, Google Calendar, Supabase" />
+  <Card title="Multi-tenancy con Prisma" href="/docs/guias/multi-tenancy-prisma" description="Patrón de aislamiento por organización" />
+  <Card title="MercadoPago en Chile" href="/docs/guias/mercadopago-chile" description="Guía genérica de integración" />
+  <Card title="Portal del cliente" href="/docs/guias/portal-cliente" description="Acceso por token en coordinalo.com/clientes/{token}" />
+  <Card title="Roles y permisos" href="/docs/guias/roles-permisos" description="Roles de organización" />
+  <Card title="Email con Resend" href="/docs/integraciones/resend" description="Proveedor de email activo" />
+  <Card title="Google Calendar" href="/docs/integraciones/google-calendar" description="Sincronización bidireccional de agenda" />
 </Cards>
 
-## ¿Por qué en español?
-
-La documentación técnica de calidad en español es escasa. Los desarrolladores hispanohablantes merecen recursos en su idioma nativo — sin traducciones automáticas, sin mezcla de idiomas, pensado desde el día uno para LATAM.
+¿Por qué en español? Porque quienes leen esto trabajan en español, y la documentación técnica en este idioma es escasa.
 
 ---
 
