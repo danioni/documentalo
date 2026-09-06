@@ -16,6 +16,8 @@ Un tercero se integra por dos vías. Las dos viven en `coordinalo.com`; no exist
 | REST Servicialo, por organización | `https://coordinalo.com/api/servicialo/{orgSlug}/…` | Descubrimiento (`services`, `availability`, `manifest`): sin credencial si la organización está publicada en Servicialo. Ciclo de vida (`sessions/{sessionId}` y sus transiciones): `X-Org-Api-Key: sk_admin_…` o `Authorization: Bearer sk_admin_…`. | [Servicialo → Implementaciones](/docs/servicialo#implementaciones) |
 | MCP (Streamable HTTP) | `https://coordinalo.com/api/mcp` | `X-Org-Api-Key: sk_admin_…`. En esta ruta `Authorization: Bearer` es el JWT de sesión de la app, no la API key. | [Servicialo → Dos servidores MCP](/docs/servicialo#dos-servidores-mcp) |
 
+Recomendación: usar `X-Org-Api-Key` en ambas vías.
+
 La API key la emite un owner o admin de la organización y se muestra completa una sola vez. No hay OAuth para el MCP ni webhooks salientes.
 
 <Cards>

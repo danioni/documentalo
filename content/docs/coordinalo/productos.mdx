@@ -32,8 +32,6 @@ Tal como están en `contextual-triggers.ts`:
 
 `anzuelo-hosts.ts` mapea `relacionalo.com` y `www.relacionalo.com` al producto `relacionalo`, y `planificalo.com` y `www.planificalo.com` al producto `planificalo`, con overrides `NEXT_PUBLIC_ANZUELO_RELACIONALO_HOST` y `NEXT_PUBLIC_ANZUELO_PLANIFICALO_HOST`. El proxy reescribe la raíz de esos hosts a `/anzuelo/{producto}`.
 
-En Vercel, `relacionalo.com` está asignado al proyecto de Coordinalo. `planificalo.com` está asignado a otro proyecto, cuyo último deploy de producción es del 2026-02-18, así que la reescritura de Planificalo no aplica en ese host mientras siga así.
-
 ## Alcance por producto
 
 Las rutas de interfaz son las que existen hoy bajo `src/app/[orgSlug]`. Las rutas de API de esta tabla son internas de la app (sesión de usuario y membresía en la organización); la integración de terceros va por REST Servicialo y por MCP, ver [Servicialo](/docs/servicialo).

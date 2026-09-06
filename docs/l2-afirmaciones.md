@@ -23,7 +23,7 @@
 | `encargo` | Marco narrativo y decisiones vigentes del encargo L2 (no es dato técnico; se lista para que la frase sea rastreable) |
 | `INFERENCIA` | Conclusión directa de una fuente citada, no una lectura literal; se marca para que se pueda discutir |
 
-Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **5** (se listan al final).
+Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **4** (se listan al final).
 
 ## 1. Home — `app/page.tsx` y `app/layout.tsx`
 
@@ -71,7 +71,7 @@ Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **5** (se list
 | Afirmación | Archivo y línea | Fuente |
 |---|---|---|
 | El sitio documenta lo que corre; lo que es intención se dice con estado y fecha | `index.mdx:6` | `encargo` |
-| Productos de Grupo Digitalo | `index.mdx:6`, `:63` | `V:P5 L139`; `encargo`. `INFERENCIA` |
+| Productos de Grupo Digitalo | `index.mdx:6`, `:65` | `V:P5 L139`; `encargo`. `INFERENCIA` |
 | Coordinalo: producto SaaS en producción | `index.mdx:10` | `V:P5 L129`; `manifest:271` |
 | Tres productos activables: Coordinalo (operación), Planificalo (finanzas), Relacionalo (clientes) | `index.mdx:10` | `V:P12 L229`, `L236` |
 | Una organización nueva nace con Coordinalo activo y los otros dos disponibles | `index.mdx:10` | `V:P12 L229`, `L233` |
@@ -81,28 +81,29 @@ Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **5** (se list
 | Planificalo y Relacionalo no tienen API pública; rutas internas con sesión | `index.mdx:12` | `V:P2 L81`; `V L437` |
 | Fila REST: base, descubrimiento sin credencial si está publicada, ciclo de vida con `X-Org-Api-Key` / `Authorization: Bearer sk_admin_…` | `index.mdx:16` | `V L39`; `V:P2 L88`; `V:P3 L94`, `L101`; `V:A L1271-1290`; `sonda` |
 | Fila MCP: `https://coordinalo.com/api/mcp`, Streamable HTTP, key en `X-Org-Api-Key`, `Bearer` es el JWT de sesión | `index.mdx:17` | `V L39`; `V:P2 L89`; `V:P3 L94` |
-| La API key la emite un owner o admin; se muestra completa una sola vez | `index.mdx:19` | `V:P3 L94`, `L100` |
-| No hay OAuth para el MCP ni webhooks salientes | `index.mdx:19` | `V:P4 L108`; `V:P15 L264` |
-| Planificalo: ventas, cobros, nóminas y reportes | `index.mdx:24` | `V L606`, `L625`, `L642`, `L597` (rutas `planificalo/*`) |
-| Relacionalo: clientes, audiencias, campañas y comunicaciones | `index.mdx:25` | `V L649`, `L659`, `L667`, `L674` |
-| Servicialo: estándar abierto propuesto, Apache-2.0 | `index.mdx:30` | `manifest:20-21`, `:27`; `encargo` |
-| Protocolo 0.10 en borrador; HTTP Profile 1.0.0 | `index.mdx:30` | `manifest:20-21`; `HTTP_PROFILE:7-10` |
-| RFC-001 sin ratificar | `index.mdx:30` | `V:P20 L353` |
-| RFC-005 en período final de comentarios hasta el 2026-09-13 | `index.mdx:30` | `V:P20 L353`; `anuncio:24` |
-| Una implementación registrada: Coordinalo | `index.mdx:30` | `manifest:266-274` |
-| Especificación en `https://servicialo.com/spec`, en inglés | `index.mdx:34` | `manifest:24`; `PROTOCOL:1755` |
-| El repositorio contiene protocolo, manifest, HTTP Profile y servidor MCP del protocolo | `index.mdx:35` | `manifest:22`, `:26`, `:106`, `:112` |
-| Habilitalo: manifiesto JSON (fuente y tipos de evento), función pura, eventos canónicos, historial desde otras fuentes | `index.mdx:40` | `README-H:7-8`, `:34-38`, `:55`, `:79-84` |
-| Habilitalo: su README declara licencia MIT | `index.mdx:40` | `README-H:10`, `:153`, `:209` |
-| Habilitalo: documentación propia pendiente en este sitio | `index.mdx:40` | `encargo` (L4) |
-| Repositorio `github.com/habilitalo/protocolo` | `index.mdx:43` | `README-H:12`; `V L17` |
-| Recursos: solo páginas existentes y no retiradas | `index.mdx:48-57` | `repo` `content/docs/guias/meta.json`, `content/docs/integraciones/meta.json` |
-| Multi-tenancy con Prisma: patrón de aislamiento por organización | `index.mdx:51` | `V L537` (el patrón coincide con el código real) |
-| MercadoPago en Chile: guía genérica | `index.mdx:52` | `V L542` |
-| Portal del cliente: acceso por token en `coordinalo.com/clientes/{token}` | `index.mdx:53` | `V:P14 L253` |
-| Roles y permisos: roles de organización | `index.mdx:54` | `V:P13 L241` (la página existe; su contenido es L5) |
-| Resend: proveedor de email activo | `index.mdx:55` | `V:P8 L175` |
-| Google Calendar: sincronización bidireccional | `index.mdx:56` | `V:P10 L198` |
+| Recomendación: usar `X-Org-Api-Key` en ambas vías | `index.mdx:19` | Decisión de Franco en la revisión del PR #3 (2026-09-06); consistente con `V:P3 L94` (las dos vías aceptan `X-Org-Api-Key`) |
+| La API key la emite un owner o admin; se muestra completa una sola vez | `index.mdx:21` | `V:P3 L94`, `L100` |
+| No hay OAuth para el MCP ni webhooks salientes | `index.mdx:21` | `V:P4 L108`; `V:P15 L264` |
+| Planificalo: ventas, cobros, nóminas y reportes | `index.mdx:26` | `V L606`, `L625`, `L642`, `L597` (rutas `planificalo/*`) |
+| Relacionalo: clientes, audiencias, campañas y comunicaciones | `index.mdx:27` | `V L649`, `L659`, `L667`, `L674` |
+| Servicialo: estándar abierto propuesto, Apache-2.0 | `index.mdx:32` | `manifest:20-21`, `:27`; `encargo` |
+| Protocolo 0.10 en borrador; HTTP Profile 1.0.0 | `index.mdx:32` | `manifest:20-21`; `HTTP_PROFILE:7-10` |
+| RFC-001 sin ratificar | `index.mdx:32` | `V:P20 L353` |
+| RFC-005 en período final de comentarios hasta el 2026-09-13 | `index.mdx:32` | `V:P20 L353`; `anuncio:24` |
+| Una implementación registrada: Coordinalo | `index.mdx:32` | `manifest:266-274` |
+| Especificación en `https://servicialo.com/spec`, en inglés | `index.mdx:36` | `manifest:24`; `PROTOCOL:1755` |
+| El repositorio contiene protocolo, manifest, HTTP Profile y servidor MCP del protocolo | `index.mdx:37` | `manifest:22`, `:26`, `:106`, `:112` |
+| Habilitalo: manifiesto JSON (fuente y tipos de evento), función pura, eventos canónicos, historial desde otras fuentes | `index.mdx:42` | `README-H:7-8`, `:34-38`, `:55`, `:79-84` |
+| Habilitalo: su README declara licencia MIT | `index.mdx:42` | `README-H:10`, `:153`, `:209` |
+| Habilitalo: documentación propia pendiente en este sitio | `index.mdx:42` | `encargo` (L4) |
+| Repositorio `github.com/habilitalo/protocolo` | `index.mdx:45` | `README-H:12`; `V L17` |
+| Recursos: solo páginas existentes y no retiradas | `index.mdx:50-59` | `repo` `content/docs/guias/meta.json`, `content/docs/integraciones/meta.json` |
+| Multi-tenancy con Prisma: patrón de aislamiento por organización | `index.mdx:53` | `V L537` (el patrón coincide con el código real) |
+| MercadoPago en Chile: guía genérica | `index.mdx:54` | `V L542` |
+| Portal del cliente: acceso por token en `coordinalo.com/clientes/{token}` | `index.mdx:55` | `V:P14 L253` |
+| Roles y permisos: roles de organización | `index.mdx:56` | `V:P13 L241` (la página existe; su contenido es L5) |
+| Resend: proveedor de email activo | `index.mdx:57` | `V:P8 L175` |
+| Google Calendar: sincronización bidireccional | `index.mdx:58` | `V:P10 L198` |
 
 ## 3. Productos y activación — `content/docs/coordinalo/productos.mdx`
 
@@ -122,35 +123,32 @@ Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **5** (se list
 | Umbrales en `contextual-triggers.ts`: Planificalo si hay cobros; Relacionalo con ≥ 20 clientes (`RELACIONALO_CLIENTS_THRESHOLD = 20`) | `productos.mdx:24-29` | `V:P12 L234` |
 | `anzuelo-hosts.ts` mapea `relacionalo.com`/`www.` → `relacionalo` y `planificalo.com`/`www.` → `planificalo`, con overrides `NEXT_PUBLIC_ANZUELO_{RELACIONALO,PLANIFICALO}_HOST` | `productos.mdx:33` | `V:P12 L229`, `L235`; `V:P5 L136` |
 | El proxy reescribe la raíz a `/anzuelo/{producto}` | `productos.mdx:33` | `V:P12 L229`; `V:P5 L136` (`proxy.ts:194-197`) |
-| `relacionalo.com` asignado al proyecto de Coordinalo en Vercel | `productos.mdx:35` | `V:P5 L136` |
-| `planificalo.com` asignado a otro proyecto, último deploy de producción 2026-02-18 | `productos.mdx:35` | `V:P5 L137` |
-| Mientras siga así, la reescritura de Planificalo no aplica en ese host | `productos.mdx:35` | `V:P5 L137`. `INFERENCIA` (si el host no llega al proyecto de Coordinalo, su proxy no corre) |
-| Las rutas de interfaz viven bajo `src/app/[orgSlug]` | `productos.mdx:39` | `V L497` (`find src/app/[orgSlug] -name page.tsx`); `V:P22 L420-424` |
-| Las rutas de API de la tabla son internas: sesión y membresía | `productos.mdx:39` | `V:P1 L53`; `V:P2 L81` |
-| La integración de terceros va por REST Servicialo y MCP | `productos.mdx:39` | `V L39` |
-| Coordinalo incluye agenda y calendario, sesiones, disponibilidad y bloqueos, Google Calendar, agendas públicas, disputas | `productos.mdx:43` | `V L456` (sessions), `L465` (availability, calendar-blocks), `V:P10 L198-212` (Google Calendar), `L471` y `V:A L980-986` (agendas), `L682` y `V:A L997-1000` (disputes) |
-| Rutas UI `/[org]/coordinalo/agenda`, `/[org]/coordinalo/calendar`, `/[org]/coordinalo/sessions` | `productos.mdx:43` | `V L497`; `V:P22 L420` |
-| Prefijo `/api/organizations/{orgSlug}/coordinalo/*` | `productos.mdx:43` | `V:A L978-1013` |
-| Planificalo incluye ventas, cobros y pagos, pagos a proveedores y reparto, nóminas, P&L, flujo de caja, cierres, boletas DTE | `productos.mdx:44` | `V L642` (sales), `L597` (charges), `L633` (payments), `L621`/`L633` (revenue-sharing, pagos-proveedores), `L625` (payroll), `L606` (pnl, cash-flow), `L608` (cierres), `V:P6 L153-156` (DTE) |
-| MercadoPago: integración disponible (sin más) | `productos.mdx:44` | `V:P9 L187`; `encargo` |
-| OpenFactura como proveedor DTE: integración disponible | `productos.mdx:44` | `V:P6 L149`, `L153` |
-| `/[org]/planificalo/ventas` es sección gateada por producto | `productos.mdx:44` | `V:P22 L424` (`planificalo/(gated)/ventas/page.tsx`) |
-| `/[org]/settings/facturacion-electronica` | `productos.mdx:44` | `V:P6 L156` |
-| `/api/organizations/{orgSlug}/planificalo/*`: 91 rutas | `productos.mdx:44` | `V:P2 L81` |
-| Relacionalo incluye fichas e historial, audiencias, campañas, envío de WhatsApp (Twilio), registros de comunicación | `productos.mdx:45` | `V L667` (clients, history), `L649` (audiences), `L659` (campaigns), `V:P7 L170` (send-whatsapp), `L674` (communication logs), `V:P7 L163` (Twilio) |
-| `/[org]/relacionalo/clientes` | `productos.mdx:45`, `:50` | `V:P22 L423` |
-| `/api/organizations/{orgSlug}/relacionalo/*`: 24 rutas; `…/communication/*` | `productos.mdx:45` | `V:P2 L81`; `V L674` |
-| `/[org]/dashboard` existe | `productos.mdx:49` | `V L497`; `V:P22 L422` |
-| Carve-outs core en `product-registry.ts`: `/relacionalo/clientes`, `/planificalo/catalogo`, `/mi-*` | `productos.mdx:50` | `V:P12 L234` |
-| Portal del proveedor: grupo de rutas `(provider)`, `/mi-*` | `productos.mdx:50` | `V:P13 L246` |
-| Catálogo en `/[org]/planificalo/catalogo`, detalle `/[org]/planificalo/services/{id}`, proveedor `/[org]/planificalo/providers/{id}` | `productos.mdx:50` | `V L497` |
-| Los carve-outs se ven con el producto dueño en `available` | `productos.mdx:50` | `V:P12 L234` ("carve-outs core"). `INFERENCIA` (es el significado de carve-out core en el registro) |
-| Booking público en `/explorar/{orgSlug}` sobre `/api/public/**` | `productos.mdx:51` | `V:P22 L421`; `V L688`; `V:P1 L57`; `V:A L1245-1260` |
-| Portal del cliente en `/clientes/{token}` sobre `/api/clientes/{token}/**` | `productos.mdx:52` | `V:P14 L253`, `L257`; `V:P1 L55` |
-| Los tres productos operan sobre la misma base de datos | `productos.mdx:56` | `V L27` (un solo proyecto Supabase de producción); `V L21` (`packages/database` compartido); `V:P1 L72`. `INFERENCIA` |
-| El ciclo financiero vive en `Cobro`, no en `Session`; `invoiced/paid/closed` retirados por el principio 7 de Servicialo | `productos.mdx:56` | `V:P11 L220` |
-| Eventos internos con namespaces `servicialo.*`, `coordinalo.*`, `planificalo.*`; no se exponen a terceros | `productos.mdx:56` | `V:P15 L272` |
-| No hay webhooks salientes | `productos.mdx:56` | `V:P15 L264` |
+| Las rutas de interfaz viven bajo `src/app/[orgSlug]` | `productos.mdx:37` | `V L497` (`find src/app/[orgSlug] -name page.tsx`); `V:P22 L420-424` |
+| Las rutas de API de la tabla son internas: sesión y membresía | `productos.mdx:37` | `V:P1 L53`; `V:P2 L81` |
+| La integración de terceros va por REST Servicialo y MCP | `productos.mdx:37` | `V L39` |
+| Coordinalo incluye agenda y calendario, sesiones, disponibilidad y bloqueos, Google Calendar, agendas públicas, disputas | `productos.mdx:41` | `V L456` (sessions), `L465` (availability, calendar-blocks), `V:P10 L198-212` (Google Calendar), `L471` y `V:A L980-986` (agendas), `L682` y `V:A L997-1000` (disputes) |
+| Rutas UI `/[org]/coordinalo/agenda`, `/[org]/coordinalo/calendar`, `/[org]/coordinalo/sessions` | `productos.mdx:41` | `V L497`; `V:P22 L420` |
+| Prefijo `/api/organizations/{orgSlug}/coordinalo/*` | `productos.mdx:41` | `V:A L978-1013` |
+| Planificalo incluye ventas, cobros y pagos, pagos a proveedores y reparto, nóminas, P&L, flujo de caja, cierres, boletas DTE | `productos.mdx:42` | `V L642` (sales), `L597` (charges), `L633` (payments), `L621`/`L633` (revenue-sharing, pagos-proveedores), `L625` (payroll), `L606` (pnl, cash-flow), `L608` (cierres), `V:P6 L153-156` (DTE) |
+| MercadoPago: integración disponible (sin más) | `productos.mdx:42` | `V:P9 L187`; `encargo` |
+| OpenFactura como proveedor DTE: integración disponible | `productos.mdx:42` | `V:P6 L149`, `L153` |
+| `/[org]/planificalo/ventas` es sección gateada por producto | `productos.mdx:42` | `V:P22 L424` (`planificalo/(gated)/ventas/page.tsx`) |
+| `/[org]/settings/facturacion-electronica` | `productos.mdx:42` | `V:P6 L156` |
+| `/api/organizations/{orgSlug}/planificalo/*`: 91 rutas | `productos.mdx:42` | `V:P2 L81` |
+| Relacionalo incluye fichas e historial, audiencias, campañas, envío de WhatsApp (Twilio), registros de comunicación | `productos.mdx:43` | `V L667` (clients, history), `L649` (audiences), `L659` (campaigns), `V:P7 L170` (send-whatsapp), `L674` (communication logs), `V:P7 L163` (Twilio) |
+| `/[org]/relacionalo/clientes` | `productos.mdx:43`, `:48` | `V:P22 L423` |
+| `/api/organizations/{orgSlug}/relacionalo/*`: 24 rutas; `…/communication/*` | `productos.mdx:43` | `V:P2 L81`; `V L674` |
+| `/[org]/dashboard` existe | `productos.mdx:47` | `V L497`; `V:P22 L422` |
+| Carve-outs core en `product-registry.ts`: `/relacionalo/clientes`, `/planificalo/catalogo`, `/mi-*` | `productos.mdx:48` | `V:P12 L234` |
+| Portal del proveedor: grupo de rutas `(provider)`, `/mi-*` | `productos.mdx:48` | `V:P13 L246` |
+| Catálogo en `/[org]/planificalo/catalogo`, detalle `/[org]/planificalo/services/{id}`, proveedor `/[org]/planificalo/providers/{id}` | `productos.mdx:48` | `V L497` |
+| Los carve-outs se ven con el producto dueño en `available` | `productos.mdx:48` | `V:P12 L234` ("carve-outs core"). `INFERENCIA` (es el significado de carve-out core en el registro) |
+| Booking público en `/explorar/{orgSlug}` sobre `/api/public/**` | `productos.mdx:49` | `V:P22 L421`; `V L688`; `V:P1 L57`; `V:A L1245-1260` |
+| Portal del cliente en `/clientes/{token}` sobre `/api/clientes/{token}/**` | `productos.mdx:50` | `V:P14 L253`, `L257`; `V:P1 L55` |
+| Los tres productos operan sobre la misma base de datos | `productos.mdx:54` | `V L27` (un solo proyecto Supabase de producción); `V L21` (`packages/database` compartido); `V:P1 L72`. `INFERENCIA` |
+| El ciclo financiero vive en `Cobro`, no en `Session`; `invoiced/paid/closed` retirados por el principio 7 de Servicialo | `productos.mdx:54` | `V:P11 L220` |
+| Eventos internos con namespaces `servicialo.*`, `coordinalo.*`, `planificalo.*`; no se exponen a terceros | `productos.mdx:54` | `V:P15 L272` |
+| No hay webhooks salientes | `productos.mdx:54` | `V:P15 L264` |
 
 ## 4. Servicialo — `content/docs/servicialo/index.mdx`
 
@@ -228,10 +226,9 @@ Conteo de filas `SIN FUENTE`: **0**. Filas marcadas `INFERENCIA`: **5** (se list
 ## Filas marcadas `INFERENCIA`
 
 1. "De Grupo Digitalo" / "Grupo Digitalo la publica" (home, índice, Servicialo): L0 muestra que todos los hosts viven en el mismo team de Vercel (`V:P5 L139`) y `PROTOCOL.md:94` remite al manifiesto de Grupo Digitalo; ningún documento dice literalmente "Grupo Digitalo publica Servicialo".
-2. `productos.mdx:35`: si `planificalo.com` no apunta al proyecto de Coordinalo, el proxy de Coordinalo no corre para ese host.
-3. `productos.mdx:50`: los carve-outs core son visibles con el producto dueño en `available`; es el sentido de "carve-out core" en `V:P12 L234`.
-4. `productos.mdx:56`: los tres productos comparten base de datos (un proyecto Supabase de producción, `packages/database` único).
-5. `servicialo/index.mdx:23`: "no asume quién inicia una acción" resume que los cuatro tipos de actor pueden ejecutar tools autenticados.
+2. `productos.mdx:48`: los carve-outs core son visibles con el producto dueño en `available`; es el sentido de "carve-out core" en `V:P12 L234`.
+3. `productos.mdx:54`: los tres productos comparten base de datos (un proyecto Supabase de producción, `packages/database` único).
+4. `servicialo/index.mdx:23`: "no asume quién inicia una acción" resume que los cuatro tipos de actor pueden ejecutar tools autenticados.
 
 ## Discrepancias encontradas al verificar (no entran al texto salvo donde se indica)
 
