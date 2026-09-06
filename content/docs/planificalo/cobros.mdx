@@ -149,11 +149,6 @@ GET /api/v1/cobros/:id
     "id": "cli_789ghi",
     "name": "Juan Pérez",
     "email": "juan@example.com"
-  },
-  "receipt": {
-    "id": "rec_abc123",
-    "number": "001-00234",
-    "url": "https://receipts.coordinalo.com/rec_abc123.pdf"
   }
 }
 ```
@@ -286,7 +281,6 @@ GET /api/v1/cobros/:id/receipt
   "number": "001-00234",
   "amount": 100000,
   "issuedAt": "2026-01-15T14:30:00Z",
-  "downloadUrl": "https://receipts.coordinalo.com/rec_abc123.pdf",
   "client": {
     "name": "Juan Pérez",
     "email": "juan@example.com"

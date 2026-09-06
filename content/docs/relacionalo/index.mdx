@@ -1,13 +1,13 @@
 ---
-title: "Relaciónalo — API de gestión de clientes"
+title: "Relacionalo — API de gestión de clientes"
 description: "Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas para organizaciones de servicios."
 ---
 
-# Relaciónalo
+# Relacionalo
 
 Clientes, historial de sesiones, comunicaciones automáticas y portal de reservas.
 
-Relaciónalo es el módulo de gestión de clientes del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos principales y gestiona la relación completa con el cliente: desde su primera reserva online hasta las comunicaciones de seguimiento post-sesión.
+Relacionalo es el módulo de gestión de clientes del ecosistema Digitalo. Opera dentro de [Coordinalo](/docs/coordinalo) como uno de los tres módulos principales y gestiona la relación completa con el cliente: desde su primera reserva online hasta las comunicaciones de seguimiento post-sesión.
 
 ---
 
@@ -49,7 +49,7 @@ Vista consolidada que agrupa toda la información de un cliente en un solo lugar
 Página pública donde los clientes agendan sesiones online 24/7, sin necesidad de contactar a la organización. Cada organización tiene su propio portal con URL personalizada.
 
 ```
-https://coordinalo.com/{slug}/explorar
+https://coordinalo.com/explorar/{slug}
 ```
 
 El portal muestra los servicios disponibles, permite seleccionar profesional y horario, y confirma la reserva automáticamente.
@@ -125,7 +125,7 @@ Endpoints públicos (no requieren autenticación).
 
 ## Flujo del cliente
 
-El ciclo de vida completo del cliente en Relaciónalo:
+El ciclo de vida completo del cliente en Relacionalo:
 
 ```
 ┌────────────────────┐
@@ -173,7 +173,7 @@ Cada paso genera registros en la ficha del cliente: sesiones, pagos y comunicaci
 
 ## Templates WhatsApp
 
-Relaciónalo incluye 11 templates pre-aprobados por Meta, listos para usar. Los templates usan variables dinámicas que se reemplazan automáticamente.
+Relacionalo incluye 11 templates pre-aprobados por Meta, listos para usar. Los templates usan variables dinámicas que se reemplazan automáticamente.
 
 | # | Template | Canal | Trigger | Variables |
 |---|----------|-------|---------|-----------|
@@ -189,7 +189,7 @@ Relaciónalo incluye 11 templates pre-aprobados por Meta, listos para usar. Los 
 | 10 | Reactivación | WhatsApp + Email | 30d sin actividad | `{{name}}`, `{{days_inactive}}`, `{{booking_url}}` |
 | 11 | Bienvenida | WhatsApp | Al crear cliente | `{{name}}`, `{{organization}}`, `{{booking_url}}` |
 
-Los templates deben ser pre-aprobados por Meta antes de poder usarse en WhatsApp Business. Coordinalo incluye estos 11 templates listos para usar con la integración de [Evolution API](/docs/integraciones/whatsapp-evolution).
+Los templates deben ser pre-aprobados por Meta antes de poder usarse en WhatsApp Business. Coordinalo incluye estos 11 templates listos para usar.
 
 ### Ejemplo de template
 
@@ -284,16 +284,16 @@ La ficha incluye en una sola llamada: datos personales, métricas históricas, s
 
 ## Relación con otros módulos
 
-Relaciónalo se integra con los otros dos módulos de Coordinalo:
+Relacionalo se integra con los otros dos módulos de Coordinalo:
 
-| Módulo | Relación con Relaciónalo |
+| Módulo | Relación con Relacionalo |
 |--------|--------------------------|
 | **[Coordinalo](/docs/coordinalo)** (Operaciones) | Las sesiones agendadas se vinculan al cliente en su ficha |
-| **[Planifícalo](/docs/planificalo)** (Finanzas) | Las ventas y saldos del cliente se muestran en la ficha |
+| **[Planificalo](/docs/planificalo)** (Finanzas) | Las ventas y saldos del cliente se muestran en la ficha |
 
 ### Webhooks de gestión de clientes
 
-Relaciónalo emite eventos que pueden consumirse vía webhooks:
+Relacionalo emite eventos que pueden consumirse vía webhooks:
 
 | Evento | Descripción |
 |--------|-------------|
@@ -321,4 +321,4 @@ Relaciónalo emite eventos que pueden consumirse vía webhooks:
 
 ---
 
-Relaciónalo es parte del ecosistema [Coordinalo](/docs/coordinalo). Ver también: [Planifícalo](/docs/planificalo) (Finanzas) · [Servicialo](/docs/servicialo) (Estándar abierto).
+Relacionalo es parte del ecosistema [Coordinalo](/docs/coordinalo). Ver también: [Planificalo](/docs/planificalo) (Finanzas) · [Servicialo](/docs/servicialo) (Estándar abierto).

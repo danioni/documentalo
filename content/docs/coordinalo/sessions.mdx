@@ -90,12 +90,11 @@ POST /api/v1/sessions
 Coordinalo lleva el seguimiento de las sesiones a través del siguiente flujo:
 
 ```
-Proyectado → Programado → Confirmado → Entregado
+Programado → Confirmado → En curso → Completado
 ```
 
 | Estado | Código | Descripción |
 |--------|--------|-------------|
-| **Proyectado** | `projected` | Sesión planificada pero aún no agendada |
 | **Programado** | `scheduled` | Agendada con fecha y hora |
 | **Confirmado** | `confirmed` | Confirmada por el cliente (WhatsApp/Email) |
 | **En progreso** | `in_progress` | Sesión en curso |
