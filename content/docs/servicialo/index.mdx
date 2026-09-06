@@ -1,386 +1,109 @@
 ---
-title: "Servicialo — El estándar abierto para servicios profesionales"
-description: "Protocolo que define cómo AI agents y aplicaciones interactúan con organizaciones de servicios. Compatible con MCP (Model Context Protocol)."
+title: Servicialo
+description: Estándar propuesto de interoperabilidad para servicios profesionales. Qué es, en qué estado está y dónde está lo normativo.
 ---
-
-import { Callout, Card, Cards } from 'fumadocs-ui/components/callout';
-
-# Servicialo
 
 <div className="mb-8 flex flex-wrap gap-2">
-  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Borrador v0.10</span>
-  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">Compatible con MCP</span>
-  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">Estándar abierto</span>
+  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400">Protocolo 0.10 · borrador</span>
+  <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">HTTP Profile 1.0.0</span>
+  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">Apache-2.0</span>
+  <span className="rounded-full border border-gray-600 bg-gray-800 px-3 py-1 text-xs font-medium text-gray-300">1 implementación</span>
 </div>
 
-Protocolo que define cómo AI agents y aplicaciones interactúan con organizaciones de servicios profesionales. Compatible con [Model Context Protocol (MCP)](https://modelcontextprotocol.io/).
+Esta página es la entrada en español al estándar: qué es, en qué estado está y dónde está lo normativo. El texto normativo está en inglés, en [servicialo.com/spec](https://servicialo.com/spec) y en el repositorio [servicialo/mcp-server](https://github.com/servicialo/mcp-server); aquí no se duplica.
 
----
+## Qué es
 
-## ¿Qué es Servicialo?
+Servicialo es un estándar abierto **propuesto** que define cómo un sistema expone servicios profesionales (una sesión de kinesiología, una consulta, una clase) a otros sistemas y a agentes de IA: qué es un servicio, por qué estados pasa desde que se pide hasta que se documenta y se cobra, y qué operaciones mínimas debe ofrecer cualquier implementación. Es una especificación con licencia Apache-2.0, no un producto. Grupo Digitalo la publica y hoy existe una implementación: Coordinalo.
 
-Servicialo define un **conjunto estandarizado de operaciones** para gestionar servicios profesionales: agendamiento, pagos, clientes y notificaciones.
+El problema que ataca: cada sistema de agenda y gestión expone su propia API, y un agente que quiera agendar, verificar una entrega o registrar un pago tiene que integrarse con cada uno por separado. Servicialo fija un vocabulario común (ocho dimensiones de un servicio, un ciclo de vida con seis estados obligatorios y tres financieros opcionales, flujos de excepción) y bindings máquina a máquina: HTTP como binding normativo, MCP como binding de referencia, A2A experimental. Una implementación solo HTTP es conforme sin MCP.
 
-Es un estándar abierto, no un producto. Cualquier plataforma puede implementar la especificación para exponer sus servicios de manera uniforme a aplicaciones y AI agents.
+### Agnóstico al origen: el Actor
 
-### Principios de diseño
+El protocolo no asume quién inicia una acción. Cada transición de estado se registra con su actor, su método y su fecha. Las herramientas autenticadas reciben un parámetro `actor` con `type` (`client`, `provider`, `organization` o `agent`), `id` y, cuando alguien actúa por otro, `on_behalf_of`. Si `actor.type` es `agent`, la especificación exige además un `mandate_id` (modelo de agencia delegada, §10). Ejemplo de la especificación (§13.3):
 
-| Principio | Descripción |
-|-----------|-------------|
-| **Interoperable** | Cualquier plataforma puede implementar el estándar |
-| **Nativo para IA** | Diseñado para ser consumido por agentes de IA vía MCP |
-| **Dominio acotado** | Cubre exclusivamente servicios profesionales |
-| **Incremental** | Cada versión agrega capacidades sin romper las anteriores |
-| **Agnóstico al origen** | Servicialo no asume quién inicia una acción. Un paciente reservando por WhatsApp, una secretaria agendando por teléfono, un kinesiólogo programando un control, y un AI agent operando vía MCP son todos actores válidos del protocolo. Cada operación registra quién la ejecutó y, opcionalmente, en nombre de quién. |
-
-### ¿Por qué un estándar?
-
-Hoy, cada plataforma de servicios profesionales (clínicas, consultorios, salones, academias) expone APIs propietarias. Un AI agent que quiera agendar una cita necesita integrarse con cada una por separado.
-
-Servicialo resuelve esto definiendo una interfaz común. Un agent que implementa Servicialo puede interactuar con **cualquier** plataforma compatible.
-
-**Coordinalo** es la implementación de referencia.
-
----
-
-## Conceptos fundamentales
-
-### Actor
-
-Cualquier entidad que inicia o ejecuta una acción en el sistema. Servicialo es agnóstico al origen de las acciones — una sesión puede ser creada por un cliente, un profesional, un administrador o un AI agent. Todas las operaciones del protocolo registran quién las inició.
-
-```typescript
-interface Actor {
-  type: 'client' | 'provider' | 'organization' | 'agent';
-  id: string;
-  on_behalf_of?: {              // cuando alguien actúa por otro
-    type: 'client' | 'provider' | 'organization';
-    id: string;
-  };
+```json
+{
+  "actor": {
+    "type": "agent",
+    "id": "agent_scheduler_01",
+    "mandate_id": "mdt_01JAXYZ...",
+    "on_behalf_of": {
+      "type": "professional",
+      "id": "provider_abc"
+    }
+  }
 }
 ```
 
-#### Ejemplos de actores
-
-| Situación | Actor |
-|-----------|-------|
-| Paciente reserva online | `{type: "client", id: "pac_123"}` |
-| Admin agenda para paciente | `{type: "organization", id: "org_1", on_behalf_of: {type: "client", id: "pac_123"}}` |
-| Kinesiólogo programa seguimiento | `{type: "provider", id: "pro_456"}` |
-| AI agent agenda vía MCP | `{type: "agent", id: "claude", on_behalf_of: {type: "client", id: "pac_123"}}` |
-| Clínica derivadora solicita hora | `{type: "organization", id: "org_2", on_behalf_of: {type: "client", id: "pac_789"}}` |
-
----
-
-## Herramientas estándar
-
-Servicialo define cuatro grupos de herramientas que toda implementación debe exponer. **Todas las herramientas reciben `actor` como parámetro requerido** para registrar quién inicia cada operación.
-
-### Agendamiento (Scheduling)
-
-Herramientas para gestionar el ciclo de vida de las sesiones.
-
-| Herramienta | Descripción | Parámetros |
-|-------------|-------------|------------|
-| `scheduling.check_availability()` | Consultar horarios disponibles | `provider_id`, `service_id`, `date_range` |
-| `scheduling.book()` | Agendar una sesión | `organization_id`, `service_id`, `provider_id`, `client_id`, `starts_at`, `actor` |
-| `scheduling.reschedule()` | Reagendar sesión existente | `session_id`, `new_datetime`, `actor` |
-| `scheduling.cancel()` | Cancelar sesión | `session_id`, `reason?`, `actor` |
-
-#### `scheduling.book()` — Detalle
-
-```typescript
-// scheduling.book()
-// Crea una nueva sesión
-
-Request: {
-  organization_id: string,
-  service_id: string,
-  provider_id: string,
-  client_id: string,
-  starts_at: ISO8601,
-  actor: Actor               // quién inicia la reserva
-}
-
-Response: {
-  session: Session,
-  status: 'confirmed' | 'pending_confirmation',
-  confirmation_required_from?: Actor  // null si auto-confirm
-}
-```
-
-El campo `status` en la respuesta permite que cada organización defina su política: **auto-confirmación** (el portal confirma al instante) o **confirmación manual** (requiere que el profesional o admin apruebe).
-
-### Pagos (Payments)
-
-Herramientas para gestionar el flujo financiero asociado a los servicios.
-
-| Herramienta | Descripción | Parámetros |
-|-------------|-------------|------------|
-| `payments.get_balance()` | Consultar saldo de un cliente | `client_id` |
-| `payments.charge()` | Registrar cobro | `client_id`, `amount`, `method`, `session_id?`, `actor` |
-| `payments.record()` | Registrar pago recibido | `client_id`, `amount`, `reference`, `actor` |
-
-### Clientes (Clients)
-
-Herramientas para gestionar el directorio de clientes de la organización.
-
-| Herramienta | Descripción | Parámetros |
-|-------------|-------------|------------|
-| `clients.list()` | Listar clientes de la organización | `page?`, `limit?`, `search?` |
-| `clients.get()` | Obtener detalle de un cliente | `client_id` |
-| `clients.create()` | Crear nuevo cliente | `name`, `email?`, `phone?`, `actor` |
-
-### Notificaciones (Notifications)
-
-Herramientas para comunicaciones con clientes a través de múltiples canales.
-
-| Herramienta | Descripción | Parámetros |
-|-------------|-------------|------------|
-| `notifications.send()` | Enviar notificación | `client_id`, `channel`, `template`, `data`, `actor` |
-
-Canales soportados: `whatsapp`, `email`, `sms`.
-
----
-
-## Versiones de la especificación
-
-Servicialo sigue un esquema de versionamiento incremental. Cada versión agrega un dominio funcional.
-
-### v0.1 — Base
-
-Entidades base del protocolo.
-
-- **Organización**: Entidad raíz que agrupa profesionales, clientes y servicios
-- **Profesional**: Persona que ofrece servicios dentro de una organización
-- **Cliente**: Persona que recibe servicios
-- **Servicio**: Tipo de servicio ofrecido (ej: "Sesión de kinesiología")
-- **Sesión**: Instancia de un servicio agendado entre profesional y cliente
-
-### v0.2 — Derivaciones
-
-Derivaciones entre organizaciones y profesionales.
-
-- **Derivación**: Solicitud de transferencia de un cliente de un profesional/organización a otro
-- **Red de derivaciones**: Grafo de relaciones entre organizaciones que se derivan clientes
-- Trazabilidad completa del flujo de derivación
-
-### v0.3 — Reputación
-
-Sistema de calidad y métricas.
-
-- **Métricas de servicio**: Tasa de asistencia, puntualidad, satisfacción
-- **Calificaciones**: Puntuación bidireccional (cliente ↔ profesional)
-- **Indicadores de calidad**: Agregados a nivel organización y profesional
-
-### v0.4 — Liquidación
-
-Reparto de ingresos y acuerdos financieros.
-
-- **Acuerdo financiero**: Contrato que define cómo se reparten los ingresos entre organización y profesional
-- **Movimiento financiero**: Registro de cada transacción asociada a una sesión
-- **Liquidación**: Proceso de cierre periódico que calcula compensaciones netas
-- **Compensación**: Monto final a pagar/cobrar a cada parte
-
----
-
-## Entidades del protocolo
-
-El modelo de datos de Servicialo define las siguientes relaciones:
-
-```
-┌──────────────┐       tiene        ┌───────────────┐
-│ Organización │───────────────────▶│ Profesionales │
-└──────────────┘                    └───────┬───────┘
-                                            │ ofrecen
-                                            ▼
-                                    ┌───────────────┐
-                                    │   Servicios   │
-                                    └───────┬───────┘
-                                            │
-┌──────────────┐  participan en     ┌───────▼───────┐   iniciadas por   ┌──────────┐
-│   Clientes   │◄──────────────────▶│   Sesiones    │◄─────────────────│  Actores  │
-│  (reciben)   │                    └───────┬───────┘  (cualquier tipo) └──────────┘
-└──────────────┘                            │ generan
-                                            ▼
-                                    ┌───────────────┐
-                                    │  Movimientos  │
-                                    │  financieros  │
-                                    └───────┬───────┘
-                                            │ se liquidan via
-                                            ▼
-                                    ┌───────────────┐
-                                    │   Acuerdos    │
-                                    │  financieros  │
-                                    └───────────────┘
-```
-
-> **Sesiones son el punto de encuentro entre Clientes y Profesionales**, no una acción unidireccional. Cualquier Actor autorizado puede crear, modificar o cancelar una sesión.
-
-### Relaciones de muchos a muchos
-
-Servicialo soporta relaciones de muchos a muchos entre las entidades principales:
-
-- Un **Profesional** puede pertenecer a múltiples **Organizaciones**
-- Un **Cliente** puede ser atendido por múltiples **Organizaciones**
-- Un **Profesional** puede ofrecer múltiples **Servicios**, y un **Servicio** puede ser entregado por múltiples **Profesionales**
-
-Esto es fundamental para soportar derivaciones entre organizaciones y profesionales que operan en múltiples centros.
-
-### Esquema de entidades (v0.4)
-
-```typescript
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  timezone: string;
-  created_at: string; // ISO 8601
-}
-
-interface Professional {
-  id: string;
-  organization_id: string;
-  name: string;
-  email: string;
-  specialties: string[];
-  active: boolean;
-}
-
-interface Client {
-  id: string;
-  organization_id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-}
-
-interface Service {
-  id: string;
-  organization_id: string;
-  name: string;
-  duration_minutes: number;
-  price: number;
-  currency: string; // ISO 4217
-}
-
-interface Session {
-  id: string;
-  organization_id: string;
-  service_id: string;
-  provider_id: string;
-  client_id: string;
-
-  // Cuándo y dónde
-  starts_at: ISO8601;
-  ends_at: ISO8601;
-  modality: 'in_person' | 'remote' | 'home_visit';
-  location?: string;
-
-  // Quién la creó
-  initiated_by: Actor;
-
-  // Estado
-  status: 'created' | 'confirmed' | 'reminded' | 'in_progress'
-        | 'completed' | 'no_show' | 'cancelled' | 'rescheduled';
-
-  // Trazabilidad
-  status_history: Array<{
-    from: string;
-    to: string;
-    changed_by: Actor;
-    changed_at: ISO8601;
-    reason?: string;
-  }>;
-
-  // Referencias
-  previous_session_id?: string;  // si fue reagendada
-  referral_source?: {            // si viene de derivación
-    organization_id: string;
-    provider_id?: string;
-  };
-}
-
-interface FinancialAgreement {
-  id: string;
-  organization_id: string;
-  professional_id: string;
-  type: 'fixed' | 'percentage' | 'tiered';
-  value: number;
-  effective_from: string; // ISO 8601
-  effective_until?: string;
-}
-
-interface FinancialMovement {
-  id: string;
-  session_id: string;
-  type: 'charge' | 'payment' | 'adjustment';
-  amount: number;
-  currency: string;
-  created_at: string;
-}
-```
-
----
-
-## Ciclo de vida de una sesión
-
-Cada sesión transita por estados bien definidos. Todas las transiciones registran el Actor que las ejecutó.
-
-```
-created ──► confirmed ──► reminded ──► in_progress ──► completed
-    │           │             │              │
-    │           │             │              └──► no_show
-    │           │             │
-    └───────────┴─────────────┴──► cancelled
-                │
-                └──► rescheduled (crea nueva sesión)
-```
-
-### Transiciones permitidas por actor
-
-| Transición | Client | Provider | Organization | Agent |
-|------------|--------|----------|--------------|-------|
-| `created → confirmed` | ✗ | ✓ | ✓ | ✓* |
-| `confirmed → cancelled` | ✓ | ✓ | ✓ | ✓* |
-| `confirmed → rescheduled` | ✓ | ✓ | ✓ | ✓* |
-| `in_progress → completed` | ✗ | ✓ | ✓ | ✗ |
-| `in_progress → no_show` | ✗ | ✓ | ✓ | ✗ |
-
-\* Agent hereda permisos de `on_behalf_of`
-
----
+### Tres niveles de acceso
+
+| Nivel | Alcance | Credencial | Herramientas |
+|---|---|---|---|
+| 0, Resolver | Global, sin contexto de organización | Ninguna | `resolve.lookup`, `resolve.search`, `trust.get_score` |
+| 1, Discovery | Por organización | Ninguna | `registry.search`, `registry.get_organization`, `registry.manifest`, `services.list`, `scheduling.check_availability`, `a2a.get_agent_card` |
+| 2, Authenticated | Por organización | API key (`SERVICIALO_API_KEY` + `SERVICIALO_ORG_ID`); ServiceMandate además, si el actor es un agente | El resto: ciclo de vida, entrega, pagos, recursos, mandatos, órdenes de servicio, administración del resolver |
+
+## Estado
+
+| Qué | Estado | Fuente |
+|---|---|---|
+| Protocolo | 0.10, `status: draft`. Publicado el 2026-05-20, enmendado el 2026-08-01 | [`protocol/manifest.yaml`](https://github.com/servicialo/mcp-server/blob/main/protocol/manifest.yaml), [`CHANGELOG.md`](https://github.com/servicialo/mcp-server/blob/main/CHANGELOG.md) |
+| HTTP Profile | 1.0.0, borrador, fechado 2026-08-01. Es el binding normativo | [`spec/HTTP_PROFILE.md`](https://github.com/servicialo/mcp-server/blob/main/spec/HTTP_PROFILE.md) |
+| Perfiles | `discovery`, `coordination` y `delivery`: estables. `evidence`: candidato. `ordering`, `settlement` y `network`: experimentales | `protocol/manifest.yaml` |
+| Tools del protocolo | 40 (15 públicos, 25 autenticados). Otras 9 operaciones están especificadas y no implementadas (`service_orders.*`, `mandates.*`) | `protocol/manifest.yaml` |
+| Bindings | HTTP estable y normativo. MCP estable, binding de referencia, paquete `@servicialo/mcp-server` 0.9.14. A2A experimental, versión 0.3 | `protocol/manifest.yaml` |
+| RFC-001, el proceso de RFC | Sin ratificar. Vive en el [PR #13](https://github.com/servicialo/mcp-server/pull/13), abierto desde el 2026-05-18 | PR #13 |
+| RFC-005, entregas por período | Borrador abierto a comentarios desde el 2026-08-23; comentarios hasta el 2026-09-06 y período final de comentarios del 2026-09-06 al 2026-09-13. Categoría Minor (campo opcional aditivo), objetivo v1.0 | [PR #21](https://github.com/servicialo/mcp-server/pull/21), [anuncio](https://github.com/servicialo/mcp-server/blob/main/docs/announcements/2026-08-rfc-005-window.md) |
+| Certificación | Revisión manual (2026-06) de la única implementación listada. La suite automática de certificación no existe; está en el roadmap | [`PROTOCOL.md` §16](https://github.com/servicialo/mcp-server/blob/main/PROTOCOL.md#16-implementations), [`public/spec/certification.md`](https://github.com/servicialo/mcp-server/blob/main/public/spec/certification.md) |
+
+## Operaciones mínimas
+
+El HTTP Profile, en su §3.1, fija seis endpoints como lo mínimo para declarar conformidad HTTP. Representan el ciclo descubrir → entender → comprometer → gestionar → verificar → cerrar. Todas las rutas van bajo el base path `/servicialo/v1/`.
+
+| # | Tool | Endpoint |
+|---|---|---|
+| 1 | `registry.search` | `GET /servicialo/v1/registry/organizations` |
+| 2 | `service.get` | `GET /servicialo/v1/services/{service_id}` |
+| 3 | `scheduling.book` | `POST /servicialo/v1/sessions` |
+| 4 | `lifecycle.transition` | `POST /servicialo/v1/sessions/{session_id}/transitions` |
+| 5 | `delivery.record_evidence` | `POST /servicialo/v1/sessions/{session_id}/evidence` |
+| 6 | `payments.create_sale` | `POST /servicialo/v1/sales` |
+
+Los demás tools del manifest son opcionales; su lista está en [`protocol/manifest.yaml`](https://github.com/servicialo/mcp-server/blob/main/protocol/manifest.yaml) y su detalle en la [especificación](https://servicialo.com/spec). Las rutas de Coordinalo no usan este base path: van bajo `/api/servicialo/{orgSlug}/…` (ver [Implementaciones](#implementaciones)).
+
+## Ciclo de vida canónico
+
+`requested → scheduled → confirmed → in_progress → completed → documented`, y de forma opcional `invoiced → collected → verified`. Los seis primeros son obligatorios y estrictamente ordenados; los tres financieros pueden ir en el ciclo de la sesión o gestionarse aparte. Existe un estado opcional `pending_confirmation` entre `requested` y `scheduled`.
+
+Los estados de excepción del manifest son `cancelled`, `disputed`, `reassigning`, `rescheduling` y `partial`. Los flujos de excepción de la especificación (§7) son seis: inasistencia del cliente, inasistencia del proveedor, cancelación, disputa de calidad, reagendamiento (con la variante de conflicto de recurso) y entrega parcial. El detalle está en [`PROTOCOL.md` §6](https://github.com/servicialo/mcp-server/blob/main/PROTOCOL.md#6-the-6--3-universal-states) y [§7](https://github.com/servicialo/mcp-server/blob/main/PROTOCOL.md#7-exception-flows).
 
 ## Implementaciones
 
-### Coordinalo
+Una: Coordinalo. El manifest del protocolo la lista con `status: live`, `since: 2026-03-31` y conformidad "CORE — manual review (2026-06)".
 
-<div className="flex items-center gap-2 mb-4">
-  <span className="rounded-full bg-green-500/10 border border-green-500/30 px-3 py-1 text-xs font-medium text-green-400">En producción</span>
-</div>
+- **Versión declarada.** Su manifest público, `GET https://coordinalo.com/api/servicialo/manifest`, responde `servicialo_version: "0.9"` e `implementation_version: "1.6.0"`. El protocolo vigente es 0.10.
+- **Divergencia de vocabulario.** El manifest del protocolo registra en `reference_implementation_divergence` que `lifecycle.transition` usa `delivered` y `charged` donde el canónico dice `completed` e `invoiced`/`collected`, por compatibilidad con la API de Coordinalo. El plan de migración de vocabulario ([PR #23](https://github.com/servicialo/mcp-server/pull/23)) declara esos valores legacy, a deprecar en v1.0 y retirar en v1.2, y dice de sí mismo: "Plan only. Nothing here is implemented, scheduled, or announced". Hoy nada está deprecado formalmente.
+- **Endpoint por organización.** `https://coordinalo.com/api/servicialo/{orgSlug}/…`. Descubrimiento con `GET …/services`, `GET …/availability` y `GET …/manifest` sin credencial, condicionado a que la organización esté publicada en Servicialo y con rate limit; reserva con `POST …/book`, también sin credencial y con rate limit. Ciclo de vida con `GET …/sessions/{sessionId}` y `POST …/sessions/{sessionId}/{confirm,start,deliver,complete,cancel,reschedule}`, con API key de organización en `X-Org-Api-Key` o `Authorization: Bearer sk_admin_…`. OpenAPI en `/api/servicialo/openapi.json`; manifest de la implementación en `/api/servicialo/manifest`.
+- **A2A.** `POST …/{orgSlug}/a2a` (JSON-RPC 2.0, método `message/send`, A2A 0.3) y agent card en `…/{orgSlug}/.well-known/agent.json`. El binding A2A del protocolo está marcado `experimental`.
+- **Mandatos.** La especificación lo dice en su §16: Coordinalo no valida todavía el mandato en el límite del tool MCP; el acceso de un agente lo controla solo la API key de la organización.
+- Coordinalo no emite la cabecera `X-Servicialo-Version` en sus rutas.
 
-Primera implementación comercial del estándar Servicialo. Gestión integral para clínicas y centros de servicios profesionales en Chile.
+## Dos servidores MCP
 
-- **URL**: [coordinalo.com](https://coordinalo.com)
-- **Cobertura**: Agendamiento, Pagos, Clientes y Notificaciones
-- Versión del protocolo declarada por Coordinalo: 0.9 (manifest); protocolo vigente: 0.10 (borrador)
-- **Entorno**: Producción
+Hay dos servidores MCP distintos, y conviene no confundirlos.
 
-### Implementa Servicialo
+| | Servidor del protocolo | Servidor de Coordinalo |
+|---|---|---|
+| Nombre en el registry de MCP | `com.servicialo/mcp-server` | `com.coordinalo/mcp-server` |
+| Versión | Paquete npm `@servicialo/mcp-server` 0.9.14, publicado el 2026-08-23 | 4.1.x: `server.json` declara 4.1.1 y el código reporta 4.1.0 |
+| URL remota | `https://servicialo.com/api/mcp` | `https://coordinalo.com/api/mcp` |
+| Transportes | stdio y Streamable HTTP | Streamable HTTP |
+| Credencial | `SERVICIALO_API_KEY` + `SERVICIALO_ORG_ID` | API key de organización en la cabecera `X-Org-Api-Key` |
+| Tools | Los 40 del manifest del protocolo | 113 propios de Coordinalo. 7 siguen el vocabulario del protocolo 0.9 (`lifecycle_history`, `lifecycle_get_state`, `lifecycle_transition`, `scheduling_book`, `scheduling_confirm`, `scheduling_cancel`, `scheduling_reschedule`); 7 son públicos de booking, sin key; 5 solo con `X-Bootstrap-Key` |
+| Repositorio | [servicialo/mcp-server](https://github.com/servicialo/mcp-server) | [danioni/coordinalo-mcp](https://github.com/danioni/coordinalo-mcp) (documentación) |
 
-¿Quieres implementar el estándar en tu plataforma? Servicialo es abierto y cualquier organización puede adoptarlo.
-
-Contacta al equipo en [Grupo Digitalo](https://grupodigitalo.com) para soporte técnico y certificación de compatibilidad.
-
----
-
-## Servidor MCP
-
-Servicialo expone sus herramientas como un servidor MCP, permitiendo que agentes de IA interactúen con servicios profesionales de forma nativa.
-
-**Namespace**: `com.servicialo/mcp-server`
-
-### Configuración
+### Configuración del servidor del protocolo
 
 Agrega el servidor a tu `claude_desktop_config.json`:
 
@@ -399,100 +122,19 @@ Agrega el servidor a tu `claude_desktop_config.json`:
 }
 ```
 
-### Ejemplo: Agendar una cita vía agente de IA
+### Servidor de Coordinalo
 
-Un agente de IA puede usar las herramientas de Servicialo para gestionar sesiones. Este es el flujo completo para agendar una cita:
+Se conecta por Streamable HTTP a `https://coordinalo.com/api/mcp` con la API key de la organización en `X-Org-Api-Key`. La documentación completa de sus 113 tools en este sitio está pendiente.
 
-**1. Consultar disponibilidad**
+## Cómo participar
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "scheduling.check_availability",
-    "arguments": {
-      "provider_id": "pro_paula",
-      "service_id": "srv_kinesiologia",
-      "date_range": {
-        "from": "2026-02-14",
-        "to": "2026-02-18"
-      }
-    }
-  }
-}
-```
-
-**Respuesta:**
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "{\"available_slots\":[{\"date\":\"2026-02-14\",\"times\":[\"09:00\",\"10:00\",\"14:00\"]},{\"date\":\"2026-02-16\",\"times\":[\"11:00\",\"15:00\"]}]}"
-      }
-    ]
-  }
-}
-```
-
-**2. Agendar la sesión**
-
-```json
-{
-  "method": "tools/call",
-  "params": {
-    "name": "scheduling.book",
-    "arguments": {
-      "organization_id": "org_mamapro",
-      "service_id": "srv_kinesiologia",
-      "provider_id": "pro_paula",
-      "client_id": "cli_maria",
-      "starts_at": "2026-02-14T10:00:00-03:00",
-      "actor": {
-        "type": "agent",
-        "id": "claude_mcp",
-        "on_behalf_of": {
-          "type": "client",
-          "id": "cli_maria"
-        }
-      }
-    }
-  }
-}
-```
-
-**Respuesta:**
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 2,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "{\"session\":{\"id\":\"ses_01\",\"status\":\"confirmed\",\"starts_at\":\"2026-02-14T10:00:00-03:00\",\"ends_at\":\"2026-02-14T10:45:00-03:00\",\"provider\":\"Paula Méndez\",\"client\":\"María López\",\"service\":\"Sesión de kinesiología\",\"initiated_by\":{\"type\":\"agent\",\"id\":\"claude_mcp\",\"on_behalf_of\":{\"type\":\"client\",\"id\":\"cli_maria\"}}},\"status\":\"confirmed\",\"confirmation_required_from\":null}"
-      }
-    ]
-  }
-}
-```
+- **Especificación**: [servicialo.com/spec](https://servicialo.com/spec), también en [spec.servicialo.com](https://spec.servicialo.com).
+- **Repositorio**: [servicialo/mcp-server](https://github.com/servicialo/mcp-server), con [`PROTOCOL.md`](https://github.com/servicialo/mcp-server/blob/main/PROTOCOL.md), [`protocol/manifest.yaml`](https://github.com/servicialo/mcp-server/blob/main/protocol/manifest.yaml) y [`spec/HTTP_PROFILE.md`](https://github.com/servicialo/mcp-server/blob/main/spec/HTTP_PROFILE.md).
+- **Cambios**: [`CHANGELOG.md`](https://github.com/servicialo/mcp-server/blob/main/CHANGELOG.md).
+- **RFC**: no hay carpeta `rfcs/` en `main`; cada RFC vive en su PR. RFC-001, el proceso: [PR #13](https://github.com/servicialo/mcp-server/pull/13). RFC-005, entregas por período: [PR #21](https://github.com/servicialo/mcp-server/pull/21) y su [anuncio](https://github.com/servicialo/mcp-server/blob/main/docs/announcements/2026-08-rfc-005-window.md). Plan de migración de vocabulario: [PR #23](https://github.com/servicialo/mcp-server/pull/23).
+- **Comentarios**: en el PR del RFC durante su ventana, o abriendo un [issue](https://github.com/servicialo/mcp-server/issues) (§17.1 de la especificación).
+- **Implementaciones nuevas**: el listado se hace por PR y revisión manual ([`IMPLEMENTORS.md`](https://github.com/servicialo/mcp-server/blob/main/IMPLEMENTORS.md)).
 
 ---
 
-## Links
-
-- [Especificación (v0.10, borrador)](https://servicialo.com/spec)
-- [GitHub — Servicialo](https://github.com/servicialo/mcp-server)
-- [GitHub — Documentalo](https://github.com/danioni/documentalo)
-- [Grupo Digitalo](https://grupodigitalo.com)
-
----
-
-Servicialo es un estándar abierto mantenido por [Grupo Digitalo](https://grupodigitalo.com).
+Servicialo es un estándar abierto propuesto, publicado por [Grupo Digitalo](https://grupodigitalo.com).

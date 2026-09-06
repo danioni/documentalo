@@ -11,10 +11,10 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 export const metadata: Metadata = {
   metadataBase: new URL('https://documentalo.com'),
   title: {
-    default: 'Documentalo — Documentación técnica del ecosistema Digitalo',
+    default: 'Documentalo — Documentación técnica de Grupo Digitalo',
     template: '%s | Documentalo',
   },
-  description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo.',
+  description: 'Cómo se integra Coordinalo por REST y MCP, en qué estado está el estándar propuesto Servicialo y qué es el protocolo de conectores Habilitalo. Documentación técnica de Grupo Digitalo, en español.',
   icons: {
     icon: '/favicon.svg',
   },

@@ -1,22 +1,25 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
+const siteDescription =
+  'Cómo se integra Coordinalo por REST y MCP, en qué estado está el estándar propuesto Servicialo y qué es el protocolo de conectores Habilitalo. Documentación técnica de Grupo Digitalo, en español.';
+
 export const metadata: Metadata = {
-  title: 'Documentalo — Documentación técnica del ecosistema Digitalo',
-  description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo. Coordinalo, Planificalo, Relacionalo y más.',
+  title: 'Documentalo — Documentación técnica de Grupo Digitalo',
+  description: siteDescription,
   openGraph: {
-    title: 'Documentalo — APIs para digitalizar servicios profesionales',
-    description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
+    title: 'Documentalo — Coordinalo, Servicialo y Habilitalo, explicados para desarrolladores',
+    description: siteDescription,
     url: 'https://documentalo.com',
     siteName: 'Documentalo',
     locale: 'es_CL',
     type: 'website',
-    images: [{ url: '/og/og-home.png', width: 1200, height: 630, alt: 'Documentalo — Documentación técnica del ecosistema Digitalo' }],
+    images: [{ url: '/og/og-home.png', width: 1200, height: 630, alt: 'Documentalo — Documentación técnica de Grupo Digitalo' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Documentalo — APIs para digitalizar servicios profesionales',
-    description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
+    title: 'Documentalo — Coordinalo, Servicialo y Habilitalo, explicados para desarrolladores',
+    description: siteDescription,
     images: ['/og/og-home.png'],
   },
   alternates: {
@@ -24,57 +27,93 @@ export const metadata: Metadata = {
   },
 };
 
-const products = [
+type PieceLink = { label: string; href: string; external?: boolean };
+
+const pieces: Array<{
+  name: string;
+  kind: string;
+  status: string;
+  statusClass: string;
+  description: string;
+  links: PieceLink[];
+}> = [
   {
     name: 'Coordinalo',
-    href: '/docs/coordinalo',
-    description: 'Agenda sesiones, gestiona disponibilidad y asigna profesionales',
-    color: 'blue',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-      </svg>
-    ),
+    kind: 'Producto',
+    status: 'En producción',
+    statusClass: 'border-green-500/30 bg-green-500/10 text-green-400',
+    description:
+      'Sistema SaaS para organizaciones que entregan servicios profesionales. Incluye tres productos activables: Coordinalo (operación), Planificalo (finanzas) y Relacionalo (clientes). Un tercero se integra por REST Servicialo, organización por organización, y por MCP.',
+    links: [
+      { label: 'Documentación', href: '/docs/coordinalo' },
+      { label: 'Productos y activación', href: '/docs/coordinalo/productos' },
+    ],
   },
   {
-    name: 'Planificalo',
-    href: '/docs/planificalo',
-    description: 'Cobra, paga y liquida comisiones automáticamente',
-    color: 'purple',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-      </svg>
-    ),
+    name: 'Servicialo',
+    kind: 'Estándar propuesto',
+    status: 'Protocolo 0.10, borrador',
+    statusClass: 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+    description:
+      'Estándar abierto de interoperabilidad para servicios profesionales, con licencia Apache-2.0. HTTP Profile 1.0.0. El proceso de RFC (RFC-001) no está ratificado. Una implementación registrada: Coordinalo.',
+    links: [
+      { label: 'Documentación', href: '/docs/servicialo' },
+      { label: 'Especificación', href: 'https://servicialo.com/spec', external: true },
+    ],
   },
   {
-    name: 'Relacionalo',
-    href: '/docs/relacionalo',
-    description: 'Gestiona clientes, audiencias y comunicaciones multicanal',
-    color: 'green',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-      </svg>
-    ),
+    name: 'Habilitalo',
+    kind: 'Protocolo de conectores',
+    status: 'Abierto, MIT declarada en su README',
+    statusClass: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400',
+    description:
+      'Protocolo abierto de conectores: un manifiesto JSON declara la fuente de datos y una función pura convierte los datos crudos en eventos canónicos. Sirve para traer el historial desde otras fuentes. Documentación propia pendiente.',
+    links: [
+      { label: 'Repositorio', href: 'https://github.com/habilitalo/protocolo', external: true },
+      { label: 'habilitalo.com', href: 'https://habilitalo.com', external: true },
+    ],
   },
 ];
 
-const guides = [
+const stats = [
+  { value: '113', label: 'tools en el servidor MCP de Coordinalo' },
+  { value: '40', label: 'tools definidos por el protocolo Servicialo' },
+  { value: '6', label: 'operaciones mínimas del HTTP Profile' },
+  { value: '1', label: 'implementación registrada del estándar' },
+];
+
+const integrationPaths = [
   {
-    name: 'Integraciones',
-    href: '/docs/integraciones',
-    description: 'MercadoPago, WhatsApp Business, Supabase, Google Calendar',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-      </svg>
-    ),
+    via: 'REST Servicialo, por organización',
+    base: 'https://coordinalo.com/api/servicialo/{orgSlug}/…',
+    credential:
+      'Descubrimiento (services, availability, manifest): sin credencial si la organización está publicada en Servicialo. Ciclo de vida (sessions/{id} y sus transiciones): X-Org-Api-Key o Authorization: Bearer, con una key sk_admin_….',
+    href: '/docs/servicialo#implementaciones',
+    docLabel: 'Endpoint por organización',
   },
+  {
+    via: 'MCP (Streamable HTTP)',
+    base: 'https://coordinalo.com/api/mcp',
+    credential:
+      'X-Org-Api-Key con una key sk_admin_…. En esta ruta, Authorization: Bearer es el JWT de sesión de la app, no la API key.',
+    href: '/docs/servicialo#dos-servidores-mcp',
+    docLabel: 'Servidor MCP de Coordinalo',
+  },
+];
+
+const developerFacts = [
+  'Descubrimiento sin credenciales: services, availability y manifest de cada organización publicada en Servicialo.',
+  'Ciclo de vida con API key de organización, en X-Org-Api-Key o en Authorization: Bearer. La key la emite un owner o admin y se muestra completa una sola vez.',
+  'OpenAPI en /api/servicialo/openapi.json y manifest de la implementación en /api/servicialo/manifest.',
+  'Servidor MCP en /api/mcp (Streamable HTTP), con la key en X-Org-Api-Key.',
+  'Sin OAuth para el MCP y sin webhooks salientes, hoy.',
+];
+
+const resources = [
   {
     name: 'Guías',
     href: '/docs/guias',
-    description: 'Multi-inquilino, autenticación, webhooks y mejores prácticas',
+    description: 'Multi-tenancy con Prisma, MercadoPago en Chile, portal del cliente, roles y permisos',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
@@ -82,51 +121,46 @@ const guides = [
     ),
   },
   {
-    name: 'Referencia API',
-    href: '/docs/api',
-    description: 'Referencia completa de rutas y esquemas',
+    name: 'Integraciones',
+    href: '/docs/integraciones',
+    description: 'Email con Resend y Google Calendar',
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
       </svg>
     ),
   },
 ];
 
-const colorMap: Record<string, { border: string; bg: string; text: string; hoverBorder: string }> = {
-  blue: {
-    border: 'border-blue-500/20',
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    hoverBorder: 'hover:border-blue-500/40',
-  },
-  purple: {
-    border: 'border-purple-500/20',
-    bg: 'bg-purple-500/10',
-    text: 'text-purple-400',
-    hoverBorder: 'hover:border-purple-500/40',
-  },
-  green: {
-    border: 'border-green-500/20',
-    bg: 'bg-green-500/10',
-    text: 'text-green-400',
-    hoverBorder: 'hover:border-green-500/40',
-  },
-};
+const codeExample = [
+  '# Descubrimiento: responde sin credenciales si la organización está publicada',
+  'curl https://coordinalo.com/api/servicialo/{orgSlug}/services',
+  '',
+  '# Respuesta, recortada',
+  '# { "organization": { "slug": "{orgSlug}" },',
+  '#   "services": [ { "id": "…", "name": "…", "duration_minutes": 30,',
+  '#                   "price": "…", "currency": "CLP" } ] }',
+  '',
+  '# Ciclo de vida: requiere la API key de la organización',
+  'curl https://coordinalo.com/api/servicialo/{orgSlug}/sessions/{sessionId} \\',
+  '  -H "X-Org-Api-Key: sk_admin_…"',
+];
 
-const codeExample = `// Obtener sesiones del día
-const response = await fetch(
-  'https://coordinalo.com/api/v1/sessions?date=2026-02-16',
-  {
-    headers: {
-      'Authorization': 'Bearer tu_api_key',
-      'Content-Type': 'application/json',
-    },
+function PieceLinkItem({ link }: { link: PieceLink }) {
+  const className = 'text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300';
+  if (link.external) {
+    return (
+      <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>
+        {link.label} ↗
+      </a>
+    );
   }
-);
-
-const { data } = await response.json();
-// → [{ id: "ses_01", client: "María López", time: "10:00", status: "confirmed" }]`;
+  return (
+    <Link href={link.href} className={className}>
+      {link.label} →
+    </Link>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -139,7 +173,7 @@ export default function HomePage() {
             '@context': 'https://schema.org',
             '@type': 'WebSite',
             name: 'Documentalo',
-            description: 'Documentación técnica del ecosistema Digitalo. APIs, guías de integración y referencias técnicas.',
+            description: siteDescription,
             url: 'https://documentalo.com',
             publisher: {
               '@type': 'Organization',
@@ -162,14 +196,14 @@ export default function HomePage() {
             <span className="text-lg font-bold text-white">Documentalo</span>
           </Link>
           <div className="hidden items-center gap-6 md:flex">
-            <a href="#productos" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
-              Productos
+            <a href="#que-hay" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
+              Qué hay
             </a>
-            <a href="#guias" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
-              Guías
+            <a href="#integrar" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
+              Cómo integrar
             </a>
-            <Link href="/docs/api" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
-              Referencia API
+            <Link href="/docs" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
+              Documentación
             </Link>
           </div>
           <div className="flex items-center gap-3">
@@ -199,7 +233,6 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pb-16 pt-20 md:pb-24 md:pt-32">
-        {/* Gradient background effects */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-cyan-500/5 blur-3xl" />
           <div className="absolute -right-40 top-20 h-80 w-80 rounded-full bg-cyan-500/5 blur-3xl" />
@@ -207,16 +240,16 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-800 bg-gray-900 px-4 py-1.5 text-sm text-gray-400">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            Documentación en español para desarrolladores LATAM
+            Documentación en español · describe lo que corre
           </div>
           <h1 className="mb-6 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-            APIs para digitalizar{' '}
+            Lo que hay detrás de{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">
-              servicios profesionales
+              Coordinalo, Servicialo y Habilitalo
             </span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
-            Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.
+            Documentalo explica cómo se relacionan el producto, el estándar propuesto y el protocolo de conectores de Grupo Digitalo, y cómo un tercero se integra hoy. Lo que corre se documenta; lo que es intención se dice con su estado y su fecha.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
@@ -226,10 +259,10 @@ export default function HomePage() {
               Explorar la documentación
             </Link>
             <a
-              href="#productos"
+              href="#integrar"
               className="w-full rounded-lg border border-gray-700 px-8 py-3.5 font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900 sm:w-auto"
             >
-              Ver productos
+              Cómo integrar hoy
             </a>
           </div>
         </div>
@@ -237,14 +270,9 @@ export default function HomePage() {
 
       {/* Stats bar */}
       <section className="border-y border-gray-800/60 bg-gray-900/50 px-4 py-8">
-        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-8 sm:flex-row sm:gap-16">
-          {[
-            { value: '200+', label: 'rutas documentadas' },
-            { value: '1', label: 'protocolo abierto' },
-            { value: '3', label: 'implementaciones' },
-            { value: 'OpenAPI', label: 'especificaciones' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 text-center sm:grid-cols-4">
+          {stats.map((stat) => (
+            <div key={stat.label}>
               <div className="text-2xl font-bold text-white">{stat.value}</div>
               <div className="text-sm text-gray-500">{stat.label}</div>
             </div>
@@ -252,177 +280,72 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Servicialo — the foundation */}
-      <section id="productos" className="px-4 py-16 md:py-24">
+      {/* Three pieces */}
+      <section id="que-hay" className="px-4 py-16 md:py-24">
         <div className="mx-auto max-w-6xl">
-          {/* Servicialo block */}
-          <div className="relative mb-16 overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-gray-900/80 to-gray-900/80">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-amber-500/5 blur-3xl" />
-            <div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl" />
-            <div className="relative flex flex-col items-start gap-8 p-8 md:flex-row md:items-center md:p-12">
-              <div className="flex-1">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-medium tracking-wide text-amber-400 uppercase">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-                  </svg>
-                  Protocolo abierto
-                </div>
-                <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
-                  Construido sobre Servicialo
-                </h2>
-                <p className="max-w-xl text-gray-400">
-                  Servicialo es el protocolo abierto que define cómo modelar cualquier servicio profesional. El ecosistema Digitalo es la implementación de referencia. Cualquier sistema puede implementarlo.
-                </p>
-              </div>
-              <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                <a
-                  href="https://servicialo.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
-                >
-                  Ver especificación
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                  </svg>
-                </a>
-                <Link
-                  href="/docs/servicialo"
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-900"
-                >
-                  Ver documentación →
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Reference implementations */}
-          <h3 className="mb-2 text-center text-2xl font-bold text-white md:text-3xl">
-            Implementaciones de referencia
-          </h3>
-          <p className="mx-auto mb-10 max-w-2xl text-center text-gray-400">
-            Cada producto implementa el protocolo Servicialo y tiene su documentación completa: rutas, modelos de datos y ejemplos de uso.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {products.map((product) => {
-              const colors = colorMap[product.color];
-              return (
-                <Link
-                  key={product.name}
-                  href={product.href}
-                  className={`group relative rounded-xl border ${colors.border} ${colors.hoverBorder} bg-gray-900/50 p-6 transition-all hover:bg-gray-900`}
-                >
-                  <div className={`mb-4 inline-flex rounded-lg ${colors.bg} p-2.5 ${colors.text}`}>
-                    {product.icon}
-                  </div>
-                  <h3 className="mb-2 text-lg font-semibold text-white">{product.name}</h3>
-                  <p className="text-sm text-gray-400">{product.description}</p>
-                  <div className={`mt-4 text-sm font-medium ${colors.text} opacity-0 transition-opacity group-hover:opacity-100`}>
-                    Ver documentación →
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* What does it mean to implement Servicialo? */}
-      <section className="border-t border-gray-800/60 px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
-            ¿Qué significa implementar Servicialo?
-          </h2>
-          <p className="mx-auto mb-14 max-w-2xl text-center text-gray-400">
-            Adoptar el protocolo tiene consecuencias concretas sobre cómo tu sistema opera, se integra y escala.
-          </p>
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Card 1 */}
-            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
-              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                Tu servicio habla el mismo idioma que cualquier AI agent
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-400">
-                Cualquier LLM que entienda el protocolo puede operar tu negocio: agendar, cobrar, documentar — sin integración custom.
-              </p>
-            </div>
-            {/* Card 2 */}
-            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
-              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                Interoperabilidad nativa con el ecosistema Digitalo
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-400">
-                Si implementas Servicialo, tus datos son compatibles con Coordinalo, Planificalo, Relacionalo y cualquier módulo futuro — sin migración.
-              </p>
-            </div>
-            {/* Card 3 */}
-            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
-              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                El ciclo de vida de tu servicio queda formalmente modelado
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-400">
-                9 estados universales, 8 dimensiones, flujos de excepción incluidos. Deja de inventar cómo manejar cancelaciones, disputas o servicios parciales — el protocolo ya lo resuelve.
-              </p>
-            </div>
-            {/* Card 4 */}
-            <div className="rounded-xl border border-gray-800/60 bg-gray-900/50 p-8">
-              <div className="mb-4 inline-flex rounded-lg bg-amber-500/10 p-2.5 text-amber-400">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                Separación limpia entre protocolo e implementación
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-400">
-                Puedes cambiar de proveedor, construir tu propio stack, o usar Digitalo. El estándar es tuyo — no te ata a ningún vendor.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Guides & Integrations */}
-      <section id="guias" className="border-t border-gray-800/60 bg-gray-900/30 px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
-            Guías e Integraciones
+          <h2 className="mb-3 text-center text-3xl font-bold text-white md:text-4xl">
+            Tres cosas, tres estados
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
-            Tutoriales paso a paso, patrones de arquitectura y guías de integración con servicios externos.
+            Las tres piezas que este sitio documenta y el estado real de cada una.
           </p>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {guides.map((guide) => (
-              <Link
-                key={guide.name}
-                href={guide.href}
-                className="group rounded-xl border border-gray-800/60 bg-gray-900/50 p-6 transition-all hover:border-cyan-500/30 hover:bg-gray-900"
+          <div className="grid gap-4 md:grid-cols-3">
+            {pieces.map((piece) => (
+              <div
+                key={piece.name}
+                className="flex flex-col rounded-xl border border-gray-800/60 bg-gray-900/50 p-6"
               >
-                <div className="mb-4 inline-flex rounded-lg bg-cyan-500/10 p-2.5 text-cyan-400">
-                  {guide.icon}
+                <div className="mb-1 text-xs uppercase tracking-wide text-gray-500">{piece.kind}</div>
+                <h3 className="mb-3 text-xl font-semibold text-white">{piece.name}</h3>
+                <span className={`mb-4 inline-flex w-fit rounded-full border px-3 py-1 text-xs font-medium ${piece.statusClass}`}>
+                  {piece.status}
+                </span>
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-gray-400">{piece.description}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {piece.links.map((link) => (
+                    <PieceLinkItem key={link.href} link={link} />
+                  ))}
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-white">{guide.name}</h3>
-                <p className="text-sm text-gray-400">{guide.description}</p>
-                <div className="mt-4 text-sm font-medium text-cyan-400 opacity-0 transition-opacity group-hover:opacity-100">
-                  Explorar →
-                </div>
-              </Link>
+              </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How to integrate today */}
+      <section id="integrar" className="border-t border-gray-800/60 bg-gray-900/30 px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-3 text-center text-3xl font-bold text-white md:text-4xl">
+            Cómo se integra un tercero hoy
+          </h2>
+          <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
+            Dos vías, ambas en coordinalo.com. Planificalo y Relacionalo no tienen API pública propia: sus rutas son internas de la app. No existe el prefijo /api/v1/.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-gray-800/60 bg-gray-900/50">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="border-b border-gray-800/60 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Vía</th>
+                  <th className="px-5 py-3 font-medium">Base</th>
+                  <th className="px-5 py-3 font-medium">Credencial</th>
+                  <th className="px-5 py-3 font-medium">Doc</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800/60">
+                {integrationPaths.map((path) => (
+                  <tr key={path.via} className="align-top">
+                    <td className="px-5 py-4 font-medium text-white">{path.via}</td>
+                    <td className="px-5 py-4 font-mono text-xs text-cyan-300">{path.base}</td>
+                    <td className="px-5 py-4 text-gray-400">{path.credential}</td>
+                    <td className="px-5 py-4">
+                      <Link href={path.href} className="text-cyan-400 transition-colors hover:text-cyan-300">
+                        {path.docLabel} →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -436,15 +359,10 @@ export default function HomePage() {
                 Para desarrolladores
               </h2>
               <p className="mb-6 text-gray-400">
-                APIs REST con tokens de acceso, respuestas JSON consistentes y documentación en español. Integra el ecosistema Digitalo en tu aplicación.
+                Lo que un integrador externo puede consumir hoy en Coordinalo, y con qué credencial.
               </p>
               <ul className="space-y-3">
-                {[
-                  'Autenticación con llaves de API y tokens de acceso',
-                  'Respuestas JSON paginadas y tipadas',
-                  'Webhooks para eventos en tiempo real',
-                  'Kits de desarrollo y ejemplos de código',
-                ].map((item) => (
+                {developerFacts.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-gray-300">
                     <svg className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -455,10 +373,10 @@ export default function HomePage() {
               </ul>
               <div className="mt-8">
                 <Link
-                  href="/docs"
+                  href="/docs/servicialo#implementaciones"
                   className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-sm font-medium text-gray-950 transition-colors hover:bg-cyan-400"
                 >
-                  Empezar con la API
+                  Ver el endpoint por organización
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                   </svg>
@@ -466,57 +384,52 @@ export default function HomePage() {
               </div>
             </div>
             <div className="overflow-hidden rounded-xl border border-gray-800/60 bg-gray-900">
-              {/* Code window chrome */}
               <div className="flex items-center gap-2 border-b border-gray-800/60 px-4 py-3">
                 <div className="h-3 w-3 rounded-full bg-gray-700" />
                 <div className="h-3 w-3 rounded-full bg-gray-700" />
                 <div className="h-3 w-3 rounded-full bg-gray-700" />
-                <span className="ml-2 text-xs text-gray-500">GET /api/v1/sessions</span>
+                <span className="ml-2 text-xs text-gray-500">GET /api/servicialo/{'{orgSlug}'}/services</span>
               </div>
               <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
                 <code className="text-gray-300">
-                  {codeExample.split('\n').map((line, i) => (
-                    <div key={i}>
-                      {line.startsWith('//') || line.startsWith('// →') ? (
-                        <span className="text-gray-500">{line}</span>
-                      ) : line.includes("'Authorization'") || line.includes("'Content-Type'") ? (
-                        <span>
-                          {line.split("'").map((part, j) =>
-                            j % 2 === 1 ? (
-                              <span key={j} className="text-cyan-300">&apos;{part}&apos;</span>
-                            ) : (
-                              <span key={j}>{part}</span>
-                            )
-                          )}
-                        </span>
-                      ) : line.includes('await') || line.includes('const') ? (
-                        <span>
-                          {line.replace(/(const|await|fetch)/g, '§$1§').split('§').map((part, j) =>
-                            ['const', 'await', 'fetch'].includes(part) ? (
-                              <span key={j} className="text-purple-400">{part}</span>
-                            ) : part.includes("'") ? (
-                              <span key={j}>
-                                {part.split("'").map((subpart, k) =>
-                                  k % 2 === 1 ? (
-                                    <span key={k} className="text-cyan-300">&apos;{subpart}&apos;</span>
-                                  ) : (
-                                    <span key={k}>{subpart}</span>
-                                  )
-                                )}
-                              </span>
-                            ) : (
-                              <span key={j}>{part}</span>
-                            )
-                          )}
-                        </span>
-                      ) : (
-                        <span>{line}</span>
-                      )}
+                  {codeExample.map((line, i) => (
+                    <div key={i} className={line.startsWith('#') ? 'text-gray-500' : undefined}>
+                      {line === '' ? ' ' : line}
                     </div>
                   ))}
                 </code>
               </pre>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Guides & Integrations */}
+      <section className="border-t border-gray-800/60 bg-gray-900/30 px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
+            Guías e integraciones
+          </h2>
+          <p className="mx-auto mb-12 max-w-2xl text-center text-gray-400">
+            Solo las páginas que existen y no están retiradas.
+          </p>
+          <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+            {resources.map((resource) => (
+              <Link
+                key={resource.name}
+                href={resource.href}
+                className="group rounded-xl border border-gray-800/60 bg-gray-900/50 p-6 transition-all hover:border-cyan-500/30 hover:bg-gray-900"
+              >
+                <div className="mb-4 inline-flex rounded-lg bg-cyan-500/10 p-2.5 text-cyan-400">
+                  {resource.icon}
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-white">{resource.name}</h3>
+                <p className="text-sm text-gray-400">{resource.description}</p>
+                <div className="mt-4 text-sm font-medium text-cyan-400 opacity-0 transition-opacity group-hover:opacity-100">
+                  Explorar →
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -535,15 +448,24 @@ export default function HomePage() {
                 <span className="font-semibold text-white">Documentalo</span>
               </div>
               <p className="text-sm text-gray-500">
-                Documentación técnica del ecosistema Digitalo. APIs, guías y referencias para desarrolladores.
+                Documentación técnica de Grupo Digitalo. Describe lo que corre.
               </p>
             </div>
             <div>
-              <h4 className="mb-3 text-sm font-semibold text-white">Productos</h4>
+              <h4 className="mb-3 text-sm font-semibold text-white">Coordinalo</h4>
               <ul className="space-y-2">
                 <li><Link href="/docs/coordinalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</Link></li>
+                <li><Link href="/docs/coordinalo/productos" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Productos y activación</Link></li>
                 <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planificalo</Link></li>
                 <li><Link href="/docs/relacionalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Relacionalo</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="mb-3 text-sm font-semibold text-white">Estándar y protocolos</h4>
+              <ul className="space-y-2">
+                <li><Link href="/docs/servicialo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Servicialo</Link></li>
+                <li><a href="https://servicialo.com/spec" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Especificación de Servicialo</a></li>
+                <li><a href="https://github.com/habilitalo/protocolo" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Habilitalo</a></li>
               </ul>
             </div>
             <div>
@@ -551,16 +473,8 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li><Link href="/docs/guias" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Guías</Link></li>
                 <li><Link href="/docs/integraciones" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Integraciones</Link></li>
-                <li><Link href="/docs/api" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Referencia API</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-3 text-sm font-semibold text-white">Ecosistema</h4>
-              <ul className="space-y-2">
-                <li><a href="https://servicialo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-amber-400/80 transition-colors hover:text-amber-300">Servicialo (estándar)</a></li>
-                <li><a href="https://coordinalo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</a></li>
-                <li><a href="https://grupodigitalo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Grupo Digitalo</a></li>
-                <li><a href="https://github.com/danioni/documentalo" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">GitHub</a></li>
+                <li><a href="https://coordinalo.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">coordinalo.com</a></li>
+                <li><a href="https://github.com/danioni/documentalo" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">GitHub de Documentalo</a></li>
               </ul>
             </div>
           </div>
