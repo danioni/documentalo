@@ -1,4 +1,4 @@
-# Documéntalo
+# Documentalo
 
 Hub central de documentación técnica en español para desarrolladores de LATAM.
 

@@ -11,15 +11,15 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 export const metadata: Metadata = {
   metadataBase: new URL('https://documentalo.com'),
   title: {
-    default: 'Documéntalo — Documentación técnica del ecosistema Digitalo',
-    template: '%s | Documéntalo',
+    default: 'Documentalo — Documentación técnica del ecosistema Digitalo',
+    template: '%s | Documentalo',
   },
   description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo.',
   icons: {
     icon: '/favicon.svg',
   },
   openGraph: {
-    siteName: 'Documéntalo',
+    siteName: 'Documentalo',
     locale: 'es_CL',
     type: 'website',
   },

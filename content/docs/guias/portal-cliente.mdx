@@ -12,7 +12,7 @@ El portal del cliente permite a los usuarios ver su plan de tratamiento, agendar
 Los clientes acceden mediante un token único:
 
 ```
-https://app.coordinalo.com/clientes/[token]
+https://coordinalo.com/clientes/[token]
 ```
 
 El token se envía por email/WhatsApp al crear el cliente o bajo demanda.
@@ -76,7 +76,7 @@ POST /api/v1/clients/:clientId/portal-access
 Respuesta:
 ```json
 {
-  "portalUrl": "https://app.coordinalo.com/clientes/abc123xyz",
+  "portalUrl": "https://coordinalo.com/clientes/abc123xyz",
   "token": "abc123xyz",
   "expiresAt": "2026-02-20T10:00:00Z",
   "sentTo": {

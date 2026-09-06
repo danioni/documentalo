@@ -4,7 +4,6 @@
     "index",
     "multi-tenancy-prisma",
     "mercadopago-chile",
-    "webhooks",
     "portal-cliente",
     "roles-permisos"
   ]

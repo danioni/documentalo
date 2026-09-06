@@ -2,20 +2,20 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Documéntalo — Documentación técnica del ecosistema Digitalo',
-  description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo. Coordinalo, Planifícalo, Relaciónalo y más.',
+  title: 'Documentalo — Documentación técnica del ecosistema Digitalo',
+  description: 'APIs, guías de integración y referencias técnicas para desarrolladores que construyen con Digitalo. Coordinalo, Planificalo, Relacionalo y más.',
   openGraph: {
-    title: 'Documéntalo — APIs para digitalizar servicios profesionales',
+    title: 'Documentalo — APIs para digitalizar servicios profesionales',
     description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     url: 'https://documentalo.com',
-    siteName: 'Documéntalo',
+    siteName: 'Documentalo',
     locale: 'es_CL',
     type: 'website',
-    images: [{ url: '/og/og-home.png', width: 1200, height: 630, alt: 'Documéntalo — Documentación técnica del ecosistema Digitalo' }],
+    images: [{ url: '/og/og-home.png', width: 1200, height: 630, alt: 'Documentalo — Documentación técnica del ecosistema Digitalo' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Documéntalo — APIs para digitalizar servicios profesionales',
+    title: 'Documentalo — APIs para digitalizar servicios profesionales',
     description: 'Agendamiento, finanzas, gestión de clientes y más. Integra un ecosistema completo de gestión de servicios en tu app — documentado en español para LATAM.',
     images: ['/og/og-home.png'],
   },
@@ -37,7 +37,7 @@ const products = [
     ),
   },
   {
-    name: 'Planifícalo',
+    name: 'Planificalo',
     href: '/docs/planificalo',
     description: 'Cobra, paga y liquida comisiones automáticamente',
     color: 'purple',
@@ -48,7 +48,7 @@ const products = [
     ),
   },
   {
-    name: 'Relaciónalo',
+    name: 'Relacionalo',
     href: '/docs/relacionalo',
     description: 'Gestiona clientes, audiencias y comunicaciones multicanal',
     color: 'green',
@@ -116,7 +116,7 @@ const colorMap: Record<string, { border: string; bg: string; text: string; hover
 
 const codeExample = `// Obtener sesiones del día
 const response = await fetch(
-  'https://api.coordinalo.com/api/v1/sessions?date=2026-02-16',
+  'https://coordinalo.com/api/v1/sessions?date=2026-02-16',
   {
     headers: {
       'Authorization': 'Bearer tu_api_key',
@@ -138,7 +138,7 @@ export default function HomePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebSite',
-            name: 'Documéntalo',
+            name: 'Documentalo',
             description: 'Documentación técnica del ecosistema Digitalo. APIs, guías de integración y referencias técnicas.',
             url: 'https://documentalo.com',
             publisher: {
@@ -159,7 +159,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
               </svg>
             </div>
-            <span className="text-lg font-bold text-white">Documéntalo</span>
+            <span className="text-lg font-bold text-white">Documentalo</span>
           </Link>
           <div className="hidden items-center gap-6 md:flex">
             <a href="#productos" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">
@@ -362,7 +362,7 @@ export default function HomePage() {
                 Interoperabilidad nativa con el ecosistema Digitalo
               </h3>
               <p className="text-sm leading-relaxed text-gray-400">
-                Si implementas Servicialo, tus datos son compatibles con Coordinalo, Planifícalo, Relaciónalo y cualquier módulo futuro — sin migración.
+                Si implementas Servicialo, tus datos son compatibles con Coordinalo, Planificalo, Relacionalo y cualquier módulo futuro — sin migración.
               </p>
             </div>
             {/* Card 3 */}
@@ -532,7 +532,7 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                   </svg>
                 </div>
-                <span className="font-semibold text-white">Documéntalo</span>
+                <span className="font-semibold text-white">Documentalo</span>
               </div>
               <p className="text-sm text-gray-500">
                 Documentación técnica del ecosistema Digitalo. APIs, guías y referencias para desarrolladores.
@@ -542,8 +542,8 @@ export default function HomePage() {
               <h4 className="mb-3 text-sm font-semibold text-white">Productos</h4>
               <ul className="space-y-2">
                 <li><Link href="/docs/coordinalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Coordinalo</Link></li>
-                <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planifícalo</Link></li>
-                <li><Link href="/docs/relacionalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Relaciónalo</Link></li>
+                <li><Link href="/docs/planificalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Planificalo</Link></li>
+                <li><Link href="/docs/relacionalo" className="text-sm text-gray-400 transition-colors hover:text-cyan-400">Relacionalo</Link></li>
               </ul>
             </div>
             <div>
